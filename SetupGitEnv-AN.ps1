@@ -1,9 +1,11 @@
 # Define the directories
 $gitFolder = "C:\git"
-$esystemsFolder = "C:\git\esystemsdev"
+$organization = "agilenowdev"
+$repository = "configuration"
+$orgFolder = "$gitFolder\$organization"
 
 # Function to create a directory if it doesn't exist
-function Ensure-DirectoryExists {
+function Set-Directory {
     param (
         [string]$Path
     )
@@ -32,20 +34,20 @@ function Set-FullAccessPermissions {
 
 # Create the directories
 Write-Host "Ensuring directories exist..."
-Ensure-DirectoryExists -Path $gitFolder
-Ensure-DirectoryExists -Path $esystemsFolder
+Set-Directory -Path $gitFolder
+Set-Directory -Path $orgFolder
 
 # Set full access permissions to the Users group
 Set-FullAccessPermissions -Path $gitFolder
-Set-FullAccessPermissions -Path $esystemsFolder
+Set-FullAccessPermissions -Path $orgFolder
 
 # Configure Git
 Write-Host "Configuring Git..."
 git config --global --add safe.directory C:\git
 
 # Clone the repository
-$repositoryUrl = "https://github.com/esystemsdev/configuration.git"
-$clonePath = "$esystemsFolder\configuration"
+$repositoryUrl = "https://github.com/$organization/$repository.git"
+$clonePath = "$orgFolder\$repository"
 
 if (-not (Test-Path -Path "$clonePath\.git")) {
     Write-Host "Cloning the repository to $clonePath..."
