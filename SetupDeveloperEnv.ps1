@@ -2,7 +2,7 @@
 if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Write-Host "Powershell-yaml module not found. Installing..."
     try {
-        Install-Module -Name powershell-yaml -Force -Scope CurrentUser -ErrorAction Stop
+        Install-Module -Name powershell-yaml -Force -Scope CurrentUser -ErrorAction Stop -Confirm:$false
         Write-Host "Powershell-yaml module installed successfully."
     } catch {
         Write-Error "Failed to install powershell-yaml module. Exiting."
