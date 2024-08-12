@@ -1,0 +1,94 @@
+applications:
+  - name: Docker
+    install: false
+    url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
+    silentArguments: "install --quiet"
+    programCheck: "Docker\Docker\DockerCli.exe"
+    commandCheck: docker
+
+  - name: Git
+    url: "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe"
+    silentArguments: "/SILENT"
+    programCheck: "Git\cmd\git.exe"
+    commandCheck: git
+
+  - name: VSCode
+    url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
+    silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
+    programCheck: "Microsoft VS Code\Code.exe"
+    commandCheck: code
+
+  - name: Node.js
+    install: true
+    url: "https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi"
+    installer: "msi"
+    programCheck: "nodejs\node.exe"
+    commandCheck: node
+
+  - name: Python
+    url: "https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe"
+    silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
+    commandCheck: python
+
+  - name: pgAdmin 4
+    url: "https://ftp.postgresql.org/pub/pgadmin/pgadmin4/v8.10/windows/pgadmin4-8.10-x64.exe"
+    silentArguments: "/VERYSILENT /ALLUSERS"
+    programCheck: "pgAdmin 4\runtime\pgAdmin4.exe"
+
+  - name: Twingate
+    url: "https://api.twingate.com/download/windows"
+    silentArguments: "/quiet"
+    programCheck: "Twingate\Twingate.exe"
+
+  - name: JDK
+    url: "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
+    installer: "msi"
+    programCheck: "Java\jdk-17\bin\java.exe"
+
+  - name: Visual Studio 2022
+    url: "https://aka.ms/vs/17/release/vs_community.exe"
+    silentArguments: "--add Microsoft.VisualStudio.Workload.ManagedDesktop --add Microsoft.VisualStudio.Workload.NetWeb --add Microsoft.Net.Component.4.8.SDK --add Microsoft.Net.Component.4.8.TargetingPack --add Microsoft.Net.ComponentGroup.TargetingPacks.Common --add Microsoft.Net.ComponentGroup.DevelopmentPrerequisites --add Microsoft.VisualStudio.Component.Web --add Microsoft.VisualStudio.Component.FSharp --add Microsoft.VisualStudio.Component.VC.CoreIde --add Microsoft.VisualStudio.Component.VC.CMake.Project --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.VC.DiagnosticTools --add Microsoft.VisualStudio.Component.Windows10SDK.18362 --add Microsoft.Net.Component.4.8.SDK --add Microsoft.Net.Component.4.8.TargetingPack --add Microsoft.NetCore.Component.SDK --add Microsoft.NetCore.Component.DevelopmentTools --add Microsoft.NetCore.Component.Runtime.6.0 --add Microsoft.NetCore.Component.Runtime.8.0 --add Microsoft.VisualStudio.Workload.Python --add Microsoft.VisualStudio.Workload.Azure --add Microsoft.VisualStudio.Workload.Node"
+    programCheck: "Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe"
+
+  - name: SSMS
+    url: "https://aka.ms/ssmsfullsetup"
+    programCheck: "Microsoft SQL Server Management Studio 18\Common7\IDE\Ssms.exe,Microsoft SQL Server Management Studio 20\Common7\IDE\Ssms.exe"
+
+  - name: 7-Zip
+    url: "https://www.7-zip.org/a/7z2301-x64.exe"
+    silentArguments: "/S"
+    programCheck: "7-Zip\7z.exe"
+
+  - name: Slack
+    url: "https://downloads.slack-edge.com/releases/windows/4.32.122/prod/x64/SlackSetup.exe"
+    programCheck: "Slack\slack.exe"
+
+  - name: Google Chrome
+    url: "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B743FF219-1E25-35A1-2BE5-CAAAAE003F78%7D%26lang%3Den%26browser%3D4%26usagestats3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dfalse%26ap%3Dx64-stable%26brand%3DGCEU/dl/chrome/install/googlechromestandaloneenterprise64.msi"
+    installer: "msi"
+    programCheck: "Google\Chrome\Application\chrome.exe"
+
+  - name: Postman
+    url: "https://dl.pstmn.io/download/latest/win64"
+    silentArguments: "/S"
+    programCheck: "Postman\Postman.exe"
+
+vscodeExtensions:
+  - ms-azuretools.vscode-docker
+  - ms-vscode-remote.remote-containers
+  - ms-python.python
+  - eamodio.gitlens
+  - github.copilot
+  - github.copilot-chat
+  - ms-dotnettools.vscode-dotnet-runtime
+  - ms-dotnettools.csharp
+  - ms-dotnettools.csdevkit
+  - davidanson.vscode-markdownlint
+  - eg2.vscode-npm-script
+  - ms-vscode.powershell
+  - dbaeumer.vscode-eslint
+  - esbenp.prettier-vscode
+  - ms-vscode-remote.remote-wsl
+  - ms-vscode.vscode-html-language-features
+  - ecmel.vscode-html-css
+  - ritwickdey.LiveServer
