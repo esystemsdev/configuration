@@ -1,9 +1,9 @@
 # Check if the powershell-yaml module is installed
 if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
-    Write-Host "powershell-yaml module not found. Installing..."
+    Write-Host "Powershell-yaml module not found. Installing..."
     try {
         Install-Module -Name powershell-yaml -Force -Scope CurrentUser -ErrorAction Stop
-        Write-Host "powershell-yaml module installed successfully."
+        Write-Host "Powershell-yaml module installed successfully."
     } catch {
         Write-Error "Failed to install powershell-yaml module. Exiting."
         exit 1
@@ -88,7 +88,6 @@ function Test-AllProgramLocations {
     param (
         [string]$paths
     )
-
     if ([string]::IsNullOrEmpty($paths)) {
         return $false
     }
@@ -101,7 +100,7 @@ function Test-AllProgramLocations {
             foreach ($location in $locations) {
                 if ($location) {
                     $fullPath = Join-Path -Path $location -ChildPath $path
-                    Write-Output "Full paths : $fullPath"
+                    
                     if (Test-Path $fullPath) {
                         return $true
                     }
@@ -128,17 +127,17 @@ foreach ($app in $config.applications) {
         continue
     }
 
-    $shouldInstall = $false
+    $shouldInstall = $true
 
     # Check based on command
-    if ($app.commandCheck -and -not (Test-CommandExists -Command $app.commandCheck)) {
-        $shouldInstall = $true
+    if ($app.commandCheck -and (Test-CommandExists -Command $app.commandCheck)) {
+        $shouldInstall = $false
     }
 
     # Check based on paths
-    if ($app.programCheck) {
-        if (-not (Test-AllProgramLocations -paths $app.programCheck)) {
-            $shouldInstall = $true
+    if ($app.programCheck -and $shouldInstall) {
+        if (Test-AllProgramLocations -paths $app.programCheck) {
+            $shouldInstall = $false
         }
     }
 
@@ -156,7 +155,9 @@ foreach ($app in $config.applications) {
         if ($app.installer -eq "msi") {
             $installerFileName = "$($app.name).msi"
         }
-
+        if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
+            $app.silentArguments = "/quiet /norestart"
+        }
         Install-Software -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
     } else {
         Write-Host "$($app.name) is already installed."

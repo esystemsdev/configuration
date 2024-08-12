@@ -1,6 +1,5 @@
 applications:
   - name: Docker
-    install: false
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
@@ -13,14 +12,12 @@ applications:
     commandCheck: git
 
   - name: VSCode
-    install: false
     url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
     programCheck: "Microsoft VS Code\\Code.exe"
     commandCheck: code
 
   - name: Node.js
-    install: true
     url: "https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi"
     installer: "msi"
     programCheck: "nodejs\\node.exe"
