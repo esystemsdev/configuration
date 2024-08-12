@@ -37,13 +37,16 @@ applications:
     programCheck: "Docker\Docker\DockerCli.exe"
     commandCheck: docker
 
-  - name: Git
-    install: true
-    url: "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe"
-    silentArguments: "/SILENT"
-    programCheck: "Git\cmd\git.exe"
-    commandCheck: git
+  - name: JDK
+    install: false
+    url: "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
+    installer: "java.msi"
+    programCheck: "Java\\jdk-17\\bin\\java.exe"
 
+  - name: SSMS
+    url: "https://aka.ms/ssmsfullsetup"
+    programCheck: "Microsoft SQL Server Management Studio 18\\Common7\\IDE\\Ssms.exe,Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe"
+    installer: "SSMS-Setup-ENU.exe"
   # Additional applications...
 ```
 

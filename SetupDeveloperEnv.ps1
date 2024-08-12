@@ -140,20 +140,19 @@ foreach ($app in $config.applications) {
             $shouldInstall = $false
         }
     }
-
+    if ($app.name -eq "VSCode") {
+        $installVSCode = $true
+    }
     # Install if not installed
     if ($shouldInstall) {
         if ($app.name -eq "Docker") {
             $installDocker = $true
         }
-        if ($app.name -eq "VSCode") {
-            $installVSCode = $true
-        }
 
         # Determine installer type
         $installerFileName = "$($app.name).exe"
-        if ($app.installer -eq "msi") {
-            $installerFileName = "$($app.name).msi"
+        if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
+            $installerFileName = $app.installer
         }
         if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
             $app.silentArguments = "/quiet /norestart"

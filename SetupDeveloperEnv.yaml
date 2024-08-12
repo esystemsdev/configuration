@@ -19,14 +19,14 @@ applications:
 
   - name: Node.js
     url: "https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi"
-    installer: "msi"
+    installer: "nodejs.msi"
     programCheck: "nodejs\\node.exe"
     commandCheck: node
 
   - name: Python
     url: "https://www.python.org/ftp/python/3.11.5/python-3.11.5-amd64.exe"
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
-    commandCheck: python
+    programCheck: "Python311\\python.exe"
 
   - name: pgAdmin 4
     url: "https://ftp.postgresql.org/pub/pgadmin/pgadmin4/v8.10/windows/pgadmin4-8.10-x64.exe"
@@ -40,7 +40,7 @@ applications:
 
   - name: JDK
     url: "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
-    installer: "msi"
+    installer: "java.msi"
     programCheck: "Java\\jdk-17\\bin\\java.exe"
 
   - name: Visual Studio 2022
@@ -51,7 +51,7 @@ applications:
   - name: SSMS
     url: "https://aka.ms/ssmsfullsetup"
     programCheck: "Microsoft SQL Server Management Studio 18\\Common7\\IDE\\Ssms.exe,Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe"
-
+    installer: "SSMS-Setup-ENU.exe"
   - name: 7-Zip
     url: "https://www.7-zip.org/a/7z2301-x64.exe"
     silentArguments: "/S"
@@ -63,7 +63,7 @@ applications:
 
   - name: Google Chrome
     url: 'https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B743FF219-1E25-35A1-2BE5-CAAAAE003F78%7D%26lang%3Den%26browser%3D4%26usagestats3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dfalse%26ap%3Dx64-stable%26brand%3DGCEU/dl/chrome/install/googlechromestandaloneenterprise64.msi'
-    installer: "msi"
+    installer: "chrome.msi"
     programCheck: "Google\\Chrome\\Application\\chrome.exe"
 
   - name: Postman
