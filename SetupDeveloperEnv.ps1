@@ -9,7 +9,7 @@ if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
         exit 1
     }
 } else {
-    Write-Host "powershell-yaml module is already installed."
+    Write-Host "Powershell-yaml module is already installed."
 }
 
 # Import the powershell-yaml module
@@ -89,14 +89,23 @@ function Test-AllProgramLocations {
         [string]$paths
     )
 
+    if ([string]::IsNullOrEmpty($paths)) {
+        return $false
+    }
+    
     $pathsArray = $paths -split ","
-    $locations = @($env:ProgramFiles, $env:ProgramFilesX86, $env:LOCALAPPDATA)
-
+    $locations = @($env:ProgramFiles, "$env:ProgramFiles (x86)", $env:LOCALAPPDATA)
     foreach ($path in $pathsArray) {
-        foreach ($location in $locations) {
-            $fullPath = Join-Path -Path $location -ChildPath $path.Trim()
-            if (Test-Path $fullPath) {
-                return $true
+        $path = $path.Trim()
+        if (-not [string]::IsNullOrEmpty($path)) {
+            foreach ($location in $locations) {
+                if ($location) {
+                    $fullPath = Join-Path -Path $location -ChildPath $path
+                    Write-Output "Full paths : $fullPath"
+                    if (Test-Path $fullPath) {
+                        return $true
+                    }
+                }
             }
         }
     }
@@ -110,7 +119,7 @@ $installVSCode = $false
 foreach ($app in $config.applications) {
     # Default install to true if not explicitly set
     $install = $app.install
-    if (-not $install) {
+    if ($null -eq $install) {
         $install = $true
     }
     
@@ -171,7 +180,7 @@ if ($installDocker) {
 }
 
 # If VSCode is installed or being installed, install the VSCode extensions
-if ($installVSCode -or (Test-CommandExists -Command "code")) {
+if ($installVSCode) {
     # Determine the correct path to code.cmd
     $codeCmdPath = (Get-Command code.cmd -ErrorAction SilentlyContinue).Source
     if (-not $codeCmdPath) {
