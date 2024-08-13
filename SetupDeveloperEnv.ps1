@@ -33,6 +33,7 @@ $config = ConvertFrom-Yaml (Get-Content -Path $yamlFilePath -Raw)
 # Helper function to download and install MSI or EXE files with error handling and exit code verification
 function Install-Software {
     param (
+        [string]$Name,
         [string]$Url,
         [string]$InstallerFileName,
         [string]$SilentArguments = "/quiet /norestart"
@@ -52,11 +53,14 @@ function Install-Software {
         Write-Host "$InstallerFileName already exists at $tempPath. Skipping download."
     }
 
-    Write-Host "Installing $InstallerFileName..."
+    Write-Host "Installing $Name - $InstallerFileName..."
     try {
         $process = Start-Process -FilePath $tempPath -ArgumentList $SilentArguments -Wait -PassThru
 
         if ($process.ExitCode -ne 0) {
+            if ($process.ExitCode -eq 1603) {
+                Write-Host "A later version of $Name may already be installed. Use 'Add or remove programs' to uninstall that version and try again."
+            }
             throw "Installation of $InstallerFileName failed with exit code $($process.ExitCode)."
         }
     } catch {
@@ -157,7 +161,7 @@ foreach ($app in $config.applications) {
         if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
             $app.silentArguments = "/quiet /norestart"
         }
-        Install-Software -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
+        Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
     } else {
         Write-Host "$($app.name) is already installed."
     }

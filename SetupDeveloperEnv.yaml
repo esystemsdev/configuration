@@ -14,7 +14,7 @@ applications:
   - name: VSCode
     url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
-    programCheck: "Microsoft VS Code\\Code.exe"
+    programCheck: "Programs\\Microsoft VS Code\\Code.exe"
     commandCheck: code
 
   - name: Node.js
@@ -62,7 +62,7 @@ applications:
     programCheck: "Slack\\slack.exe"
 
   - name: Google Chrome
-    url: 'https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B743FF219-1E25-35A1-2BE5-CAAAAE003F78%7D%26lang%3Den%26browser%3D4%26usagestats3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dfalse%26ap%3Dx64-stable%26brand%3DGCEU/dl/chrome/install/googlechromestandaloneenterprise64.msi'
+    url: "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B743FF219-1E25-35A1-2BE5-CAAAAE003F78%7D%26lang%3Den%26browser%3D4%26usagestats3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dfalse%26ap%3Dx64-stable%26brand%3DGCEU/dl/chrome/install/googlechromestandaloneenterprise64.msi"
     installer: "chrome.msi"
     programCheck: "Google\\Chrome\\Application\\chrome.exe"
 
@@ -70,6 +70,16 @@ applications:
     url: "https://dl.pstmn.io/download/latest/win64"
     silentArguments: "/S"
     programCheck: "Postman\\Postman.exe"
+
+  - name: Azure Dev CLI
+    url: "https://azdrelease.azureedge.net/azd/standalone/release/latest/azd-windows-amd64.msi"
+    installer: "azd.msi"
+    programCheck: "Programs\\Azure Dev CLI\\azd.exe"
+
+  - name: Promptflow
+    url: "https://promptflowartifact.blob.core.windows.net/msi-installer/promptflow-1.14.0.msi"
+    installer: "Promptflow.msi"
+    programCheck: "Apps\\promptflow\\pfcli.exe"
 
 vscodeExtensions:
   - ms-azuretools.vscode-docker
