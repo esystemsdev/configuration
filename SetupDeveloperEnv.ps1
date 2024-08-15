@@ -30,6 +30,35 @@ if (-not (Test-Path -Path $yamlFilePath)) {
 # Parse the YAML file
 $config = ConvertFrom-Yaml (Get-Content -Path $yamlFilePath -Raw)
 
+# Function to prompt user for application group selection
+function Prompt-UserForGroupSelection {
+    Write-Host "Please select the groups of applications you want to install."
+    Write-Host "The following groups are available:"
+    
+    $groupNames = $config.applications.group | Sort-Object -Unique
+    $groupSelections = @()
+    
+    foreach ($group in $groupNames) {
+        # Provide a brief description of the group contents
+        $appsInGroup = $config.applications | Where-Object { $_.group -eq $group } | ForEach-Object { $_.name }
+        Write-Host "`n[$group] includes:"
+        $appsInGroup | ForEach-Object { Write-Host "- $_" }
+        
+        $choice = Read-Host "`nDo you want to install the $group group? (y/n)"
+        if ($choice -eq 'y') {
+            $groupSelections += $group
+        }
+    }
+
+    # Automatically include the "Development" group
+    if (-not ($groupSelections -contains "Development")) {
+        Write-Host "`nThe 'Development' group is required and will be installed automatically."
+        $groupSelections += "Development"
+    }
+
+    return $groupSelections
+}
+
 # Helper function to download and install MSI or EXE files with error handling and exit code verification
 function Install-Software {
     param (
@@ -115,55 +144,62 @@ function Test-AllProgramLocations {
     return $false
 }
 
+# Get user selection of groups to install
+$selectedGroups = Prompt-UserForGroupSelection
+
 # Check and install applications based on the configuration
 $installDocker = $false
 $installVSCode = $false
 
 foreach ($app in $config.applications) {
-    # Default install to true if not explicitly set
-    $install = $app.install
-    if ($null -eq $install) {
-        $install = $true
-    }
+    if ($selectedGroups -contains $app.group) {
+        # Default install to true if not explicitly set
+        $install = $app.install
+        if ($null -eq $install) {
+            $install = $true
+        }
     
-    if ($install -eq $false) {
-        Write-Host "Skipping installation of $($app.name) as per configuration."
-        continue
-    }
+        if ($install -eq $false) {
+            Write-Host "Skipping installation of $($app.name) as per configuration."
+            continue
+        }
 
-    $shouldInstall = $true
+        $shouldInstall = $true
 
-    # Check based on command
-    if ($app.commandCheck -and (Test-CommandExists -Command $app.commandCheck)) {
-        $shouldInstall = $false
-    }
-
-    # Check based on paths
-    if ($app.programCheck -and $shouldInstall) {
-        if (Test-AllProgramLocations -paths $app.programCheck) {
+        # Check based on command
+        if ($app.commandCheck -and (Test-CommandExists -Command $app.commandCheck)) {
             $shouldInstall = $false
         }
-    }
-    if ($app.name -eq "VSCode") {
-        $installVSCode = $true
-    }
-    # Install if not installed
-    if ($shouldInstall) {
-        if ($app.name -eq "Docker") {
-            $installDocker = $true
-        }
 
-        # Determine installer type
-        $installerFileName = "$($app.name).exe"
-        if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
-            $installerFileName = $app.installer
+        # Check based on paths
+        if ($app.programCheck -and $shouldInstall) {
+            if (Test-AllProgramLocations -paths $app.programCheck) {
+                $shouldInstall = $false
+            }
         }
-        if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
-            $app.silentArguments = "/quiet /norestart"
+        if ($app.name -eq "VSCode") {
+            $installVSCode = $true
         }
-        Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
+        # Install if not installed
+        if ($shouldInstall) {
+            if ($app.name -eq "Docker") {
+                $installDocker = $true
+            }
+
+            # Determine installer type
+            $installerFileName = "$($app.name).exe"
+            if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
+                $installerFileName = $app.installer
+            }
+            if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
+                $app.silentArguments = "/quiet /norestart"
+            }
+            Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
+        } else {
+            Write-Host "$($app.name) is already installed."
+        }
     } else {
-        Write-Host "$($app.name) is already installed."
+        Write-Host "Skipping $($app.name) as it is not part of the selected groups."
     }
 }
 
@@ -205,4 +241,4 @@ if ($installVSCode) {
     }
 }
 
-Write-Host "Computer setup complete. All applications and additional tools are installed. You can now proceed with the GitHub setup."
+Write-Host "Computer setup complete. All selected applications and additional tools are installed. You can now proceed with the GitHub setup."
