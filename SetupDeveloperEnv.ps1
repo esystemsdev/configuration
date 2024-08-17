@@ -144,6 +144,47 @@ function Test-AllProgramLocations {
     return $false
 }
 
+# Function to set environment path variable if not already set
+function Set-EnvironmentVariable {
+    param (
+        [Parameter(Mandatory=$true)]
+        [hashtable]$app
+    )
+
+    # Define the locations to check for application paths
+    $locations = @($env:ProgramFiles, "$env:ProgramFiles (x86)", $env:LOCALAPPDATA)
+
+    # Find the actual installation path
+    $actualPath = $null
+    foreach ($location in $locations) {
+        $fullPath = Join-Path -Path $location -ChildPath $app.programCheck
+        if (Test-Path $fullPath) {
+            $actualPath = $fullPath
+            break
+        }
+    }
+
+    if ($null -ne $actualPath) {
+        # Get the directory path to add to the PATH environment variable and ensure it ends with a backslash
+        $dirPath = (Split-Path -Path $actualPath -Parent) + '\'
+
+        # Get the current PATH environment variable
+        $currentPath = [System.Environment]::GetEnvironmentVariable("Path", "User")
+
+        # Check if the directory path is already in the PATH environment variable
+        $pathArray = $currentPath -split ';'
+        if (-not ($pathArray -contains $dirPath)) {
+            $newPath = "$currentPath;$dirPath"
+            [System.Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+            Write-Host "Added $dirPath to the PATH environment variable."
+        } else {
+            Write-Host "$dirPath is already in the PATH environment variable."
+        }
+    } else {
+        Write-Host "Could not find the installation path for $($app.name)."
+    }
+}
+
 # Get user selection of groups to install
 $selectedGroups = Prompt-UserForGroupSelection
 
@@ -177,11 +218,13 @@ foreach ($app in $config.applications) {
                 $shouldInstall = $false
             }
         }
+        # vscode is a special case and we updated extensions if installed
         if ($app.name -eq "VSCode") {
             $installVSCode = $true
         }
         # Install if not installed
         if ($shouldInstall) {
+            # Handle specific cases
             if ($app.name -eq "Docker") {
                 $installDocker = $true
             }
@@ -191,12 +234,18 @@ foreach ($app in $config.applications) {
             if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
                 $installerFileName = $app.installer
             }
-            if([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
+            if ([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
                 $app.silentArguments = "/quiet /norestart"
             }
             Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
         } else {
             Write-Host "$($app.name) is already installed."
+        }
+
+        # Always check and set environment variables even if the application is already installed
+        if ($app.environmentVariable -eq $true) {
+            # Example: Setting a specific environment variable based on app name
+            Set-EnvironmentVariable -app $app
         }
     } else {
         Write-Host "Skipping $($app.name) as it is not part of the selected groups."

@@ -1,6 +1,6 @@
 applications:
   - name: Docker
-    group: "Virtualization"
+    group: "Development AI"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
@@ -12,9 +12,18 @@ applications:
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
     commandCheck: git
+    environmentVariable : true
+
+  - name: GitHub CLI
+    group: "Development"
+    url: "https://github.com/cli/cli/releases/download/v2.54.0/gh_2.54.0_windows_amd64.msi"
+    sinstaller: "GitHub CLI.msi"
+    programCheck: "GitHub CLI\\gh.exe"
+    environmentVariable : true
 
   - name: VSCode
     group: "Development"
+    install: true
     url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
     programCheck: "Programs\\Microsoft VS Code\\Code.exe"
@@ -50,6 +59,7 @@ applications:
     url: "https://download.oracle.com/java/22/latest/jdk-22_windows-x64_bin.msi"
     installer: "java.msi"
     programCheck: "Java\\jdk-22\\bin\\java.exe"
+    environmentVariable : true
 
   - name: Visual Studio 2022
     group: "Development OutSystems"
@@ -68,6 +78,7 @@ applications:
     url: "https://www.7-zip.org/a/7z2301-x64.exe"
     silentArguments: "/S"
     programCheck: "7-Zip\\7z.exe"
+    environmentVariable : true
 
   - name: Slack
     group: "Development"
@@ -91,12 +102,27 @@ applications:
     url: "https://azdrelease.azureedge.net/azd/standalone/release/latest/azd-windows-amd64.msi"
     installer: "azd.msi"
     programCheck: "Programs\\Azure Dev CLI\\azd.exe"
+    environmentVariable : true
 
+  #- name: Azure CLI
+  #  group: "Development AI"
+  #  url: "https://aka.ms/installazurecliwindowsx64"
+  #  installer: "azure-cli.msi"
+  #  programCheck: "Programs\\Azure CLI\\az.exe"
+
+  - name: PowerShell
+    group: "Development"
+    url: "https://github.com/PowerShell/PowerShell/releases/download/v7.4.4/PowerShell-7.4.4-win-x64.msi"
+    installer: "PowerShell.msi"
+    programCheck: "PowerShell\\7\\pwsh.exe"
+    environmentVariable : true
+  
   - name: Promptflow
     group: "Development AI"
     url: "https://promptflowartifact.blob.core.windows.net/msi-installer/promptflow-1.14.0.msi"
     installer: "Promptflow.msi"
     programCheck: "Apps\\promptflow\\pfcli.exe"
+    environmentVariable : true
 
 vscodeExtensions:
   - ms-azuretools.vscode-docker
