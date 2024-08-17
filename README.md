@@ -12,18 +12,24 @@ This PowerShell script automates the installation of essential tools and depende
 - Installs tools such as Docker, Git, Node.js, Python, Visual Studio Code, and more.
 - Verifies if tools are already installed and skips reinstallation if unnecessary.
 - Allows the user to choose which groups of applications to install, with a default installation of the "Development" group.
+- Supports an optional `-groups` parameter to automate the selection process, allowing for a faster setup without user prompts.
+- Automatically sets environment variables for installed applications if needed.
 - Configures your environment according to company standards.
 
 **Usage:**
 ```powershell
 # Run the script with administrator rights
 .\SetupDeveloperEnv.ps1
+
+# Optionally, specify the groups to install without prompts
+.\SetupDeveloperEnv.ps1 -groups "Development, Development AI"
 ```
 
 **Installation Process:**
-- The script will prompt you to select which groups of applications you wish to install. Available groups will be displayed, and the script will provide a brief description of each.
-- The "Development" group, containing essential development tools, will always be installed by default.
-- After selecting the desired groups, the script will proceed to install the necessary software, skipping any that are already installed.
+- The script will either prompt you to select which groups of applications you wish to install or automatically install based on the `-groups` parameter.
+- The "Development" group, containing essential development tools, will always be installed by default if no groups are specified.
+- If the `-groups` parameter is set to `"all"`, all applications in the YAML configuration will be installed.
+- The script installs the necessary software and ensures that the appropriate environment variables are set, updating the system `PATH` if needed.
 
 ### 2. `SetupDeveloperEnv.yaml`
 
@@ -33,6 +39,7 @@ This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. 
 - Customizable: You can modify this file to adjust which tools are installed or to change installation parameters.
 - Supports both `.exe` and `.msi` installers.
 - Organized by application groups, allowing for targeted installation based on development needs.
+- Includes options to set environment variables automatically after installation.
 
 **Sample Configuration:**
 ```yaml
@@ -44,6 +51,7 @@ applications:
     silentArguments: "install --quiet"
     programCheck: "Docker\Docker\DockerCli.exe"
     commandCheck: docker
+    environmentVariable: true
 
   - name: JDK
     install: false
@@ -57,6 +65,7 @@ applications:
     url: "https://aka.ms/ssmsfullsetup"
     programCheck: "Microsoft SQL Server Management Studio 18\\Common7\\IDE\\Ssms.exe,Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe"
     installer: "SSMS-Setup-ENU.exe"
+    environmentVariable: false
   # Additional applications...
 ```
 
@@ -86,8 +95,8 @@ This script is designed to help developers quickly clone all necessary repositor
 
 ### Step 2: Select Application Groups
 
-1. When running the `SetupDeveloperEnv.ps1` script, you will be prompted to select which groups of applications to install. Review the descriptions provided for each group and make your selections.
-2. The "Development" group will be installed by default, ensuring that essential development tools are always available.
+1. If you do not use the `-groups` parameter, you will be prompted to select which groups of applications to install. Review the descriptions provided for each group and make your selections.
+2. Alternatively, specify the `-groups` parameter to install applications from selected groups automatically, or use `"all"` to install all available applications.
 
 ### Step 3: Clone Necessary Repositories
 

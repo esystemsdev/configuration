@@ -1,3 +1,7 @@
+param (
+    [string]$groups
+)
+
 # Check if the powershell-yaml module is installed
 if (-not (Get-Module -ListAvailable -Name powershell-yaml)) {
     Write-Host "Powershell-yaml module not found. Installing..."
@@ -57,6 +61,23 @@ function Prompt-UserForGroupSelection {
     }
 
     return $groupSelections
+}
+
+# Function to get the selected groups based on input or prompt
+function Get-SelectedGroups {
+    param (
+        [string]$groups
+    )
+
+    if ($groups) {
+        if ($groups -ieq "all") {
+            return $config.applications.group | Sort-Object -Unique
+        } else {
+            return $groups -split ',' | ForEach-Object { $_.Trim() }
+        }
+    } else {
+        return Prompt-UserForGroupSelection
+    }
 }
 
 # Helper function to download and install MSI or EXE files with error handling and exit code verification
@@ -186,7 +207,7 @@ function Set-EnvironmentVariable {
 }
 
 # Get user selection of groups to install
-$selectedGroups = Prompt-UserForGroupSelection
+$selectedGroups = Get-SelectedGroups -groups $groups
 
 # Check and install applications based on the configuration
 $installDocker = $false
@@ -244,7 +265,6 @@ foreach ($app in $config.applications) {
 
         # Always check and set environment variables even if the application is already installed
         if ($app.environmentVariable -eq $true) {
-            # Example: Setting a specific environment variable based on app name
             Set-EnvironmentVariable -app $app
         }
     } else {
