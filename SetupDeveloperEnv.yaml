@@ -125,21 +125,26 @@ applications:
     environmentVariable : true
 
 vscodeExtensions:
-  - ms-azuretools.vscode-docker
-  - ms-vscode-remote.remote-containers
-  - ms-python.python
+  - davidanson.vscode-markdownlint
+  - dbaeumer.vscode-eslint
   - eamodio.gitlens
+  - ecmel.vscode-html-css
+  - eg2.vscode-npm-script
+  - esbenp.prettier-vscode
   - github.copilot
   - github.copilot-chat
-  - ms-dotnettools.vscode-dotnet-runtime
-  - ms-dotnettools.csharp
+  - idered.npm
+  - ms-azuretools.vscode-bicep
+  - ms-azuretools.vscode-docker
   - ms-dotnettools.csdevkit
-  - davidanson.vscode-markdownlint
-  - eg2.vscode-npm-script
-  - ms-vscode.powershell
-  - dbaeumer.vscode-eslint
-  - esbenp.prettier-vscode
+  - ms-dotnettools.csharp
+  - ms-dotnettools.vscode-dotnet-runtime
+  - ms-mssql.mssql
+  - ms-python.debugpy
+  - ms-python.python
+  - ms-python.vscode-pylance
+  - ms-vscode-remote.remote-containers
   - ms-vscode-remote.remote-wsl
+  - ms-vscode.powershell
   - ms-vscode.vscode-html-language-features
-  - ecmel.vscode-html-css
   - ritwickdey.LiveServer
