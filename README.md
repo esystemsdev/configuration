@@ -81,7 +81,7 @@ This script is designed to help developers quickly clone all necessary repositor
 **Usage:**
 ```powershell
 # Run the script with your user account
-.\SetupGitEnv.ps1
+C:\git\esystemsdev\configuration\SetupDeveloperEnv.ps1 -groups all
 ```
 
 ## How to Use This Repository

@@ -6,36 +6,37 @@ cd C:/git/esystemsdev
 
 ## Clone the repository
 
+```bash
 git clone https://github.com/microsoft/sample-app-aoai-chatGPT.git chatgpt
+```
 
 ## Navigate to the project folder
 
+```bash
 cd C:/git/esystemsdev/chatgpt
+```
 
 ## Initialize the project with Azure Developer CLI
 
+```bash
 azd init
+```
 
 ## Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
 ## Deploy the project to Azure
 
+```bash
 azd up
+```
 
 ## Create a new repo
 
-### Step 1: Install GitHub CLI
-
-Open Command Prompt or PowerShell as an administrator.
-Run the following command to install GitHub CLI:
-
-   ```bash
-   winget install --id GitHub.cli
-   ```
-
-### Step 2: Authenticate with GitHub
+### Step 1: Authenticate with GitHub
 
 Once `gh` is installed, you can authenticate with your GitHub account:
 
@@ -43,7 +44,7 @@ Once `gh` is installed, you can authenticate with your GitHub account:
    gh auth login
    ```
 
-### Step 3: Create and Push to a GitHub Repository
+### Step 2: Create and Push to a GitHub Repository
 
 Now that the GitHub CLI is installed and you're authenticated, you can proceed with creating a repository and pushing your code as previously outlined.
 

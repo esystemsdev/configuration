@@ -6,29 +6,32 @@ cd C:/git/esystemsdev
 
 ## Clone the repository
 
+```bash
 git clone https://github.com/Azure-Samples/ai-studio-in-a-box chatbot
 
 cd C:/git/esystemsdev/chatbot
 azd auth login
 
-azd env new eSYS-Demo-chatbot
+az login
+-- Account name must be between 3 and 15 characters in length and use numbers, line and lower-case letters only
+azd env new esys-chatbot
 azd env set AZURE_LOCATION swedencentral
-
+azd env set AZURE_SUBSCRIPTION_ID 67576622-504a-4532-9903-dbae7df491f5
 
 azd up
+Enter a value for the 'deployCosmosDb' infrastructure parameter: True
+Enter a value for the 'deploySearch' infrastructure parameter: True
+Enter a value for the 'publicNetworkAccess' infrastructure parameter: Disabled
+Enter a value for the 'systemDatastoresAuthMode' infrastructure parameter: accessKey
+```
 
-## Create a new repo
+Azure AI studio
 
-### Step 1: Install GitHub CLI
+- Deploy model gpt-4o
 
-Open Command Prompt or PowerShell as an administrator.
-Run the following command to install GitHub CLI:
+### Create a new repo
 
-   ```bash
-   winget install --id GitHub.cli
-   ```
-
-### Step 2: Authenticate with GitHub
+### Step 1: Authenticate with GitHub
 
 Once `gh` is installed, you can authenticate with your GitHub account:
 
@@ -36,14 +39,14 @@ Once `gh` is installed, you can authenticate with your GitHub account:
    gh auth login
    ```
 
-### Step 3: Create and Push to a GitHub Repository
+### Step 2: Create and Push to a GitHub Repository
 
 Now that the GitHub CLI is installed and you're authenticated, you can proceed with creating a repository and pushing your code as previously outlined.
 
 1. **Navigate to Your Project Directory**:
 
    ```bash
-   cd C:/git/esystemsdev/chatgpt
+   cd C:/git/esystemsdev/chatbot
    ```
 
 2. **Initialize the Git Repository (if not done)**:
@@ -55,13 +58,13 @@ Now that the GitHub CLI is installed and you're authenticated, you can proceed w
 3. **Create a New Private GitHub Repository**:
 
    ```bash
-   gh repo create esystemsdev/chatgpt --private --source=. --remote=origin
+   gh repo create esystemsdev/chatbot --private --source=.
    ```
 
 4. **Update the Remote URL**:
 
    ```bash
-   git remote set-url origin https://github.com/esystemsdev/chatgpt
+   git remote set-url origin https://github.com/esystemsdev/chatbot
    ```
 
 5. **Push to GitHub**:
@@ -76,5 +79,5 @@ Run the following command to delete a repository. Be very careful with this comm
 
    ```bash
    gh auth refresh -h github.com -s delete_repo
-   gh repo delete esystemsdev/chatgpt
+   gh repo delete esystemsdev/chatbot
    ```
