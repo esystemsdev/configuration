@@ -49,7 +49,7 @@ applications:
     group: "Virtualization"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
-    programCheck: "Docker\Docker\DockerCli.exe"
+    programCheck: "Docker\\Docker\\DockerCli.exe"
     commandCheck: docker
     environmentVariable: true
 

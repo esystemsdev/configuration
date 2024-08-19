@@ -14,7 +14,7 @@ azd auth login
 
 az login
 -- Account name must be between 3 and 15 characters in length and use numbers, line and lower-case letters only
-azd env new esys-chatbot
+azd env new esys-ai-demo
 azd env set AZURE_LOCATION swedencentral
 azd env set AZURE_SUBSCRIPTION_ID 67576622-504a-4532-9903-dbae7df491f5
 
