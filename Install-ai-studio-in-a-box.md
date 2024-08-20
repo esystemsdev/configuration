@@ -14,7 +14,7 @@ azd auth login
 
 az login
 -- Account name must be between 3 and 15 characters in length and use numbers, line and lower-case letters only
-azd env new esys-ai-demo
+azd env new esys-demo-ai
 azd env set AZURE_LOCATION swedencentral
 azd env set AZURE_SUBSCRIPTION_ID 67576622-504a-4532-9903-dbae7df491f5
 
@@ -73,11 +73,52 @@ Now that the GitHub CLI is installed and you're authenticated, you can proceed w
    git push -u origin main
    ```
 
-## Delete the Repository
+## Deleting Resources with `azd down`
 
-Run the following command to delete a repository. Be very careful with this command, as it cannot be undone.
+The `azd down` command is a powerful tool that deletes all resources associated with your Azure deployment as defined in your Azure Developer CLI (azd) environment. This operation is irreversible, so it's essential to ensure that you no longer need the resources or have backups if required.
+
+### Steps to Delete Resources
+
+1. **Navigate to Your Project Directory:**
+   Ensure you are in the root directory of your Azure Developer project where your `azd` environment files and infrastructure code are located.
 
    ```bash
-   gh auth refresh -h github.com -s delete_repo
-   gh repo delete esystemsdev/chatbot
+   cd C:/git/esystemsdev/chatbot
    ```
+
+2. **Check the Current Environment:**
+   It's always a good idea to confirm the environment you are targeting. You can do this by checking the environment configuration file.
+
+   ```bash
+   azd env list
+   ```
+
+   Ensure that the environment you intend to delete is active.
+
+3. **Run the `azd down` Command:**
+   To delete all resources associated with your current environment, run the following command:
+
+   ```bash
+   azd down
+   ```
+
+   This command will start the process of deleting all resources in Azure that are tracked by the `azd` environment.
+
+4. **Confirm Deletion:**
+   During the process, you may be prompted to confirm the deletion of resources. Ensure that you read the prompts carefully and confirm only if you are certain you want to proceed.
+
+   ```plaintext
+   Are you sure you want to delete all resources? (y/n): y
+   ```
+
+### Important Notes
+
+- **Irreversibility**: Once the `azd down` command completes, the deletion of resources cannot be undone. All data and configurations associated with those resources will be permanently lost.
+  
+- **Check for Critical Resources**: Before running the command, ensure that there are no critical resources that should be preserved, such as databases, storage accounts, or production environments.
+
+- **Backup Important Data**: If you have critical data stored in Azure resources, make sure to back it up before running the `azd down` command.
+
+- **Verify Environment**: Double-check that you are operating in the correct environment. Deleting resources in the wrong environment could have unintended consequences.
+
+By following these steps and precautions, you can safely delete your Azure resources using the `azd down` command.

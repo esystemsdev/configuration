@@ -9,6 +9,7 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 This PowerShell script automates the installation of essential tools and dependencies required for development. It reads configuration data from `SetupDeveloperEnv.yaml` and installs the necessary software, ensuring that your development environment is fully equipped.
 
 **Features:**
+
 - Installs tools such as Docker, Git, Node.js, Python, Visual Studio Code, and more.
 - Verifies if tools are already installed and skips reinstallation if unnecessary.
 - Allows the user to choose which groups of applications to install, with a default installation of the "Development" group.
@@ -17,6 +18,7 @@ This PowerShell script automates the installation of essential tools and depende
 - Configures your environment according to company standards.
 
 **Usage:**
+
 ```powershell
 # Run the script with administrator rights
 .\SetupDeveloperEnv.ps1
@@ -26,6 +28,7 @@ This PowerShell script automates the installation of essential tools and depende
 ```
 
 **Installation Process:**
+
 - The script will either prompt you to select which groups of applications you wish to install or automatically install based on the `-groups` parameter.
 - The "Development" group, containing essential development tools, will always be installed by default if no groups are specified.
 - If the `-groups` parameter is set to `"all"`, all applications in the YAML configuration will be installed.
@@ -36,12 +39,14 @@ This PowerShell script automates the installation of essential tools and depende
 This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. It lists all the software that needs to be installed, along with their respective download URLs, installation arguments, and checks to ensure they are installed correctly.
 
 **Features:**
+
 - Customizable: You can modify this file to adjust which tools are installed or to change installation parameters.
 - Supports both `.exe` and `.msi` installers.
 - Organized by application groups, allowing for targeted installation based on development needs.
 - Includes options to set environment variables automatically after installation.
 
 **Sample Configuration:**
+
 ```yaml
 applications:
   - name: Docker
@@ -74,11 +79,13 @@ applications:
 This script is designed to help developers quickly clone all necessary repositories and install global npm packages. It supports multiple repositories, making it easy to set up the development environment for different projects.
 
 **Features:**
+
 - Clones repositories from GitHub based on configuration.
 - Installs global npm packages required for development.
 - Ensures that all repositories are up-to-date with the latest changes.
 
 **Usage:**
+
 ```powershell
 # Run the script with your user account
 C:\git\esystemsdev\configuration\SetupDeveloperEnv.ps1 -groups all
