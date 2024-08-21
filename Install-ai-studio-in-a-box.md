@@ -12,22 +12,26 @@ git clone https://github.com/Azure-Samples/ai-studio-in-a-box chatbot
 cd C:/git/esystemsdev/chatbot
 azd auth login
 
-az login
--- Account name must be between 3 and 15 characters in length and use numbers, line and lower-case letters only
+# Create a new environment
 azd env new esys-demo-ai
+
+# Existing environment variables
 azd env set AZURE_LOCATION swedencentral
 azd env set AZURE_SUBSCRIPTION_ID 67576622-504a-4532-9903-dbae7df491f5
 
+# Infrastructure-specific parameters
+azd env set AZURE_DEPLOY_COSMOS_DB True
+azd env set AZURE_DEPLOY_SEARCH True
+azd env set AZURE_PUBLIC_NETWORK_ACCESS Disabled
+azd env set AZURE_SYSTEM_DATASTORES_AUTH_MODE accessKey
+# Add your allowed IPs here, e.g., 192.168.1.1, or use $(curl -s https://api.ipify.org) to dynamically set it
+azd env set AZURE_ALLOWED_IPS 185.11.208.90
+# GlobalDocumentDB or MongoDB, Cassandra, etc.
+azd env set AZURE_COSMOS_DB_KIND GlobalDocumentDB
+
 azd up
-Enter a value for the 'deployCosmosDb' infrastructure parameter: True
-Enter a value for the 'deploySearch' infrastructure parameter: True
-Enter a value for the 'publicNetworkAccess' infrastructure parameter: Disabled
-Enter a value for the 'systemDatastoresAuthMode' infrastructure parameter: accessKey
+
 ```
-
-Azure AI studio
-
-- Deploy model gpt-4o
 
 ### Create a new repo
 
