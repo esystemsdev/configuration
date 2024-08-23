@@ -27,7 +27,7 @@ azd env set AZURE_SYSTEM_DATASTORES_AUTH_MODE accessKey
 # Add your allowed IPs here, e.g., 192.168.1.1, or use $(curl -s https://api.ipify.org) to dynamically set it
 azd env set AZURE_ALLOWED_IPS 185.11.208.90
 # GlobalDocumentDB or MongoDB, Cassandra, etc.
-azd env set AZURE_COSMOS_DB_KIND GlobalDocumentDB
+azd env set AZURE_COSMOS_DB_KIND MongoDB
 
 azd up
 
