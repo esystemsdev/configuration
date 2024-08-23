@@ -30,7 +30,6 @@ git clone https://github.com/esystemsdev/azure-ai-functions.git
 cd azure-ai-functions
 ```
 
-
 ## **3. Set Up the Directory Structure**
 
 Once you are inside the `azure-ai-functions` directory, create the following directory structure:
@@ -49,9 +48,12 @@ You also need to create the following placeholder files:
 mkdir -p .github/workflows
 touch .github/workflows/deploy-dev.yml
 touch .github/workflows/deploy-tst.yml
-touch .github/workflows/deploy-prod.yml
+touch .github/workflows/deploy-pro.yml
 touch function-app/requirements.txt
 touch config/variables.yaml
+touch config/functions-dev.yaml
+touch config/functions-tst.yaml
+touch config/functions-pro.yaml
 ```
 
 ### **Directory Structure Overview**
@@ -64,11 +66,14 @@ azure-ai-functions/
 │   └── workflows/
 │       ├── deploy-dev.yml
 │       ├── deploy-tst.yml
-│       └── deploy-prod.yml
+│       └── deploy-pro.yml
 ├── function-app/
 │   └── requirements.txt
 └── config/
-    └── variables.yaml
+    └── variables.yaml   # Specifies the parameters to be created in Key Vault (without values)
+    └── functions-dev.yaml
+    └── functions-tst.yaml
+    └── functions-pro.yaml
 ```
 
 ## **4. Initialize the Repository**
@@ -91,7 +96,6 @@ git push -u origin main
 ### **Conclusion**
 
 You have successfully created a private repository, set up the necessary directory structure, and made the initial commit. You can now proceed with developing your Azure Functions and configuring the CI/CD pipelines to automate your deployments.
-```
 
 ### **Explanation**
 
