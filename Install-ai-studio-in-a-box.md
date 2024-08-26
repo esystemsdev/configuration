@@ -7,13 +7,13 @@ cd C:/git/esystemsdev
 ## Clone the repository
 
 ```bash
-git clone https://github.com/Azure-Samples/ai-studio-in-a-box chatbot
+git clone https://github.com/Azure-Samples/ai-studio-in-a-box azure-ai-env
 
-cd C:/git/esystemsdev/chatbot
+cd C:/git/esystemsdev/azure-ai-env
 azd auth login
 
 # Create a new environment
-azd env new esys-demo-ai
+azd env new esys-ai-dev
 
 # Existing environment variables
 azd env set AZURE_LOCATION swedencentral
@@ -21,14 +21,14 @@ azd env set AZURE_SUBSCRIPTION_ID 67576622-504a-4532-9903-dbae7df491f5
 
 # Infrastructure-specific parameters
 azd env set AZURE_DEPLOY_COSMOS_DB True
+# GlobalDocumentDB or MongoDB
+azd env set AZURE_COSMOS_DB_KIND MongoDB
 azd env set AZURE_DEPLOY_SEARCH True
 azd env set AZURE_PUBLIC_NETWORK_ACCESS Disabled
 azd env set AZURE_SYSTEM_DATASTORES_AUTH_MODE accessKey
 # Add your allowed IPs here, e.g., 192.168.1.1, or use $(curl -s https://api.ipify.org) to dynamically set it
 azd env set AZURE_ALLOWED_IPS 185.11.208.90
-# GlobalDocumentDB or MongoDB, Cassandra, etc.
-azd env set AZURE_COSMOS_DB_KIND MongoDB
-
+azd env set AZURE_DEPLOY_FUNCTION_APP True
 azd up
 
 ```
@@ -50,7 +50,7 @@ Now that the GitHub CLI is installed and you're authenticated, you can proceed w
 1. **Navigate to Your Project Directory**:
 
    ```bash
-   cd C:/git/esystemsdev/chatbot
+   cd C:/git/esystemsdev/azure-ai-env
    ```
 
 2. **Initialize the Git Repository (if not done)**:
@@ -62,13 +62,13 @@ Now that the GitHub CLI is installed and you're authenticated, you can proceed w
 3. **Create a New Private GitHub Repository**:
 
    ```bash
-   gh repo create esystemsdev/chatbot --private --source=.
+   gh repo create esystemsdev/azure-ai-env --private --source=.
    ```
 
 4. **Update the Remote URL**:
 
    ```bash
-   git remote set-url origin https://github.com/esystemsdev/chatbot
+   git remote set-url origin https://github.com/esystemsdev/azure-ai-env
    ```
 
 5. **Push to GitHub**:
@@ -87,7 +87,7 @@ The `azd down` command is a powerful tool that deletes all resources associated 
    Ensure you are in the root directory of your Azure Developer project where your `azd` environment files and infrastructure code are located.
 
    ```bash
-   cd C:/git/esystemsdev/chatbot
+   cd C:/git/esystemsdev/azure-ai-env
    ```
 
 2. **Check the Current Environment:**

@@ -1,6 +1,6 @@
-# Azure AI Functions Repository Setup
+# Azure AI Repository Setup
 
-This document provides step-by-step instructions to create a private GitHub repository named `azure-ai-functions`, clone it locally, set up the required directory structure, and push the initial commit.
+This document provides step-by-step instructions to create a private GitHub repository named `azure-ai`, clone it locally, set up the required directory structure, and push the initial commit.
 
 ## **Prerequisites**
 
@@ -10,15 +10,15 @@ This document provides step-by-step instructions to create a private GitHub repo
 
 ## **1. Create a Private Repository on GitHub**
 
-Use the following command to create a new private repository named `azure-ai-functions`:
+Use the following command to create a new private repository named `azure-ai`:
 
 ```bash
-gh repo create esystemsdev/azure-ai-functions --private --confirm
+gh repo create esystemsdev/azure-ai --private --confirm
 ```
 
 This command will:
 
-- Create a new private repository named `azure-ai-functions` in your GitHub account.
+- Create a new private repository named `azure-ai` in your GitHub account.
 
 ## **2. Clone the Repository Locally**
 
@@ -26,18 +26,21 @@ After creating the repository, clone it to your local machine:
 
 ```bash
 cd C:/git/esystemsdev
-git clone https://github.com/esystemsdev/azure-ai-functions.git
-cd azure-ai-functions
+git clone https://github.com/esystemsdev/azure-ai.git
+cd azure-ai
 ```
 
 ## **3. Set Up the Directory Structure**
 
-Once you are inside the `azure-ai-functions` directory, create the following directory structure:
+Once you are inside the `azure-ai` directory, create the following directory structure:
 
 ```bash
 mkdir -p .github/workflows
-mkdir function-app
 mkdir config
+mkdir docs
+mkdir function-app
+mkdir scripts
+
 ```
 
 ### **Create Necessary Files**
@@ -45,15 +48,12 @@ mkdir config
 You also need to create the following placeholder files:
 
 ```bash
-mkdir -p .github/workflows
-touch .github/workflows/deploy-dev.yml
-touch .github/workflows/deploy-tst.yml
-touch .github/workflows/deploy-pro.yml
+touch .github/workflows/deploy.yml
 touch function-app/requirements.txt
-touch config/variables.yaml
-touch config/functions-dev.yaml
-touch config/functions-tst.yaml
-touch config/functions-pro.yaml
+touch config/template.md
+touch config/variables-dev.yaml
+touch config/variables-tst.yaml
+touch config/variables-pro.yaml
 ```
 
 ### **Directory Structure Overview**
@@ -61,19 +61,17 @@ touch config/functions-pro.yaml
 After running the above commands, your directory structure should look like this:
 
 ```bash
-azure-ai-functions/
+azure-ai/
 ├── .github/
 │   └── workflows/
-│       ├── deploy-dev.yml
-│       ├── deploy-tst.yml
-│       └── deploy-pro.yml
+│       ├── deploy.yml
 ├── function-app/
 │   └── requirements.txt
 └── config/
-    └── variables.yaml   # Specifies the parameters to be created in Key Vault (without values)
-    └── functions-dev.yaml
-    └── functions-tst.yaml
-    └── functions-pro.yaml
+    └── template.md
+    └── variables-dev.yaml
+    └── variables-tst.yaml
+    └── variables-pro.yaml
 ```
 
 ## **4. Initialize the Repository**
@@ -83,7 +81,7 @@ Now, initialize the repository, add all the files, and push the initial commit t
 ```bash
 git init
 git add .
-git commit -m "Initial setup of Azure Functions repo with CI/CD structure"
+git commit -m "Initial setup of Azure AI repo with CI/CD structure"
 git push -u origin main
 ```
 
