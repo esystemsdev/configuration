@@ -36,11 +36,17 @@ applications:
     programCheck: "nodejs\\node.exe"
     commandCheck: node
 
+  #- name: Python
+  #  group: "Development"
+  #  url: "https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe"
+  #  silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
+  #  programCheck: "Python312\\python.exe"
+
   - name: Python
     group: "Development"
-    url: "https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe"
+    url: "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe"
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
-    programCheck: "Python312\\python.exe"
+    programCheck: "Python311\\python.exe"
 
   - name: pgAdmin 4
     group: "Database"
