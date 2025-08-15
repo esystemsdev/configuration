@@ -48,6 +48,13 @@ applications:
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
     programCheck: "Python311\\python.exe"
 
+  - name: Ruby
+    group: "Development Workato"
+    url: "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-3.4.2-1/rubyinstaller-devkit-3.4.2-1-x64.exe"
+    silentArguments: "/VERYSILENT /NORESTART /ALLUSERS /DIR=\"%ProgramFiles%\\Ruby\""
+    programCheck: "Ruby\\Ruby.exe"
+
+
   - name: pgAdmin 4
     group: "Database"
     url: "https://ftp.postgresql.org/pub/pgadmin/pgadmin4/v8.10/windows/pgadmin4-8.10-x64.exe"
