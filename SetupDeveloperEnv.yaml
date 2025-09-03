@@ -17,9 +17,11 @@ applications:
   - name: GitHub CLI
     group: "Development"
     url: "https://github.com/cli/cli/releases/download/v2.54.0/gh_2.54.0_windows_amd64.msi"
-    sinstaller: "GitHub CLI.msi"
+    installer: "GitHub CLI.msi"
     programCheck: "GitHub CLI\\gh.exe"
-    environmentVariable : true
+    commandCheck: gh
+    environmentVariable: true
+
 
   - name: VSCode
     group: "Development"
@@ -31,7 +33,7 @@ applications:
 
   - name: Node.js
     group: "Development"
-    url: "https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi"
+    url: "https://nodejs.org/dist/v22.19.0/node-v22.19.0-x64.msi"
     installer: "nodejs.msi"
     programCheck: "nodejs\\node.exe"
     commandCheck: node
@@ -69,10 +71,10 @@ applications:
 
   - name: JDK
     group: "Development"
-    url: "https://download.oracle.com/java/22/latest/jdk-22_windows-x64_bin.msi"
+    url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
     installer: "java.msi"
-    programCheck: "Java\\jdk-22\\bin\\java.exe"
-    environmentVariable : true
+    programCheck: "Java\\jdk-21\\bin\\java.exe"
+    environmentVariable: true
 
   - name: Visual Studio 2022
     group: "Development OutSystems"
