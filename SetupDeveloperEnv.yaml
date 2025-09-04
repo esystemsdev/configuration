@@ -112,12 +112,17 @@ applications:
     silentArguments: "/S"
     programCheck: "Postman\\Postman.exe"
 
-  - name: Azure Dev CLI
-    group: "Development AI"
-    url: "https://azdrelease.azureedge.net/azd/standalone/release/latest/azd-windows-amd64.msi"
-    installer: "azd.msi"
-    programCheck: "Programs\\Azure Dev CLI\\azd.exe"
-    environmentVariable : true
+  ###
+  # There is no executable file to download anymore.
+  # There are several ways to install it manually, though.
+  # Details: https://learn.microsoft.com/en-us/azure/developer/azure-developer-cli/install-azd
+  ###
+  #- name: Azure Dev CLI
+  #  group: "Development AI"
+  #  url: "https://azdrelease.azureedge.net/azd/standalone/release/latest/azd-windows-amd64.msi"
+  #  installer: "azd.msi"
+  #  programCheck: "Programs\\Azure Dev CLI\\azd.exe"
+  #  environmentVariable : true
 
   #- name: Azure CLI
   #  group: "Development AI"
