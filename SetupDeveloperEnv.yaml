@@ -8,7 +8,7 @@ applications:
 
   - name: Git
     group: "Development"
-    url: "https://github.com/git-for-windows/git/releases/download/v2.46.0.windows.1/Git-2.46.0-64-bit.exe"
+    url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
     commandCheck: git
@@ -16,7 +16,7 @@ applications:
 
   - name: GitHub CLI
     group: "Development"
-    url: "https://github.com/cli/cli/releases/download/v2.54.0/gh_2.54.0_windows_amd64.msi"
+    url: "https://github.com/cli/cli/releases/download/v2.78.0/gh_2.78.0_windows_amd64.msi"
     installer: "GitHub CLI.msi"
     programCheck: "GitHub CLI\\gh.exe"
     commandCheck: gh
@@ -40,7 +40,7 @@ applications:
 
   #- name: Python
   #  group: "Development"
-  #  url: "https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe"
+  #  url: "https://www.python.org/ftp/python/3.13.7/python-3.13.7-amd64.exe"
   #  silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
   #  programCheck: "Python312\\python.exe"
 
