@@ -148,15 +148,25 @@ function Test-AllProgramLocations {
     
     $pathsArray = $paths -split ","
     $locations = @($env:ProgramFiles, "$env:ProgramFiles (x86)", $env:LOCALAPPDATA)
+    
     foreach ($path in $pathsArray) {
         $path = $path.Trim()
         if (-not [string]::IsNullOrEmpty($path)) {
-            foreach ($location in $locations) {
-                if ($location) {
-                    $fullPath = Join-Path -Path $location -ChildPath $path
-                    
-                    if (Test-Path $fullPath) {
-                        return $true
+            # Check if the path is already a full path (contains drive letter or starts with \)
+            if ($path -match '^[A-Za-z]:\\' -or $path.StartsWith('\\')) {
+                # It's already a full path, check it directly
+                if (Test-Path $path) {
+                    return $true
+                }
+            } else {
+                # It's a relative path, check in standard locations
+                foreach ($location in $locations) {
+                    if ($location) {
+                        $fullPath = Join-Path -Path $location -ChildPath $path
+                        
+                        if (Test-Path $fullPath) {
+                            return $true
+                        }
                     }
                 }
             }
@@ -177,11 +187,21 @@ function Set-EnvironmentVariable {
 
     # Find the actual installation path
     $actualPath = $null
-    foreach ($location in $locations) {
-        $fullPath = Join-Path -Path $location -ChildPath $app.programCheck
-        if (Test-Path $fullPath) {
-            $actualPath = $fullPath
-            break
+    
+    # Check if the programCheck is already a full path
+    if ($app.programCheck -match '^[A-Za-z]:\\' -or $app.programCheck.StartsWith('\\')) {
+        # It's already a full path, check it directly
+        if (Test-Path $app.programCheck) {
+            $actualPath = $app.programCheck
+        }
+    } else {
+        # It's a relative path, check in standard locations
+        foreach ($location in $locations) {
+            $fullPath = Join-Path -Path $location -ChildPath $app.programCheck
+            if (Test-Path $fullPath) {
+                $actualPath = $fullPath
+                break
+            }
         }
     }
 

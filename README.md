@@ -20,21 +20,35 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
    - You will need to answer a few questions during the installation. Note that the installation is not fully silent.
 3. **Installed Applications**:
-   - The `SetupDeveloperEnv.ps1` script installs the following applications:
-     - **Docker Desktop**: Containerization platform.
-     - **Git**: Version control system.
-     - **Node.js and npm**: JavaScript runtime and package manager.
-     - **Python**: Programming language.
-     - **pgAdmin**: PostgreSQL management tool.
-     - **Twingate**: Secure remote access tool.
-     - **JDK (Java Development Kit)**: Development environment for building applications using Java.
-     - **Microsoft Visual Studio 2022**: IDE for .NET, C#, and other languages.
-     - **SQL Server Management Studio (SSMS)**: Tool for managing SQL Server.
-     - **7-Zip**: File archiver.
-     - **Slack**: Communication platform.
-     - **Google Chrome**: Web browser.
-     - **Visual Studio Code (VS Code)**: Code editor.
-     - **Postman**: API testing tool.
+   - The `SetupDeveloperEnv.ps1` script installs applications organized by groups:
+
+   **Development Group:**
+   - **Git**: Version control system
+   - **GitHub CLI**: Command-line interface for GitHub
+   - **Visual Studio Code (VS Code)**: Code editor with essential extensions (ESLint, GitLens, Prettier, GitHub Copilot, Docker, Python, PowerShell, and more)
+   - **Node.js**: JavaScript runtime and package manager
+   - **Python**: Programming language
+   - **Twingate**: Secure remote access tool
+   - **JDK (Java Development Kit)**: Development environment for building applications using Java
+   - **7-Zip**: File archiver
+   - **Slack**: Communication platform
+   - **Google Chrome**: Web browser
+   - **Postman**: API testing tool
+   - **PowerShell**: Cross-platform automation and configuration tool
+
+   **Development AI Group:**
+   - **Docker**: Containerization platform
+   - **Cursor**: AI-powered code editor
+
+   **Database Group:**
+   - **pgAdmin 4**: PostgreSQL management tool
+   - **Microsoft SQL Server Management Studio (SSMS)**: Tool for managing SQL Server
+
+   **Development OutSystems Group:**
+   - **Microsoft Visual Studio 2022**: IDE for .NET, C#, and other languages
+
+   **Development Workato Group:**
+   - **Ruby**: Programming language with development kit
 4. **Run the Script**:
    - Run the script with your own account. Open PowerShell navigate to the location of the script.
    - Execute the script:
@@ -51,11 +65,12 @@ This PowerShell script automates the installation of essential tools and depende
 
 **Features:**
 
-- Installs tools such as Docker, Git, Node.js, Python, Visual Studio Code, and more.
+- Installs tools organized by groups: Development, Development AI, Database, Development OutSystems, and Development Workato.
 - Verifies if tools are already installed and skips reinstallation if unnecessary.
 - Allows the user to choose which groups of applications to install, with a default installation of the "Development" group.
 - Supports an optional `-groups` parameter to automate the selection process, allowing for a faster setup without user prompts.
 - Automatically sets environment variables for installed applications if needed.
+- Installs VS Code with essential extensions for development.
 - Configures your environment according to company standards.
 
 **Usage:**
@@ -65,7 +80,9 @@ This PowerShell script automates the installation of essential tools and depende
 .\SetupDeveloperEnv.ps1
 
 # Optionally, specify the groups to install without prompts
-.\SetupDeveloperEnv.ps1 -groups "Development, Development AI"
+.\SetupDeveloperEnv.ps1 -groups "Development, Development AI, Database"
+
+.\SetupDeveloperEnv.ps1 -groups "Development Workato"
 ```
 
 **Installation Process:**
@@ -77,42 +94,59 @@ This PowerShell script automates the installation of essential tools and depende
 
 ### 2. `SetupDeveloperEnv.yaml`
 
-This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. It lists all the software that needs to be installed, along with their respective download URLs, installation arguments, and checks to ensure they are installed correctly.
+This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. It lists all the software that needs to be installed, along with their respective download URLs, installation arguments, and checks to ensure they are installed correctly. It also defines VS Code extensions that will be automatically installed with VS Code.
 
 **Features:**
 
 - Customizable: You can modify this file to adjust which tools are installed or to change installation parameters.
 - Supports both `.exe` and `.msi` installers.
-- Organized by application groups, allowing for targeted installation based on development needs.
+- Organized by application groups: Development, Development AI, Database, Development OutSystems, and Development Workato.
 - Includes options to set environment variables automatically after installation.
+- Defines VS Code extensions to be installed automatically with VS Code.
+- Allows for targeted installation based on development needs.
 
 **Sample Configuration:**
 
 ```yaml
 applications:
   - name: Docker
-    install: true
-    group: "Virtualization"
+    group: "Development AI"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
     commandCheck: docker
+
+  - name: Git
+    group: "Development"
+    url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
+    silentArguments: "/SILENT"
+    programCheck: "Git\\cmd\\git.exe"
+    commandCheck: git
     environmentVariable: true
 
   - name: JDK
-    install: false
     group: "Development"
-    url: "https://download.oracle.com/java/17/latest/jdk-17_windows-x64_bin.msi"
+    url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
     installer: "java.msi"
-    programCheck: "Java\\jdk-17\\bin\\java.exe"
+    programCheck: "Java\\jdk-21\\bin\\java.exe"
+    environmentVariable: true
 
-  - name: SSMS
+  - name: Microsoft SQL Server Management Studio
     group: "Database"
     url: "https://aka.ms/ssmsfullsetup"
     programCheck: "Microsoft SQL Server Management Studio 18\\Common7\\IDE\\Ssms.exe,Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe"
     installer: "SSMS-Setup-ENU.exe"
-    environmentVariable: false
   # Additional applications...
+
+vscodeExtensions:
+  - davidanson.vscode-markdownlint
+  - dbaeumer.vscode-eslint
+  - eamodio.gitlens
+  - esbenp.prettier-vscode
+  - github.copilot
+  - ms-azuretools.vscode-docker
+  - ms-python.python
+  # Additional extensions...
 ```
 
 ### 3. `SetupGitEnv.ps1`
