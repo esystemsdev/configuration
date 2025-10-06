@@ -2,6 +2,47 @@
 
 Welcome to the eSystems Nordic configuration repository. This repository contains essential scripts and configuration files necessary for setting up development environments across various projects managed by eSystems Nordic Ltd. It provides a standardized setup process, ensuring that all developers have a consistent environment for building and deploying software.
 
+## Prerequisites
+
+### Initial Developer Computer Setup
+
+1. **Download the Setup Script to C:\Setup folder**:
+   - Download the [SetupDeveloperEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.ps1) script from GitHub.
+   - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.yaml) script from GitHub.
+   - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupGitEnv.ps1) script from GitHub.
+2. **Run the Script**:
+   - Run the script with administrator rights. Open PowerShell as an administrator and navigate to the location of the script.
+   - Execute the script:
+
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1"
+     ```
+
+   - You will need to answer a few questions during the installation. Note that the installation is not fully silent.
+3. **Installed Applications**:
+   - The `SetupDeveloperEnv.ps1` script installs the following applications:
+     - **Docker Desktop**: Containerization platform.
+     - **Git**: Version control system.
+     - **Node.js and npm**: JavaScript runtime and package manager.
+     - **Python**: Programming language.
+     - **pgAdmin**: PostgreSQL management tool.
+     - **Twingate**: Secure remote access tool.
+     - **JDK (Java Development Kit)**: Development environment for building applications using Java.
+     - **Microsoft Visual Studio 2022**: IDE for .NET, C#, and other languages.
+     - **SQL Server Management Studio (SSMS)**: Tool for managing SQL Server.
+     - **7-Zip**: File archiver.
+     - **Slack**: Communication platform.
+     - **Google Chrome**: Web browser.
+     - **Visual Studio Code (VS Code)**: Code editor.
+     - **Postman**: API testing tool.
+4. **Run the Script**:
+   - Run the script with your own account. Open PowerShell navigate to the location of the script.
+   - Execute the script:
+
+     ```powershell
+     powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
+     ```
+
 ## Repository Contents
 
 ### 1. `SetupDeveloperEnv.ps1`
