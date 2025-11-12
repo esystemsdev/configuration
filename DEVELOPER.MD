@@ -49,7 +49,7 @@ Troubleshooting:
 Install Builder CLI:
 
 ```powershell
-npm install -g @aifabrix/builder
+sudo npm install -g @aifabrix/builder
 ```
 
 Quick start (minimal):
