@@ -9,7 +9,8 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 1. **Download the Setup Script to C:\Setup folder**:
    - Download the [SetupDeveloperEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.ps1) script from GitHub.
    - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.yaml) script from GitHub.
-   - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupGitEnv.ps1) script from GitHub.
+   - Download the [SetupGitEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupGitEnv.ps1) script from GitHub.
+   - Download the [OnboardDeveloper.ps1](https://github.com/esystemsdev/configuration/blob/main/OnboardDeveloper.ps1) script from GitHub.
 2. **Run the Script**:
    - Run the script with administrator rights. Open PowerShell as an administrator and navigate to the location of the script.
    - Execute the script:
@@ -166,6 +167,56 @@ This script is designed to help developers quickly clone all necessary repositor
 C:\git\esystemsdev\configuration\SetupGitEnv.ps1
 ```
 
+### 4. `OnboardDeveloper.ps1`
+
+This script automates the onboarding process for developers by setting up SSH access to development servers. It generates SSH keys, claims access through an API endpoint, and configures SSH settings for seamless connectivity.
+
+**Features:**
+
+- Automatically generates SSH keys (ed25519) if they don't exist.
+- Claims developer access via API endpoint with developer ID and PIN.
+- Configures SSH config entries for easy server access.
+- Tests SSH connectivity to verify successful onboarding.
+
+**Usage:**
+
+```powershell
+# Run the script with your user account
+.\OnboardDeveloper.ps1
+
+# Or specify parameters directly
+.\OnboardDeveloper.ps1 -DeveloperId "01" -Pin "123456"
+
+# Optionally specify a different server
+.\OnboardDeveloper.ps1 -Server "dev.aifabrix" -DeveloperId "01" -Pin "123456"
+```
+
+**Parameters:**
+
+- `-Server` (optional): The development server hostname. Defaults to `"dev.aifabrix"`.
+- `-DeveloperId` (optional): Your developer ID (1-6 digits). Will be prompted if not provided.
+- `-Pin` (optional): Your PIN (4-8 digits). Will be prompted if not provided.
+
+**Process:**
+
+1. The script will prompt for your Developer ID and PIN if not provided as parameters.
+2. It checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed.
+3. Your public SSH key is sent to the onboarding API endpoint to claim access.
+4. An SSH config entry is created for easy access using `ssh dev<DeveloperId>`.
+5. The script tests SSH connectivity to verify the setup was successful.
+
+**After Onboarding:**
+
+Once onboarding is complete, you can connect to the development server using:
+```powershell
+ssh dev<DeveloperId>
+```
+
+For example, if your Developer ID is `01`, you would use:
+```powershell
+ssh dev01
+```
+
 ## How to Use This Repository
 
 ### Step 1: Set Up Your Development Environment
@@ -185,7 +236,13 @@ C:\git\esystemsdev\configuration\SetupGitEnv.ps1
 1. After setting up your environment, run the `SetupGitEnv.ps1` script.
 2. This will clone all necessary repositories and install global npm packages for your projects.
 
-### Step 4: Begin Development
+### Step 4: Onboard to Development Servers (Optional)
+
+1. If you need access to development servers, run the `OnboardDeveloper.ps1` script.
+2. Provide your Developer ID and PIN when prompted, or pass them as parameters.
+3. The script will set up SSH access and verify connectivity.
+
+### Step 5: Begin Development
 
 With your environment set up, you can now begin working on your projects. Clone additional repositories as needed, and use the provided scripts to manage your development environment efficiently.
 
