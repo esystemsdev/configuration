@@ -44,7 +44,20 @@ Troubleshooting:
   ```
 - Ensure the onboarding service is reachable from your network on port `9999`.
 
-## 4) AI Fabrix developer basics
+## 4) Cursor basics
+
+![Cursor SSH Connection](images/cursor-1.png)
+
+To connect to your developer container:
+
+1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen.
+2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01`) or enter `user@host` format.
+3. **Automatic connection**: Cursor will automatically connect you to your developer container.
+4. **Clone repo or open existing folder**: Once connected, you can:
+   - Clone a repository from your remote host
+   - Open an existing folder on the remote host
+
+## 5) AI Fabrix developer basics
 
 Install Builder CLI:
 
@@ -64,12 +77,12 @@ aifabrix run myapp
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
-## 5) Workato developer basics
+## 6) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
 
-## 6) Security notes
+## 7) Security notes
 
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
