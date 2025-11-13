@@ -55,9 +55,37 @@ To connect to your developer container:
 3. **Automatic connection**: Cursor will automatically connect you to your developer container.
 4. **Clone repo or open existing folder**: Once connected, you can:
    - Clone a repository from your remote host
-   - Open an existing folder on the remote host
+   - Open an existing folder on the remote host: select your working folder `/workspace/<your repo>`
 
-## 5) AI Fabrix developer basics
+**First-time setup**: When installing for the first time as a developer:
+- Open `/workspace/` root folder
+- Clone the following repositories:
+
+```bash
+git clone https://github.com/esystemsdev/aifabrix-miso
+git clone https://github.com/esystemsdev/aifabrix-dataplane
+git clone https://github.com/esystemsdev/aifabrix-miso-azure
+git clone https://github.com/esystemsdev/aifabrix-miso-client
+git clone https://github.com/esystemsdev/aifabrix-d360
+git clone https://github.com/esystemsdev/aifabrix-miso-client-python
+git clone https://github.com/esystemsdev/aifabrix-core
+git clone https://github.com/esystemsdev/aifabrix-form-engine
+git clone https://github.com/esystemsdev/aifabrix-builder
+git clone https://github.com/esystemsdev/aifabrix-docs
+git clone https://github.com/esystemsdev/openwebui-template
+git clone https://github.com/esystemsdev/flowise-template
+```
+
+## 5) Git configuration
+
+Configure your Git identity:
+
+```powershell
+git config --global user.name "Your Name"
+git config --global user.email "you@esystems.fi"
+```
+
+## 6) AI Fabrix developer basics
 
 Install Builder CLI:
 
@@ -77,12 +105,12 @@ aifabrix run myapp
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
-## 6) Workato developer basics
+## 7) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
 
-## 7) Security notes
+## 8) Security notes
 
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
