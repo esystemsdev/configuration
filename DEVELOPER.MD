@@ -102,6 +102,17 @@ aifabrix build myapp
 aifabrix run myapp
 ```
 
+**Image environment variables:**
+
+- `AIFABRIX_HOME`: Base config directory for AI Fabrix tools inside the container.  
+  Default: `/workspace/.aifabrix`.  
+  Override at container run time if needed (e.g., `-e AIFABRIX_HOME=/custom/.aifabrix`).
+
+- `AIFABRIX_SECRETS`: Path to the local secrets file used by tools that resolve `kv://` references.  
+  Default: `/workspace/aifabrix-miso/builder/secrets.local.yaml`.  
+  Override at container run time if needed (e.g., `-e AIFABRIX_SECRETS=/path/to/secrets.yaml`).
+  
+
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
