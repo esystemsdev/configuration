@@ -156,13 +156,12 @@ try {
     $username = "dev$DeveloperId"
     Add-SSHConfigEntry -Alias $username -Server $Server -User $username
 
-    Write-Host "Testing SSH connectivity..." -ForegroundColor Cyan
-    $null = & ssh "$username@$Server" -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new "echo ok" 2>$null
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "SSH test failed. You may need to run: ssh $username@$Server"
-    } else {
-        Write-Host "Onboarding complete. Connect with: ssh $username" -ForegroundColor Green
-    }
+    Write-Host "`nOnboarding complete!" -ForegroundColor Green
+    Write-Host "SSH config entry added: $username" -ForegroundColor Cyan
+    Write-Host "`nNote: SSH connects directly to your Docker container, which needs time to start up." -ForegroundColor Yellow
+    Write-Host "Please wait a few minutes before connecting via SSH or Cursor." -ForegroundColor Yellow
+    Write-Host "`nTo connect later, use: ssh $username" -ForegroundColor Cyan
+    Write-Host "Or connect via Cursor: Select '$username' when connecting via SSH" -ForegroundColor Cyan
 } catch {
     $errorMessage = $_.Exception.Message
     if ($_.Exception.InnerException) {

@@ -23,7 +23,7 @@ What it does:
 - Ensures you have an SSH key (`ed25519`).
 - Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN.
 - Adds an SSH config entry for quick access.
-- Tests SSH connectivity.
+- Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
 
 Usage (PowerShell 7, recommended interactive PIN):
 
@@ -38,6 +38,7 @@ pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01 -Pin 1234
 ```
 
 Troubleshooting:
+- **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
 - If the SSH test fails, run once to trust the host key:
   ```powershell
   ssh dev01@dev.aifabrix
@@ -53,6 +54,7 @@ To connect to your developer container:
 1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen.
 2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01`) or enter `user@host` format.
 3. **Automatic connection**: Cursor will automatically connect you to your developer container.
+   - **Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
 4. **Clone repo or open existing folder**: Once connected, you can:
    - Clone a repository from your remote host
    - Open an existing folder on the remote host: select your working folder `/workspace/<your repo>`
