@@ -17,7 +17,7 @@ This guide helps new Windows developers get access, set up tools, and onboard to
 
 ## 3) Onboarding script (Windows PowerShell)
 
-Path: `developers/onboard-developer.ps1`
+Path: `developers/OnboardDeveloper.ps1`
 
 What it does:
 - Ensures you have an SSH key (`ed25519`).
@@ -28,13 +28,13 @@ What it does:
 Usage (PowerShell 7, recommended interactive PIN):
 
 ```powershell
-pwsh -File .\developers\onboard-developer.ps1 -Server dev.aifabrix -DeveloperId 01
+pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01
 ```
 
 Non-interactive example (not recommended; avoid putting PINs into shell history):
 
 ```powershell
-pwsh -File .\developers\onboard-developer.ps1 -Server dev.aifabrix -DeveloperId 01 -Pin 123456
+pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01 -Pin 123456
 ```
 
 Troubleshooting:
@@ -102,26 +102,38 @@ aifabrix build myapp
 aifabrix run myapp
 ```
 
-**Image environment variables:**
-
-- `AIFABRIX_HOME`: Base config directory for AI Fabrix tools inside the container.  
-  Default: `/workspace/.aifabrix`.  
-  Override at container run time if needed (e.g., `-e AIFABRIX_HOME=/custom/.aifabrix`).
-
-- `AIFABRIX_SECRETS`: Path to the local secrets file used by tools that resolve `kv://` references.  
-  Default: `/workspace/aifabrix-miso/builder/secrets.local.yaml`.  
-  Override at container run time if needed (e.g., `-e AIFABRIX_SECRETS=/path/to/secrets.yaml`).
-  
-
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
-## 7) Workato developer basics
+## 7) AI Fabrix Developer Workspace
+
+This is your workspace root inside the container: `/workspace`.
+
+Key locations and settings:
+
+- Per-developer config: `/home/dev{id}/.aifabrix/config.yaml`
+- Default config values:
+
+```yaml
+environment: 'dev'
+developer-id: '{id}'
+secrets-encryption: '<key from Key Vault>'
+aifabrix-home: '/workspace/.aifabrix'
+aifabrix-secrets: '/workspace/aifabrix-miso/builder/secrets.local.yaml'
+```
+
+Notes:
+
+- Use `aifabrix` CLI for local infrastructure and app workflows.
+- Docker access is via `aifabrix-docker` inside this container.
+- Editors available: `vim`, `nano`.
+
+## 8) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
 
-## 8) Security notes
+## 9) Security notes
 
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
