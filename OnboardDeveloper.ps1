@@ -117,16 +117,31 @@ function Add-SSHKeyToGitHub {
         
         if ($exception.Response) {
             $statusCode = [int]$exception.Response.StatusCode
+            $stream = $null
+            $reader = $null
             try {
                 $stream = $exception.Response.GetResponseStream()
                 if ($stream) {
                     $reader = New-Object System.IO.StreamReader($stream)
                     $errorDetails = $reader.ReadToEnd()
-                    $reader.Close()
-                    $stream.Close()
                 }
             } catch {
                 $errorDetails = "Could not read error response"
+            } finally {
+                if ($reader) {
+                    try {
+                        $reader.Dispose()
+                    } catch {
+                        # Ignore disposal errors
+                    }
+                }
+                if ($stream) {
+                    try {
+                        $stream.Dispose()
+                    } catch {
+                        # Ignore disposal errors
+                    }
+                }
             }
         }
         
@@ -201,16 +216,31 @@ try {
         if ($exception.Response) {
             $statusCode = [int]$exception.Response.StatusCode
             $statusDescription = $exception.Response.StatusDescription
+            $stream = $null
+            $reader = $null
             try {
                 $stream = $exception.Response.GetResponseStream()
                 if ($stream) {
                     $reader = New-Object System.IO.StreamReader($stream)
                     $errorDetails = $reader.ReadToEnd()
-                    $reader.Close()
-                    $stream.Close()
                 }
             } catch {
                 $errorDetails = "Could not read error response"
+            } finally {
+                if ($reader) {
+                    try {
+                        $reader.Dispose()
+                    } catch {
+                        # Ignore disposal errors
+                    }
+                }
+                if ($stream) {
+                    try {
+                        $stream.Dispose()
+                    } catch {
+                        # Ignore disposal errors
+                    }
+                }
             }
         } elseif ($exception -is [System.Net.Http.HttpRequestException]) {
             # For HttpRequestException, try to get status code from inner exception
@@ -285,4 +315,3 @@ try {
     Write-Host "`nError: $errorMessage" -ForegroundColor Red
     exit 1
 }
-
