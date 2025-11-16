@@ -20,8 +20,10 @@ This guide helps new Windows developers get access, set up tools, and onboard to
 Path: `developers/OnboardDeveloper.ps1`
 
 What it does:
+
 - Ensures you have an SSH key (`ed25519`).
 - Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN.
+- Optionally adds your SSH key to GitHub (requires a Personal Access Token).
 - Adds an SSH config entry for quick access.
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
 
@@ -38,11 +40,14 @@ pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01 -Pin 1234
 ```
 
 Troubleshooting:
+
 - **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
 - If the SSH test fails, run once to trust the host key:
+
   ```powershell
   ssh dev01@dev.aifabrix
   ```
+
 - Ensure the onboarding service is reachable from your network on port `9999`.
 
 ## 4) Cursor basics
@@ -60,6 +65,7 @@ To connect to your developer container:
    - Open an existing folder on the remote host: select your working folder `/workspace/<your repo>`
 
 **First-time setup**: When installing for the first time as a developer:
+
 - Open `/workspace/` root folder
 - Clone the following repositories:
 
@@ -86,6 +92,43 @@ Configure your Git identity:
 git config --global user.name "Your Name"
 git config --global user.email "you@esystems.fi"
 ```
+
+### GitHub SSH Key Setup
+
+To enable your development server to commit to GitHub repositories, you need to add your SSH key to GitHub. The onboarding script can do this automatically:
+
+1. **During onboarding**: When running `OnboardDeveloper.ps1`, you'll be prompted to optionally add your SSH key to GitHub.
+2. **Create a GitHub Personal Access Token**:
+   - The script will provide a link that opens the GitHub token creation page with the correct scope pre-selected.
+   - Required scope: `admin:public_key` (under "Admin" section).
+   - Give the token a descriptive name (e.g., "Dev Server SSH Key").
+   - Click "Generate token" and copy it immediately (you won't see it again!).
+3. **Enter the token**: When prompted by the script, paste your GitHub Personal Access Token.
+4. **Verification**: The script will automatically add your SSH key to your GitHub account.
+
+**Manual setup** (if you skipped it during onboarding):
+
+If you need to add your SSH key to GitHub manually:
+
+1. Get your public SSH key:
+
+   ```powershell
+   Get-Content ~\.ssh\id_ed25519.pub
+   ```
+
+2. Go to GitHub Settings → SSH and GPG keys: `https://github.com/settings/keys`
+
+3. Click "New SSH key", paste your public key, and save.
+
+**Testing GitHub access**:
+
+Once set up, test SSH access to GitHub from your development server:
+
+```bash
+ssh -T git@github.com
+```
+
+You should see: `Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.`
 
 ## 6) AI Fabrix developer basics
 
@@ -140,5 +183,3 @@ Follow the internal guide for org access, environments, and tooling:
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
 - Never share private keys. Public keys only are used during onboarding.
-
-

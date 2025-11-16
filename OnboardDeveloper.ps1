@@ -1,7 +1,8 @@
 Param(
     [string]$Server = "dev.aifabrix",
     [string]$DeveloperId,
-    [string]$Pin
+    [string]$Pin,
+    [string]$GitHubToken
 )
 
 function Read-ValueIfEmpty {
@@ -13,7 +14,16 @@ function Read-ValueIfEmpty {
     if ([string]::IsNullOrWhiteSpace($Value)) {
         if ($Type -eq "secure") {
             $sec = Read-Host -AsSecureString -Prompt $Prompt
-            return [Runtime.InteropServices.Marshal]::PtrToStringUni([Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec))
+            if ($null -eq $sec -or $sec.Length -eq 0) {
+                return ""
+            }
+            $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+            try {
+                $plainText = [Runtime.InteropServices.Marshal]::PtrToStringUni($bstr)
+                return $plainText
+            } finally {
+                [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+            }
         } else {
             return Read-Host -Prompt $Prompt
         }
@@ -31,7 +41,9 @@ function Get-SSHPublicKey {
         Write-Host "Generating SSH key (ed25519)..." -ForegroundColor Cyan
         & ssh-keygen -t ed25519 -f $priv -N "" -C "$env:USERNAME@aifabrix" | Out-Null
     }
-    return Get-Content -Raw -Path $pub
+    $pubKeyContent = Get-Content -Raw -Path $pub
+    # Remove any trailing newlines/whitespace but keep the key on a single line
+    return $pubKeyContent.Trim()
 }
 
 function Add-SSHConfigEntry {
@@ -59,6 +71,82 @@ Host $Alias
     Add-Content -Path $configPath -Value "`n$entry"
 }
 
+function Add-SSHKeyToGitHub {
+    param(
+        [string]$PublicKey,
+        [string]$GitHubToken,
+        [string]$Title
+    )
+    
+    if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
+        Write-Host "`nGitHub token not provided. Skipping GitHub SSH key upload." -ForegroundColor Yellow
+        Write-Host "To enable GitHub commits from the server, provide a GitHub Personal Access Token with 'admin:public_key' scope." -ForegroundColor Yellow
+        return $false
+    }
+    
+    Write-Host "`nAdding SSH key to GitHub..." -ForegroundColor Cyan
+    
+    # Validate the public key format
+    $keyParts = $PublicKey.Trim() -split '\s+', 3
+    if ($keyParts.Length -lt 2) {
+        Write-Host "Invalid public key format. Skipping GitHub upload." -ForegroundColor Yellow
+        return $false
+    }
+    
+    $body = @{
+        title = $Title
+        key   = $PublicKey.Trim()
+    } | ConvertTo-Json
+    
+    $headers = @{
+        "Authorization" = "Bearer $GitHubToken"
+        "Accept" = "application/vnd.github+json"
+        "X-GitHub-Api-Version" = "2022-11-28"
+    }
+    
+    try {
+        Write-Host "Sending SSH key to GitHub API..." -ForegroundColor Cyan
+        $response = Invoke-RestMethod -Method Post -Uri "https://api.github.com/user/keys" -Body $body -Headers $headers -ContentType "application/json" -ErrorAction Stop
+        Write-Host "SSH key successfully added to GitHub (ID: $($response.id))" -ForegroundColor Green
+        Write-Host "Key title: $($response.title)" -ForegroundColor Green
+        return $true
+    } catch {
+        $statusCode = $null
+        $errorDetails = $null
+        $exception = $_.Exception
+        
+        if ($exception.Response) {
+            $statusCode = [int]$exception.Response.StatusCode
+            try {
+                $stream = $exception.Response.GetResponseStream()
+                if ($stream) {
+                    $reader = New-Object System.IO.StreamReader($stream)
+                    $errorDetails = $reader.ReadToEnd()
+                    $reader.Close()
+                    $stream.Close()
+                }
+            } catch {
+                $errorDetails = "Could not read error response"
+            }
+        }
+        
+        if ($statusCode -eq 401) {
+            Write-Host "GitHub authentication failed. Invalid token or token expired." -ForegroundColor Yellow
+        } elseif ($statusCode -eq 422) {
+            Write-Host "SSH key may already exist on GitHub or is invalid." -ForegroundColor Yellow
+            if ($errorDetails) {
+                Write-Host "Details: $errorDetails" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "Failed to add SSH key to GitHub (Status: $statusCode)" -ForegroundColor Yellow
+            if ($errorDetails) {
+                Write-Host "Details: $errorDetails" -ForegroundColor Yellow
+            }
+        }
+        return $false
+    }
+}
+
 try {
     $DeveloperId = Read-ValueIfEmpty -Value $DeveloperId -Prompt "Enter developer ID (e.g., 01)"
     if ($DeveloperId -notmatch '^[0-9]{1,6}$') {
@@ -69,6 +157,30 @@ try {
         throw "Invalid PIN."
     }
     $pubKey = Get-SSHPublicKey
+    
+    # Optionally add SSH key to GitHub
+    $gitHubKeyAdded = $false
+    Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
+    Write-Host "To enable the server to commit to GitHub repositories, you need to add your SSH key to GitHub." -ForegroundColor Yellow
+    Write-Host "`nCreate a Personal Access Token:" -ForegroundColor Cyan
+    $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
+    Write-Host "  Link: $tokenUrl" -ForegroundColor White
+    Write-Host "  Note: The scope 'admin:public_key' is pre-selected for you" -ForegroundColor Yellow
+    Write-Host "  Just give it a name and click 'Generate token', then copy it immediately!" -ForegroundColor Yellow
+    $openBrowser = Read-Host "`nOpen this link in your browser now? (Y/N)"
+    if ($openBrowser -match '^[Yy]') {
+        try {
+            Start-Process $tokenUrl
+            Write-Host "Browser opened. After creating your token, come back here to enter it." -ForegroundColor Green
+        } catch {
+            Write-Host "Could not open browser automatically. Please visit: $tokenUrl" -ForegroundColor Yellow
+        }
+    }
+    $GitHubToken = Read-ValueIfEmpty -Value $GitHubToken -Prompt "Enter GitHub Personal Access Token (optional, press Enter to skip)" -Type "secure"
+    if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
+        $keyTitle = "dev$DeveloperId@$Server - $(Get-Date -Format 'yyyy-MM-dd')"
+        $gitHubKeyAdded = Add-SSHKeyToGitHub -PublicKey $pubKey -GitHubToken $GitHubToken -Title $keyTitle
+    }
     $body = @{
         developerId = $DeveloperId
         pin         = $Pin
@@ -158,6 +270,9 @@ try {
 
     Write-Host "`nOnboarding complete!" -ForegroundColor Green
     Write-Host "SSH config entry added: $username" -ForegroundColor Cyan
+    if ($gitHubKeyAdded) {
+        Write-Host "SSH key added to GitHub - server can now commit to repositories" -ForegroundColor Green
+    }
     Write-Host "`nNote: SSH connects directly to your Docker container, which needs time to start up." -ForegroundColor Yellow
     Write-Host "Please wait a few minutes before connecting via SSH or Cursor." -ForegroundColor Yellow
     Write-Host "`nTo connect later, use: ssh $username" -ForegroundColor Cyan
