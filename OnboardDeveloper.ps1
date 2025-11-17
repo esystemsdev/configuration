@@ -296,17 +296,20 @@ try {
     }
 
     $username = "dev$DeveloperId"
-    Add-SSHConfigEntry -Alias $username -Server $Server -User $username
+    # Extract domain from server (everything after the first dot)
+    $domain = if ($Server -match '^[^.]+\.(.+)$') { $matches[1] } else { "" }
+    $hostAlias = if ($domain) { "$username.$domain" } else { $username }
+    Add-SSHConfigEntry -Alias $hostAlias -Server $Server -User $username
 
     Write-Host "`nOnboarding complete!" -ForegroundColor Green
-    Write-Host "SSH config entry added: $username" -ForegroundColor Cyan
+    Write-Host "SSH config entry added: $hostAlias" -ForegroundColor Cyan
     if ($gitHubKeyAdded) {
         Write-Host "SSH key added to GitHub - server can now commit to repositories" -ForegroundColor Green
     }
     Write-Host "`nNote: SSH connects directly to your Docker container, which needs time to start up." -ForegroundColor Yellow
     Write-Host "Please wait a few minutes before connecting via SSH or Cursor." -ForegroundColor Yellow
-    Write-Host "`nTo connect later, use: ssh $username" -ForegroundColor Cyan
-    Write-Host "Or connect via Cursor: Select '$username' when connecting via SSH" -ForegroundColor Cyan
+    Write-Host "`nTo connect later, use: ssh $hostAlias" -ForegroundColor Cyan
+    Write-Host "Or connect via Cursor: Select '$hostAlias' when connecting via SSH" -ForegroundColor Cyan
 } catch {
     $errorMessage = $_.Exception.Message
     if ($_.Exception.InnerException) {
