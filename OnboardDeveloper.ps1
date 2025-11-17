@@ -167,7 +167,7 @@ try {
     if ($DeveloperId -notmatch '^[0-9]{1,6}$') {
         throw "Invalid DeveloperId. Use digits only."
     }
-    $Pin = Read-ValueIfEmpty -Value $Pin -Prompt "Enter PIN (6–8 digits)"
+    $Pin = Read-ValueIfEmpty -Value $Pin -Prompt "Enter PIN (6-8 digits)"
     if ($Pin -notmatch '^[0-9]{4,8}$') {
         throw "Invalid PIN."
     }
@@ -178,7 +178,7 @@ try {
     Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
     Write-Host "To enable the server to commit to GitHub repositories, you need to add your SSH key to GitHub." -ForegroundColor Yellow
     Write-Host "`nCreate a Personal Access Token:" -ForegroundColor Cyan
-    $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
+    $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key`&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
     Write-Host "  Link: $tokenUrl" -ForegroundColor White
     Write-Host "  Note: The scope 'admin:public_key' is pre-selected for you" -ForegroundColor Yellow
     Write-Host "  Just give it a name and click 'Generate token', then copy it immediately!" -ForegroundColor Yellow
