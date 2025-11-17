@@ -57,7 +57,7 @@ Troubleshooting:
 To connect to your developer container:
 
 1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen.
-2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01`) or enter `user@host` format.
+2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix`) or enter `user@host` format.
 3. **Automatic connection**: Cursor will automatically connect you to your developer container.
    - **Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
 4. **Clone repo or open existing folder**: Once connected, you can:
