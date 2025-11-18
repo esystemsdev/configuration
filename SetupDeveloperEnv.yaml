@@ -1,13 +1,13 @@
 applications:
   - name: Docker
-    group: "Development AI"
+    group: "Local Dev"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
     commandCheck: docker
 
   - name: Git
-    group: "Development"
+    group: "Local Dev"
     url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
@@ -15,7 +15,7 @@ applications:
     environmentVariable : true
 
   - name: GitHub CLI
-    group: "Development"
+    group: "Local Dev"
     url: "https://github.com/cli/cli/releases/download/v2.78.0/gh_2.78.0_windows_amd64.msi"
     installer: "GitHub CLI.msi"
     programCheck: "GitHub CLI\\gh.exe"
@@ -24,7 +24,7 @@ applications:
 
 
   - name: VSCode
-    group: "Development"
+    group: "Local Dev"
     install: true
     url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
@@ -32,20 +32,20 @@ applications:
     commandCheck: code
 
   - name: Node.js
-    group: "Development"
+    group: "Local Dev"
     url: "https://nodejs.org/dist/v22.19.0/node-v22.19.0-x64.msi"
     installer: "nodejs.msi"
     programCheck: "nodejs\\node.exe"
     commandCheck: node
     
   - name: Python
-    group: "Development"
+    group: "Local Dev"
     url: "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe"
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
     programCheck: "Python311\\python.exe"
 
   - name: Ruby
-    group: "Development Workato"
+    group: "Local Dev"
     url: "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-3.3.9-1/rubyinstaller-devkit-3.3.9-1-x64.exe"
     silentArguments: "/VERYSILENT /NORESTART /ALLUSERS"
     programCheck: "C:\\Ruby33-x64\\bin\\ruby.exe"
@@ -64,7 +64,7 @@ applications:
     programCheck: "Twingate\\Twingate.exe"
 
   - name: JDK
-    group: "Development"
+    group: "Local Dev"
     url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
     installer: "java.msi"
     programCheck: "Java\\jdk-21\\bin\\java.exe"
@@ -139,8 +139,8 @@ applications:
   #  environmentVariable : true
 
   - name: Cursor
-    group: "Development AI"
-    url: "https://api2.cursor.sh/updates/download/golden/win32-x64/cursor/1.7"
+    group: "Development"
+    url: "https://api2.cursor.sh/updates/download/golden/win32-x64/cursor/2.0"
     silentArguments: "/SILENT"
     programCheck: "cursor\\Cursor.exe"
  

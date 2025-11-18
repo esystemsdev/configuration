@@ -7,6 +7,18 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 ### Initial Developer Computer Setup
 
 1. **Download the Setup Script to C:\Setup folder**:
+   - **Download all files at once** (recommended):
+
+     ```powershell
+     New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+     $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
+     $files = @("OnboardDeveloper.ps1", "SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1")
+     foreach ($file in $files) {
+         Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
+     }
+     ```
+
+   - **Or download files individually**:
    - Download the [OnboardDeveloper.ps1](https://github.com/esystemsdev/configuration/blob/main/OnboardDeveloper.ps1) script from GitHub:
 
      ```powershell
@@ -30,22 +42,23 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
    - The `SetupDeveloperEnv.ps1` script installs applications organized by groups:
 
    **Development Group:**
-   - **Git**: Version control system
-   - **GitHub CLI**: Command-line interface for GitHub
-   - **Visual Studio Code (VS Code)**: Code editor with essential extensions (ESLint, GitLens, Prettier, GitHub Copilot, Docker, Python, PowerShell, and more)
-   - **Node.js**: JavaScript runtime and package manager
-   - **Python**: Programming language
+   - **Cursor**: AI-powered code editor
    - **Twingate**: Secure remote access tool
-   - **JDK (Java Development Kit)**: Development environment for building applications using Java
    - **7-Zip**: File archiver
    - **Slack**: Communication platform
    - **Google Chrome**: Web browser
    - **Postman**: API testing tool
    - **PowerShell**: Cross-platform automation and configuration tool
 
-   **Development AI Group:**
+   **Local Dev Group:**
    - **Docker**: Containerization platform
-   - **Cursor**: AI-powered code editor
+   - **Visual Studio Code (VS Code)**: Code editor with essential extensions (ESLint, GitLens, Prettier, GitHub Copilot, Docker, Python, PowerShell, and more)
+   - **Node.js**: JavaScript runtime and package manager
+   - **Python**: Programming language
+   - **JDK (Java Development Kit)**: Development environment for building applications using Java
+   - **Git**: Version control system
+   - **GitHub CLI**: Command-line interface for GitHub
+   - **Ruby**: Programming language with development kit
 
    **Database Group:**
    - **pgAdmin 4**: PostgreSQL management tool
@@ -53,9 +66,6 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
    **Development OutSystems Group:**
    - **Microsoft Visual Studio 2022**: IDE for .NET, C#, and other languages
-
-   **Development Workato Group:**
-   - **Ruby**: Programming language with development kit
 4. **Run the Script**:
    - Run the script with your own account. Open PowerShell navigate to the location of the script.
    - Execute the script:
@@ -134,7 +144,7 @@ This PowerShell script automates the installation of essential tools and depende
 
 **Features:**
 
-- Installs tools organized by groups: Development, Development AI, Database, Development OutSystems, and Development Workato.
+- Installs tools organized by groups: Development, Local Dev, Database, and Development OutSystems.
 - Verifies if tools are already installed and skips reinstallation if unnecessary.
 - Allows the user to choose which groups of applications to install, with a default installation of the "Development" group.
 - Supports an optional `-groups` parameter to automate the selection process, allowing for a faster setup without user prompts.
@@ -149,9 +159,7 @@ This PowerShell script automates the installation of essential tools and depende
 .\SetupDeveloperEnv.ps1
 
 # Optionally, specify the groups to install without prompts
-.\SetupDeveloperEnv.ps1 -groups "Development, Development AI, Database"
-
-.\SetupDeveloperEnv.ps1 -groups "Development Workato"
+.\SetupDeveloperEnv.ps1 -groups "Development, Local Dev, Database"
 ```
 
 **Installation Process:**
@@ -169,7 +177,7 @@ This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. 
 
 - Customizable: You can modify this file to adjust which tools are installed or to change installation parameters.
 - Supports both `.exe` and `.msi` installers.
-- Organized by application groups: Development, Development AI, Database, Development OutSystems, and Development Workato.
+- Organized by application groups: Development, Local Dev, Database, and Development OutSystems.
 - Includes options to set environment variables automatically after installation.
 - Defines VS Code extensions to be installed automatically with VS Code.
 - Allows for targeted installation based on development needs.
@@ -179,14 +187,14 @@ This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. 
 ```yaml
 applications:
   - name: Docker
-    group: "Development AI"
+    group: "Local Dev"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
     commandCheck: docker
 
   - name: Git
-    group: "Development"
+    group: "Local Dev"
     url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
@@ -194,7 +202,7 @@ applications:
     environmentVariable: true
 
   - name: JDK
-    group: "Development"
+    group: "Local Dev"
     url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
     installer: "java.msi"
     programCheck: "Java\\jdk-21\\bin\\java.exe"
