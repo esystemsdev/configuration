@@ -1,0 +1,83 @@
+# eSystems Nordic Oy Proprietary Software License
+
+Version 1.0 (2025)
+SPDX-License-Identifier: LicenseRef-eSystems-Proprietary-2025
+
+Copyright (c) 2025 eSystems Nordic Oy. All rights reserved.
+
+This repository contains proprietary and confidential code.
+Unauthorized copying, modification, or distribution of this
+software, via any medium, is strictly prohibited without prior
+written permission from eSystems.
+
+1. Definitions
+   “Software” means all source code, object code, scripts, configuration files,
+   documentation, and other materials contained in this repository.
+   “eSystems” means eSystems Nordic Oy.
+
+2. Ownership
+   The Software is and remains the exclusive property of eSystems. No title or
+   ownership rights are transferred to any party by accessing or possessing the
+   Software.
+
+3. License Grant
+   No license is granted by this file. Any rights to use, copy, modify, compile,
+   run, test, distribute, host, or otherwise exploit the Software must be
+   expressly granted in a separate written agreement executed by eSystems.
+   In the absence of such an agreement, all rights are reserved.
+
+4. Restrictions
+   Without a written agreement from eSystems, you must not:
+   (a) use, copy, modify, merge, publish, distribute, sublicense, sell, rent, lease,
+       lend, or otherwise make the Software available to any third party;
+   (b) reverse engineer, decompile, disassemble, or attempt to derive source code,
+       except to the limited extent required by applicable law and only after
+       providing prior written notice to eSystems;
+   (c) remove or alter any proprietary notices, trademarks, or labels.
+
+5. Confidentiality
+   The Software and any related information are the confidential information of
+   eSystems. You must protect such information with at least the same degree of
+   care you use to protect your own confidential information, and in no event less
+   than reasonable care.
+
+6. Third-Party Components
+   The Software may include or link to third-party software governed by separate
+   licenses. Those licenses control to the extent of any conflict with this License.
+   You are responsible for complying with any such third-party terms.
+
+7. Warranty Disclaimer
+   TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED “AS IS” AND
+   “AS AVAILABLE,” WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, WHETHER EXPRESS,
+   IMPLIED, STATUTORY, OR OTHERWISE, INCLUDING WITHOUT LIMITATION ANY WARRANTIES
+   OF TITLE, NON-INFRINGEMENT, MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE.
+
+8. Limitation of Liability
+   TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL ESYSTEMS BE LIABLE FOR
+   ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES,
+   OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL, EVEN IF ADVISED OF THE POSSIBILITY
+   OF SUCH DAMAGES. ESYSTEMS’ TOTAL LIABILITY FOR ALL CLAIMS RELATING TO THE SOFTWARE
+   SHALL NOT EXCEED EUR 100.
+
+9. Termination
+   Any rights you may have (if any) to access or use the Software terminate
+   immediately upon notice from eSystems. Upon termination, you must cease all
+   use and destroy all copies of the Software and related materials.
+
+10. Export and Compliance
+   You must comply with all applicable laws and regulations, including export,
+   sanctions, and data protection laws, in connection with any use of the Software.
+
+11. Governing Law and Venue
+   This License and any dispute arising out of or related to the Software shall be
+   governed by the laws of Finland, excluding its conflict of laws rules. The
+   exclusive venue shall be the District Court of Helsinki, Finland.
+
+12. Contact
+   For permissions or commercial licensing, contact:
+   eSystems Nordic Oy
+   Email: `info@esystems.fi`
+   Website: `https://www.esystems.fi`
+
+If you do not have a separate written agreement with eSystems,
+you have no rights to use the Software.
