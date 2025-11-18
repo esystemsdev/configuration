@@ -17,38 +17,85 @@ This guide helps new Windows developers get access, set up tools, and onboard to
 
 ## 3) Onboarding script (Windows PowerShell)
 
-Path: `developers/OnboardDeveloper.ps1`
+**Download the script:**
 
-What it does:
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+```
 
-- Ensures you have an SSH key (`ed25519`).
-- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN.
-- Optionally adds your SSH key to GitHub (requires a Personal Access Token).
-- Adds an SSH config entry for quick access.
+**What it does:**
+
+- Automatically generates SSH keys (ed25519) if they don't exist
+- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN
+- Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
+- Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
 
-Usage (PowerShell 7, recommended interactive PIN):
+**Usage:**
+
+**Interactive mode (recommended):**
 
 ```powershell
-pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId 01
 ```
 
-Non-interactive example (not recommended; avoid putting PINs into shell history):
+**Non-interactive mode (not recommended; avoid putting PINs into shell history):**
 
 ```powershell
-pwsh -File .\OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId 01 -Pin 123456
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId 01 -Pin 123456
 ```
 
-Troubleshooting:
+**With GitHub token:**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -DeveloperId 01 -Pin 123456 -GitHubToken "ghp_your_token_here"
+```
+
+**Parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `-Server` | string | No | `"dev.aifabrix"` | The development server hostname |
+| `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
+| `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
+| `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
+
+*Required but can be provided interactively if not specified as parameters.
+
+**Process:**
+
+1. The script prompts for your Developer ID and PIN if not provided as parameters
+2. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
+3. Sends your public SSH key to the onboarding API endpoint to claim access
+4. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
+5. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+
+**After onboarding:**
+
+Once onboarding is complete, you can connect to the development server using:
+
+```powershell
+ssh dev<DeveloperId>.<domain>
+```
+
+For example, if your Developer ID is `01` and the server is `dev.aifabrix`, you would use:
+
+```powershell
+ssh dev01.aifabrix
+```
+
+**Troubleshooting:**
 
 - **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
-- If the SSH test fails, run once to trust the host key:
+- **Connection fails immediately after onboarding**: Wait a few minutes for the Docker container to start up. The container needs time to initialize after onboarding.
+- **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
+- **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
+- **If the SSH test fails**, run once to trust the host key:
 
   ```powershell
-  ssh dev01@dev.aifabrix
+  ssh dev01.aifabrix
   ```
-
-- Ensure the onboarding service is reachable from your network on port `9999`.
 
 ## 4) Cursor basics
 
@@ -70,18 +117,18 @@ To connect to your developer container:
 - Clone the following repositories:
 
 ```bash
-git clone https://github.com/esystemsdev/aifabrix-miso
-git clone https://github.com/esystemsdev/aifabrix-dataplane
-git clone https://github.com/esystemsdev/aifabrix-miso-azure
-git clone https://github.com/esystemsdev/aifabrix-miso-client
-git clone https://github.com/esystemsdev/aifabrix-d360
-git clone https://github.com/esystemsdev/aifabrix-miso-client-python
-git clone https://github.com/esystemsdev/aifabrix-core
-git clone https://github.com/esystemsdev/aifabrix-form-engine
-git clone https://github.com/esystemsdev/aifabrix-builder
-git clone https://github.com/esystemsdev/aifabrix-docs
-git clone https://github.com/esystemsdev/openwebui-template
-git clone https://github.com/esystemsdev/flowise-template
+git clone git@github.com:esystemsdev/aifabrix-miso.git
+git clone git@github.com:esystemsdev/aifabrix-dataplane.git
+git clone git@github.com:esystemsdev/aifabrix-miso-azure.git
+git clone git@github.com:esystemsdev/aifabrix-miso-client.git
+git clone git@github.com:esystemsdev/aifabrix-d360.git
+git clone git@github.com:esystemsdev/aifabrix-miso-client-python.git
+git clone git@github.com:esystemsdev/aifabrix-core.git
+git clone git@github.com:esystemsdev/aifabrix-form-engine.git
+git clone git@github.com:esystemsdev/aifabrix-builder.git
+git clone git@github.com:esystemsdev/aifabrix-docs.git
+git clone git@github.com:esystemsdev/openwebui-template.git
+git clone git@github.com:esystemsdev/flowise-template.git
 ```
 
 ## 5) Git configuration

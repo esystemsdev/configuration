@@ -7,10 +7,16 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 ### Initial Developer Computer Setup
 
 1. **Download the Setup Script to C:\Setup folder**:
+   - Download the [OnboardDeveloper.ps1](https://github.com/esystemsdev/configuration/blob/main/OnboardDeveloper.ps1) script from GitHub:
+
+     ```powershell
+     New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+     ```
+
    - Download the [SetupDeveloperEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.ps1) script from GitHub.
    - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.yaml) script from GitHub.
    - Download the [SetupGitEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupGitEnv.ps1) script from GitHub.
-   - Download the [OnboardDeveloper.ps1](https://github.com/esystemsdev/configuration/blob/main/OnboardDeveloper.ps1) script from GitHub.
 2. **Run the Script**:
    - Run the script with administrator rights. Open PowerShell as an administrator and navigate to the location of the script.
    - Execute the script:
@@ -60,7 +66,69 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
 ## Repository Contents
 
-### 1. `SetupDeveloperEnv.ps1`
+### 1. `OnboardDeveloper.ps1`
+
+This script automates the onboarding process for developers by setting up SSH access to development servers. It generates SSH keys, claims access through an API endpoint, and configures SSH settings for seamless connectivity.
+
+**Quick Download:**
+
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+```
+
+**Features:**
+
+- Automatically generates SSH keys (ed25519) if they don't exist.
+- Claims developer access via API endpoint with developer ID and PIN.
+- Configures SSH config entries for easy server access.
+- Optionally sets up GitHub SSH key for server-side commits.
+
+**Usage:**
+
+```powershell
+# Run the script with your user account
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1"
+
+# Or specify parameters directly
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -DeveloperId "01" -Pin "123456"
+
+# Optionally specify a different server
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server "dev.aifabrix" -DeveloperId "01" -Pin "123456"
+```
+
+**Parameters:**
+
+- `-Server` (optional): The development server hostname. Defaults to `"dev.aifabrix"`.
+- `-DeveloperId` (optional): Your developer ID (1-6 digits). Will be prompted if not provided.
+- `-Pin` (optional): Your PIN (4-8 digits). Will be prompted if not provided.
+- `-GitHubToken` (optional): GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided.
+
+**Process:**
+
+1. The script will prompt for your Developer ID and PIN if not provided as parameters.
+2. It checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed.
+3. Your public SSH key is sent to the onboarding API endpoint to claim access.
+4. An SSH config entry is created for easy access using `ssh dev<DeveloperId>.<domain>`.
+5. Optionally, you can provide a GitHub Personal Access Token to enable server-side commits to GitHub repositories.
+
+**After Onboarding:**
+
+Once onboarding is complete, you can connect to the development server using:
+
+```powershell
+ssh dev<DeveloperId>.<domain>
+```
+
+For example, if your Developer ID is `01` and the server is `dev.aifabrix`, you would use:
+
+```powershell
+ssh dev01.aifabrix
+```
+
+**Note:** SSH connects directly to your Docker container, which needs time to start up. Please wait a few minutes after onboarding before connecting via SSH or Cursor.
+
+### 2. `SetupDeveloperEnv.ps1`
 
 This PowerShell script automates the installation of essential tools and dependencies required for development. It reads configuration data from `SetupDeveloperEnv.yaml` and installs the necessary software, ensuring that your development environment is fully equipped.
 
@@ -93,7 +161,7 @@ This PowerShell script automates the installation of essential tools and depende
 - If the `-groups` parameter is set to `"all"`, all applications in the YAML configuration will be installed.
 - The script installs the necessary software and ensures that the appropriate environment variables are set, updating the system `PATH` if needed.
 
-### 2. `SetupDeveloperEnv.yaml`
+### 3. `SetupDeveloperEnv.yaml`
 
 This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. It lists all the software that needs to be installed, along with their respective download URLs, installation arguments, and checks to ensure they are installed correctly. It also defines VS Code extensions that will be automatically installed with VS Code.
 
@@ -150,7 +218,7 @@ vscodeExtensions:
   # Additional extensions...
 ```
 
-### 3. `SetupGitEnv.ps1`
+### 4. `SetupGitEnv.ps1`
 
 This script is designed to help developers quickly clone all necessary repositories and install global npm packages. It supports multiple repositories, making it easy to set up the development environment for different projects.
 
@@ -165,56 +233,6 @@ This script is designed to help developers quickly clone all necessary repositor
 ```powershell
 # Run the script with your user account
 C:\git\esystemsdev\configuration\SetupGitEnv.ps1
-```
-
-### 4. `OnboardDeveloper.ps1`
-
-This script automates the onboarding process for developers by setting up SSH access to development servers. It generates SSH keys, claims access through an API endpoint, and configures SSH settings for seamless connectivity.
-
-**Features:**
-
-- Automatically generates SSH keys (ed25519) if they don't exist.
-- Claims developer access via API endpoint with developer ID and PIN.
-- Configures SSH config entries for easy server access.
-- Tests SSH connectivity to verify successful onboarding.
-
-**Usage:**
-
-```powershell
-# Run the script with your user account
-.\OnboardDeveloper.ps1
-
-# Or specify parameters directly
-.\OnboardDeveloper.ps1 -DeveloperId "01" -Pin "123456"
-
-# Optionally specify a different server
-.\OnboardDeveloper.ps1 -Server "dev.aifabrix" -DeveloperId "01" -Pin "123456"
-```
-
-**Parameters:**
-
-- `-Server` (optional): The development server hostname. Defaults to `"dev.aifabrix"`.
-- `-DeveloperId` (optional): Your developer ID (1-6 digits). Will be prompted if not provided.
-- `-Pin` (optional): Your PIN (4-8 digits). Will be prompted if not provided.
-
-**Process:**
-
-1. The script will prompt for your Developer ID and PIN if not provided as parameters.
-2. It checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed.
-3. Your public SSH key is sent to the onboarding API endpoint to claim access.
-4. An SSH config entry is created for easy access using `ssh dev<DeveloperId>`.
-5. The script tests SSH connectivity to verify the setup was successful.
-
-**After Onboarding:**
-
-Once onboarding is complete, you can connect to the development server using:
-```powershell
-ssh dev<DeveloperId>
-```
-
-For example, if your Developer ID is `01`, you would use:
-```powershell
-ssh dev01
 ```
 
 ## How to Use This Repository

@@ -71,96 +71,6 @@ Host $Alias
     Add-Content -Path $configPath -Value "`n$entry"
 }
 
-function Add-SSHKeyToGitHub {
-    param(
-        [string]$PublicKey,
-        [string]$GitHubToken,
-        [string]$Title
-    )
-    
-    if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
-        Write-Host "`nGitHub token not provided. Skipping GitHub SSH key upload." -ForegroundColor Yellow
-        Write-Host "To enable GitHub commits from the server, provide a GitHub Personal Access Token with 'admin:public_key' scope." -ForegroundColor Yellow
-        return $false
-    }
-    
-    Write-Host "`nAdding SSH key to GitHub..." -ForegroundColor Cyan
-    
-    # Validate the public key format
-    $keyParts = $PublicKey.Trim() -split '\s+', 3
-    if ($keyParts.Length -lt 2) {
-        Write-Host "Invalid public key format. Skipping GitHub upload." -ForegroundColor Yellow
-        return $false
-    }
-    
-    $body = @{
-        title = $Title
-        key   = $PublicKey.Trim()
-    } | ConvertTo-Json
-    
-    $headers = @{
-        "Authorization" = "Bearer $GitHubToken"
-        "Accept" = "application/vnd.github+json"
-        "X-GitHub-Api-Version" = "2022-11-28"
-    }
-    
-    try {
-        Write-Host "Sending SSH key to GitHub API..." -ForegroundColor Cyan
-        $response = Invoke-RestMethod -Method Post -Uri "https://api.github.com/user/keys" -Body $body -Headers $headers -ContentType "application/json" -ErrorAction Stop
-        Write-Host "SSH key successfully added to GitHub (ID: $($response.id))" -ForegroundColor Green
-        Write-Host "Key title: $($response.title)" -ForegroundColor Green
-        return $true
-    } catch {
-        $statusCode = $null
-        $errorDetails = $null
-        $exception = $_.Exception
-        
-        if ($exception.Response) {
-            $statusCode = [int]$exception.Response.StatusCode
-            $stream = $null
-            $reader = $null
-            try {
-                $stream = $exception.Response.GetResponseStream()
-                if ($stream) {
-                    $reader = New-Object System.IO.StreamReader($stream)
-                    $errorDetails = $reader.ReadToEnd()
-                }
-            } catch {
-                $errorDetails = "Could not read error response"
-            } finally {
-                if ($reader) {
-                    try {
-                        $reader.Dispose()
-                    } catch {
-                        # Ignore disposal errors
-                    }
-                }
-                if ($stream) {
-                    try {
-                        $stream.Dispose()
-                    } catch {
-                        # Ignore disposal errors
-                    }
-                }
-            }
-        }
-        
-        if ($statusCode -eq 401) {
-            Write-Host "GitHub authentication failed. Invalid token or token expired." -ForegroundColor Yellow
-        } elseif ($statusCode -eq 422) {
-            Write-Host "SSH key may already exist on GitHub or is invalid." -ForegroundColor Yellow
-            if ($errorDetails) {
-                Write-Host "Details: $errorDetails" -ForegroundColor Yellow
-            }
-        } else {
-            Write-Host "Failed to add SSH key to GitHub (Status: $statusCode)" -ForegroundColor Yellow
-            if ($errorDetails) {
-                Write-Host "Details: $errorDetails" -ForegroundColor Yellow
-            }
-        }
-        return $false
-    }
-}
 
 try {
     $DeveloperId = Read-ValueIfEmpty -Value $DeveloperId -Prompt "Enter developer ID (e.g., 01)"
@@ -173,10 +83,9 @@ try {
     }
     $pubKey = Get-SSHPublicKey
     
-    # Optionally add SSH key to GitHub
-    $gitHubKeyAdded = $false
+    # Optionally collect GitHub token for server-side SSH key setup
     Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
-    Write-Host "To enable the server to commit to GitHub repositories, you need to add your SSH key to GitHub." -ForegroundColor Yellow
+    Write-Host "To enable the server to commit to GitHub repositories, the server will generate an SSH key and add it to your GitHub account." -ForegroundColor Yellow
     Write-Host "`nCreate a Personal Access Token:" -ForegroundColor Cyan
     $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key`&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
     Write-Host "  Link: $tokenUrl" -ForegroundColor White
@@ -192,15 +101,16 @@ try {
         }
     }
     $GitHubToken = Read-ValueIfEmpty -Value $GitHubToken -Prompt "Enter GitHub Personal Access Token (optional, press Enter to skip)" -Type "secure"
-    if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
-        $keyTitle = "dev$DeveloperId@$Server - $(Get-Date -Format 'yyyy-MM-dd')"
-        $gitHubKeyAdded = Add-SSHKeyToGitHub -PublicKey $pubKey -GitHubToken $GitHubToken -Title $keyTitle
-    }
+    
     $body = @{
         developerId = $DeveloperId
         pin         = $Pin
         publicKey   = $pubKey
-    } | ConvertTo-Json
+    }
+    if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
+        $body.githubToken = $GitHubToken
+    }
+    $body = $body | ConvertTo-Json
 
     $url = "http://$Server`:9999/api/claim"
     Write-Host "Claiming access at $url ..." -ForegroundColor Cyan
@@ -303,8 +213,10 @@ try {
 
     Write-Host "`nOnboarding complete!" -ForegroundColor Green
     Write-Host "SSH config entry added: $hostAlias" -ForegroundColor Cyan
-    if ($gitHubKeyAdded) {
-        Write-Host "SSH key added to GitHub - server can now commit to repositories" -ForegroundColor Green
+    if ($response.githubKeyAdded) {
+        Write-Host "SSH key generated in container and added to GitHub - server can now commit to repositories" -ForegroundColor Green
+    } elseif (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
+        Write-Host "GitHub token provided - server will attempt to set up SSH key for GitHub access" -ForegroundColor Yellow
     }
     Write-Host "`nNote: SSH connects directly to your Docker container, which needs time to start up." -ForegroundColor Yellow
     Write-Host "Please wait a few minutes before connecting via SSH or Cursor." -ForegroundColor Yellow
