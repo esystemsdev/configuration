@@ -84,23 +84,25 @@ try {
     $pubKey = Get-SSHPublicKey
     
     # Optionally collect GitHub token for server-side SSH key setup
-    Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
-    Write-Host "To enable the server to commit to GitHub repositories, the server will generate an SSH key and add it to your GitHub account." -ForegroundColor Yellow
-    Write-Host "`nCreate a Personal Access Token:" -ForegroundColor Cyan
-    $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key`&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
-    Write-Host "  Link: $tokenUrl" -ForegroundColor White
-    Write-Host "  Note: The scope 'admin:public_key' is pre-selected for you" -ForegroundColor Yellow
-    Write-Host "  Just give it a name and click 'Generate token', then copy it immediately!" -ForegroundColor Yellow
-    $openBrowser = Read-Host "`nOpen this link in your browser now? (Y/N)"
-    if ($openBrowser -match '^[Yy]') {
-        try {
-            Start-Process $tokenUrl
-            Write-Host "Browser opened. After creating your token, come back here to enter it." -ForegroundColor Green
-        } catch {
-            Write-Host "Could not open browser automatically. Please visit: $tokenUrl" -ForegroundColor Yellow
+    if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
+        Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
+        Write-Host "To enable the server to commit to GitHub repositories, the server will generate an SSH key and add it to your GitHub account." -ForegroundColor Yellow
+        Write-Host "`nCreate a Personal Access Token:" -ForegroundColor Cyan
+        $tokenUrl = "https://github.com/settings/tokens/new?scopes=admin:public_key`&description=SSH%20Key%20for%20Dev%20Server%20-%20dev$DeveloperId"
+        Write-Host "  Link: $tokenUrl" -ForegroundColor White
+        Write-Host "  Note: The scope 'admin:public_key' is pre-selected for you" -ForegroundColor Yellow
+        Write-Host "  Just give it a name and click 'Generate token', then copy it immediately!" -ForegroundColor Yellow
+        $openBrowser = Read-Host "`nOpen this link in your browser now? (Y/N)"
+        if ($openBrowser -match '^[Yy]') {
+            try {
+                Start-Process $tokenUrl
+                Write-Host "Browser opened. After creating your token, come back here to enter it." -ForegroundColor Green
+            } catch {
+                Write-Host "Could not open browser automatically. Please visit: $tokenUrl" -ForegroundColor Yellow
+            }
         }
+        $GitHubToken = Read-ValueIfEmpty -Value $GitHubToken -Prompt "Enter GitHub Personal Access Token (optional, press Enter to skip)" -Type "secure"
     }
-    $GitHubToken = Read-ValueIfEmpty -Value $GitHubToken -Prompt "Enter GitHub Personal Access Token (optional, press Enter to skip)" -Type "secure"
     
     $body = @{
         developerId = $DeveloperId
