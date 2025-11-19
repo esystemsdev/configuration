@@ -37,19 +37,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configurat
 **Interactive mode (recommended):**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId 01
-```
-
-**Non-interactive mode (not recommended; avoid putting PINs into shell history):**
-
-```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId 01 -Pin 123456
-```
-
-**With GitHub token:**
-
-```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -DeveloperId 01 -Pin 123456 -GitHubToken "ghp_your_token_here"
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
 ```
 
 **Parameters:**
@@ -87,6 +75,7 @@ ssh dev01.aifabrix
 
 **Troubleshooting:**
 
+- **Twingate connectivity**: Validate that your Twingate is up and running and can ping `dev.aifabrix`. If Twingate is not connected or cannot reach the server, SSH connections will fail.
 - **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
 - **Connection fails immediately after onboarding**: Wait a few minutes for the Docker container to start up. The container needs time to initialize after onboarding.
 - **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
@@ -139,43 +128,6 @@ Configure your Git identity:
 git config --global user.name "Your Name"
 git config --global user.email "you@esystems.fi"
 ```
-
-### GitHub SSH Key Setup
-
-To enable your development server to commit to GitHub repositories, you need to add your SSH key to GitHub. The onboarding script can do this automatically:
-
-1. **During onboarding**: When running `OnboardDeveloper.ps1`, you'll be prompted to optionally add your SSH key to GitHub.
-2. **Create a GitHub Personal Access Token**:
-   - The script will provide a link that opens the GitHub token creation page with the correct scope pre-selected.
-   - Required scope: `admin:public_key` (under "Admin" section).
-   - Give the token a descriptive name (e.g., "Dev Server SSH Key").
-   - Click "Generate token" and copy it immediately (you won't see it again!).
-3. **Enter the token**: When prompted by the script, paste your GitHub Personal Access Token.
-4. **Verification**: The script will automatically add your SSH key to your GitHub account.
-
-**Manual setup** (if you skipped it during onboarding):
-
-If you need to add your SSH key to GitHub manually:
-
-1. Get your public SSH key:
-
-   ```powershell
-   Get-Content ~\.ssh\id_ed25519.pub
-   ```
-
-2. Go to GitHub Settings → SSH and GPG keys: `https://github.com/settings/keys`
-
-3. Click "New SSH key", paste your public key, and save.
-
-**Testing GitHub access**:
-
-Once set up, test SSH access to GitHub from your development server:
-
-```bash
-ssh -T git@github.com
-```
-
-You should see: `Hi <username>! You've successfully authenticated, but GitHub does not provide shell access.`
 
 ## 6) AI Fabrix developer basics
 
