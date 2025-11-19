@@ -17,74 +17,42 @@ This guide helps new Windows developers get access, set up tools, and onboard to
 
 ## 3) Onboarding script (Windows PowerShell)
 
-**Download the script:**
+### Step 1: Download the script
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
 ```
 
-**What it does:**
+### Step 2: Run the onboarding script
 
-- Automatically generates SSH keys (ed25519) if they don't exist
-- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN
-- Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
-- Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
-- Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
-
-**Usage:**
-
-**Interactive mode (recommended):**
+Use the developer ID that was delivered to you:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
 ```
 
-**Parameters:**
+Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 
-| Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
-| `-Server` | string | No | `"dev.aifabrix"` | The development server hostname |
-| `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
-| `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
-| `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
+### Step 3: Register GitHub token
 
-*Required but can be provided interactively if not specified as parameters.
+1. Create a GitHub Personal Access Token (if you don't have one)
+2. When prompted by the script, paste your GitHub token
+3. The script will automatically set up GitHub SSH key for server-side commits
 
-**Process:**
+### Step 4: Connect after onboarding
 
-1. The script prompts for your Developer ID and PIN if not provided as parameters
-2. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
-3. Sends your public SSH key to the onboarding API endpoint to claim access
-4. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
-5. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
-
-**After onboarding:**
-
-Once onboarding is complete, you can connect to the development server using:
+Once onboarding is complete, wait a few minutes for the Docker container to start up, then connect:
 
 ```powershell
-ssh dev<DeveloperId>.<domain>
+ssh dev<DeveloperId>.aifabrix
 ```
 
-For example, if your Developer ID is `01` and the server is `dev.aifabrix`, you would use:
+For example, if your Developer ID is `01`:
 
 ```powershell
 ssh dev01.aifabrix
 ```
-
-**Troubleshooting:**
-
-- **Twingate connectivity**: Validate that your Twingate is up and running and can ping `dev.aifabrix`. If Twingate is not connected or cannot reach the server, SSH connections will fail.
-- **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
-- **Connection fails immediately after onboarding**: Wait a few minutes for the Docker container to start up. The container needs time to initialize after onboarding.
-- **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
-- **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
-- **If the SSH test fails**, run once to trust the host key:
-
-  ```powershell
-  ssh dev01.aifabrix
-  ```
 
 ## 4) Cursor basics
 
@@ -124,27 +92,60 @@ git clone git@github.com:esystemsdev/flowise-template.git
 
 Configure your Git identity:
 
-```powershell
+```bash
 git config --global user.name "Your Name"
 git config --global user.email "you@esystems.fi"
 ```
 
 ## 6) AI Fabrix developer basics
 
-Install Builder CLI:
+### Step 1: Install Builder CLI
 
-```powershell
+```bash
 npm install -g @aifabrix/builder
 ```
 
-Quick start (minimal):
+### Step 2: Quick start (minimal)
 
-```powershell
+1. **Put infra up:**
+
+```bash
 aifabrix up
-aifabrix create myapp
-aifabrix build myapp
-aifabrix run myapp
 ```
+
+1. **Open miso-controller project:**
+
+Navigate to the miso-controller project directory.
+
+1. **Build Keycloak Docker image:**
+
+```bash
+aifabrix build keycloak
+```
+
+1. **Run Keycloak locally:**
+
+```bash
+aifabrix run keycloak
+```
+
+1. **Build Docker image:**
+
+```bash
+aifabrix build miso-controller
+```
+
+1. **Run in local Docker:**
+
+```bash
+aifabrix run miso-controller
+```
+
+1. **Validate via web-browser:**
+
+Open your web browser and verify the services are running.
+
+**Happy coding!**
 
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
@@ -182,3 +183,43 @@ Follow the internal guide for org access, environments, and tooling:
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
 - Never share private keys. Public keys only are used during onboarding.
+
+## 10) Reference information
+
+### Onboarding script details
+
+**What the script does:**
+
+- Automatically generates SSH keys (ed25519) if they don't exist
+- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN
+- Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
+- Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
+- Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
+
+**Script parameters:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `-Server` | string | No | `"dev.aifabrix"` | The development server hostname |
+| `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
+| `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
+| `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
+
+*Required but can be provided interactively if not specified as parameters.
+
+**Onboarding process:**
+
+1. The script prompts for your Developer ID and PIN if not provided as parameters
+2. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
+3. Sends your public SSH key to the onboarding API endpoint to claim access
+4. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
+5. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+
+**Troubleshooting:**
+
+- **Twingate connectivity**: Validate that your Twingate is up and running and can ping `dev.aifabrix`. If Twingate is not connected or cannot reach the server, SSH connections will fail.
+- **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
+- **Connection fails immediately after onboarding**: Wait a few minutes for the Docker container to start up. The container needs time to initialize after onboarding.
+- **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
+- **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
+- **If the SSH test fails**, run once to trust the host key.
