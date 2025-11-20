@@ -295,7 +295,7 @@ try {
                     }
                 }
             }
-        } elseif ($exception -is [System.Net.Http.HttpRequestException]) {
+        } elseif ($exception.GetType().FullName -eq 'System.Net.Http.HttpRequestException') {
             # For HttpRequestException, try to get status code from inner exception
             if ($exception.InnerException -and $exception.InnerException.Response) {
                 $statusCode = [int]$exception.InnerException.Response.StatusCode
