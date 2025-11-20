@@ -255,7 +255,7 @@ try {
     }
     $body = $body | ConvertTo-Json
 
-    $url = "http://$Server`:9999/api/claim"
+    $url = "http://${Server}:9999/api/claim"
     Write-Host "Claiming access at $url ..." -ForegroundColor Cyan
     
     try {
