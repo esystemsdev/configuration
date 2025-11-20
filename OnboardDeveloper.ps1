@@ -5,6 +5,23 @@ Param(
     [string]$GitHubToken
 )
 
+function Test-CommandAvailable {
+    param(
+        [string]$CommandName,
+        [string]$InstallationHint
+    )
+    $cmd = Get-Command $CommandName -ErrorAction SilentlyContinue
+    if (-not $cmd) {
+        $message = "$CommandName is not available. $InstallationHint"
+        if ($InstallationHint) {
+            throw $message
+        } else {
+            throw "$CommandName is not available. Please ensure it is installed and available in your PATH."
+        }
+    }
+    return $true
+}
+
 function Read-ValueIfEmpty {
     param(
         [string]$Value,
@@ -36,14 +53,124 @@ function Get-SSHPublicKey {
     $sshDir = Join-Path $userHome ".ssh"
     $priv = Join-Path $sshDir "id_ed25519"
     $pub = Join-Path $sshDir "id_ed25519.pub"
-    if (-not (Test-Path $sshDir)) { New-Item -ItemType Directory -Path $sshDir | Out-Null }
-    if (-not (Test-Path $priv -PathType Leaf -ErrorAction SilentlyContinue) -or -not (Test-Path $pub -PathType Leaf -ErrorAction SilentlyContinue)) {
-        Write-Host "Generating SSH key (ed25519)..." -ForegroundColor Cyan
-        & ssh-keygen -t ed25519 -f $priv -N "" -C "$env:USERNAME@aifabrix" | Out-Null
+    
+    if (-not (Test-Path $sshDir)) {
+        try {
+            New-Item -ItemType Directory -Path $sshDir -Force | Out-Null
+        } catch {
+            throw "Failed to create SSH directory at $sshDir`: $($_.Exception.Message)"
+        }
     }
-    $pubKeyContent = Get-Content -Raw -Path $pub
-    # Remove any trailing newlines/whitespace but keep the key on a single line
-    return $pubKeyContent.Trim()
+    
+    if (-not (Test-Path $priv -PathType Leaf -ErrorAction SilentlyContinue) -or -not (Test-Path $pub -PathType Leaf -ErrorAction SilentlyContinue)) {
+        # ssh-keygen should already be verified at script start, but check again defensively
+        if (-not (Get-Command ssh-keygen -ErrorAction SilentlyContinue)) {
+            throw "ssh-keygen command not found. Please ensure OpenSSH is installed and available in your PATH."
+        }
+        
+        Write-Host "Generating SSH key (ed25519)..." -ForegroundColor Cyan
+        
+        $comment = "$env:USERNAME@aifabrix"
+        
+        try {
+            # Capture both stdout and stderr to check for errors
+            # Use Start-Process for better argument control on Windows, or fallback to direct call
+            $keygenSucceeded = $false
+            $lastError = $null
+            $output = $null
+            
+            # Method 1: Try direct call with -N "" (most common case)
+            try {
+                $output = & ssh-keygen -t ed25519 -f $priv -N '""' -C $comment 2>&1
+                $exitCode = $LASTEXITCODE
+                if ($exitCode -eq 0) {
+                    $keygenSucceeded = $true
+                } else {
+                    $outputStr = $output | Out-String
+                    $lastError = "Exit code: $exitCode"
+                    if ($outputStr) {
+                        $lastError += ", Output: $outputStr"
+                    }
+                }
+            } catch {
+                $lastError = "Exception: $($_.Exception.Message)"
+            }
+            
+            # Method 2: If "too many arguments" or other failure, try using Start-Process without -N
+            if (-not $keygenSucceeded -and ($lastError -match 'too many arguments' -or $lastError -match 'Too many arguments')) {
+                Write-Host "Retrying without passphrase parameter..." -ForegroundColor Yellow
+                try {
+                    # Try without -N parameter (some Windows versions don't accept empty -N)
+                    $processInfo = New-Object System.Diagnostics.ProcessStartInfo
+                    $processInfo.FileName = "ssh-keygen"
+                    $processInfo.Arguments = "-q -t ed25519 -f `"$priv`" -C `"$comment`""
+                    $processInfo.UseShellExecute = $false
+                    $processInfo.RedirectStandardOutput = $true
+                    $processInfo.RedirectStandardError = $true
+                    $processInfo.RedirectStandardInput = $true
+                    $processInfo.CreateNoWindow = $true
+                    
+                    $process = New-Object System.Diagnostics.Process
+                    $process.StartInfo = $processInfo
+                    $null = $process.Start()
+                    
+                    # Send two newlines (empty passphrase and confirmation)
+                    $process.StandardInput.WriteLine()
+                    $process.StandardInput.WriteLine()
+                    $process.StandardInput.Close()
+                    
+                    $stdout = $process.StandardOutput.ReadToEnd()
+                    $stderr = $process.StandardError.ReadToEnd()
+                    $process.WaitForExit()
+                    $exitCode = $process.ExitCode
+                    
+                    if ($exitCode -eq 0) {
+                        $keygenSucceeded = $true
+                    } else {
+                        $lastError = "Start-Process exit code: $exitCode"
+                        if ($stderr) { $lastError += ", Error: $stderr" }
+                        if ($stdout) { $lastError += ", Output: $stdout" }
+                    }
+                } catch {
+                    $lastError = "$lastError ; Start-Process exception: $($_.Exception.Message)"
+                }
+            }
+            
+            if (-not $keygenSucceeded) {
+                throw "ssh-keygen failed after multiple attempts. $lastError`n`nTroubleshooting: Ensure OpenSSH is properly installed. You may need to generate the key manually using: ssh-keygen -t ed25519 -f `"$priv`" -C `"$comment`""
+            }
+            
+            # Verify the key files were created
+            if (-not (Test-Path $pub -PathType Leaf -ErrorAction SilentlyContinue)) {
+                throw "SSH key generation appeared to succeed, but public key file was not created at $pub"
+            }
+            if (-not (Test-Path $priv -PathType Leaf -ErrorAction SilentlyContinue)) {
+                throw "SSH key generation appeared to succeed, but private key file was not created at $priv"
+            }
+        } catch {
+            $errorMsg = $_.Exception.Message
+            if ($errorMsg -match 'Too many arguments') {
+                throw "SSH key generation failed: Invalid arguments passed to ssh-keygen. This may indicate an issue with your OpenSSH installation. Error: $errorMsg"
+            }
+            throw "SSH key generation failed: $errorMsg"
+        }
+    }
+    
+    # Verify the public key file exists before reading
+    if (-not (Test-Path $pub -PathType Leaf -ErrorAction SilentlyContinue)) {
+        throw "SSH public key file not found at $pub. Please ensure the key was generated successfully."
+    }
+    
+    try {
+        $pubKeyContent = Get-Content -Raw -Path $pub
+        if ([string]::IsNullOrWhiteSpace($pubKeyContent)) {
+            throw "SSH public key file is empty at $pub"
+        }
+        # Remove any trailing newlines/whitespace but keep the key on a single line
+        return $pubKeyContent.Trim()
+    } catch {
+        throw "Failed to read SSH public key from $pub`: $($_.Exception.Message)"
+    }
 }
 
 function Add-SSHConfigEntry {
@@ -73,15 +200,29 @@ Host $Alias
 
 
 try {
+    # Check for required applications at the start
+    Write-Host "Checking for required applications..." -ForegroundColor Cyan
+    $opensshHint = "OpenSSH is required for SSH key generation and connections. On Windows 10/11, you can install it via: Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0"
+    Test-CommandAvailable -CommandName "ssh-keygen" -InstallationHint $opensshHint | Out-Null
+    Test-CommandAvailable -CommandName "ssh" -InstallationHint $opensshHint | Out-Null
+    Write-Host "Required applications found." -ForegroundColor Green
+    
     $DeveloperId = Read-ValueIfEmpty -Value $DeveloperId -Prompt "Enter developer ID (e.g., 01)"
     if ($DeveloperId -notmatch '^[0-9]{1,6}$') {
         throw "Invalid DeveloperId. Use digits only."
     }
+    
+    # Validate and generate SSH key BEFORE collecting PIN
+    # This prevents wasting a single-use PIN if key generation fails
+    Write-Host "`nValidating SSH key..." -ForegroundColor Cyan
+    $pubKey = Get-SSHPublicKey
+    Write-Host "SSH key ready." -ForegroundColor Green
+    
+    # Only collect PIN after we know we have a valid SSH key
     $Pin = Read-ValueIfEmpty -Value $Pin -Prompt "Enter PIN (6-8 digits)"
     if ($Pin -notmatch '^[0-9]{4,8}$') {
         throw "Invalid PIN."
     }
-    $pubKey = Get-SSHPublicKey
     
     # Optionally collect GitHub token for server-side SSH key setup
     if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
