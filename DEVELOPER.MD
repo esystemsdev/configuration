@@ -42,7 +42,27 @@ Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 
 ### Step 4: Connect after onboarding
 
-Once onboarding is complete, wait a few minutes for the Docker container to start up, then connect:
+Once onboarding is complete, wait a few minutes for the Docker container to start up, then connect via RDP:
+
+**Windows:**
+
+- Open Remote Desktop Connection
+- Enter server address: `dev.aifabrix:3389`
+- Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+
+**macOS:**
+
+- Install Microsoft Remote Desktop from App Store
+- Add new PC: `dev.aifabrix:3389`
+- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+
+**Linux:**
+
+- Install Remmina: `sudo apt install remmina`
+- Create new RDP connection to `dev.aifabrix:3389`
+- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+
+**Alternative: SSH Access (for terminal/automation)**
 
 ```powershell
 ssh dev<DeveloperId>.aifabrix
@@ -67,6 +87,36 @@ To connect to your developer container:
 4. **Clone repo or open existing folder**: Once connected, you can:
    - Clone a repository from your remote host
    - Open an existing folder on the remote host: select your working folder `/workspace/<your repo>`
+
+To use Cursor IDE:
+
+1. **Connect via RDP**: Follow Step 4 above to connect to your desktop session
+   - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed**
+   - You'll see the Xfce desktop environment
+
+2. **Understanding your environment:**
+   - **RDP session**: Runs on the host OS (Linux server)
+   - **Terminal**: When you open a terminal, you're automatically dropped into your Docker container
+   - **Files**: `/home/dev01` on host = `/workspace` in container (same files, automatically synced)
+
+3. **Launch Cursor** (choose one method):
+
+   **Method A: From Desktop (Recommended)**
+   - Click Applications menu → Development → Cursor
+   - Cursor runs on the host OS
+   - Open workspace: `/home/dev<DeveloperId>` (e.g., `/home/dev01`)
+   - All development tools are available via terminal in Cursor
+
+   **Method B: From Terminal**
+   - Open a terminal in RDP (you're automatically in your container)
+   - Run: `cursor`
+   - Cursor runs from within the container
+   - Open workspace: `/workspace` (same files as `/home/dev01`)
+
+4. **Using development tools:**
+   - When you open a terminal in Cursor, you're already in your container
+   - All tools are pre-installed: `node`, `pnpm`, `aifabrix`, `git`, etc.
+   - No need to run `docker exec` - you're already there!
 
 **First-time setup**: When installing for the first time as a developer:
 
