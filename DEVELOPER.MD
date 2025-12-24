@@ -125,11 +125,12 @@ To use Cursor IDE:
 
 ```bash
 git clone git@github.com:esystemsdev/aifabrix-miso.git
-git clone git@github.com:esystemsdev/aifabrix-dataplane.git
 git clone git@github.com:esystemsdev/aifabrix-miso-azure.git
+git clone git@github.com:esystemsdev/aifabrix-miso-backend.git
 git clone git@github.com:esystemsdev/aifabrix-miso-client.git
-git clone git@github.com:esystemsdev/aifabrix-d360.git
 git clone git@github.com:esystemsdev/aifabrix-miso-client-python.git
+git clone git@github.com:esystemsdev/aifabrix-dataplane.git
+git clone git@github.com:esystemsdev/aifabrix-d360.git
 git clone git@github.com:esystemsdev/aifabrix-core.git
 git clone git@github.com:esystemsdev/aifabrix-form-engine.git
 git clone git@github.com:esystemsdev/aifabrix-builder.git
