@@ -59,7 +59,10 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
 **Quick start:**
 
 - Open Remote Desktop Connection
-- Enter server address: `dev.aifabrix:3389`
+- Enter server address: `dev.aifabrix:<port>` where port = `3389 + (DeveloperId * 100)`
+  - Example: `dev01` uses port `3489` (3389 + 100)
+  - Example: `dev02` uses port `3589` (3389 + 200)
+  - Example: `dev03` uses port `3689` (3389 + 300)
 - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
 
 #### Option 2: SSH (Lightweight - Terminal Only)
@@ -183,16 +186,25 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
 
 ### Connecting to RDP
 
+Each developer has a unique RDP port calculated as: **3389 + (DeveloperId × 100)**
+
+**Port Examples:**
+
+- `dev01` → Port `3489` (3389 + 100)
+- `dev02` → Port `3589` (3389 + 200)
+- `dev03` → Port `3689` (3389 + 300)
+- `dev10` → Port `4389` (3389 + 1000)
+
 **Windows:**
 
 - Open Remote Desktop Connection
-- Enter server address: `dev.aifabrix:3389`
+- Enter server address: `dev.aifabrix:<your-port>` (use your calculated port from above)
 - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
 
 **macOS:**
 
 - Open Microsoft Remote Desktop
-- Add new PC: `dev.aifabrix:3389`
+- Add new PC: `dev.aifabrix:<your-port>` (use your calculated port from above)
 - Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
 
 ### Using Development Tools
