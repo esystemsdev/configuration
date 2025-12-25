@@ -1,21 +1,29 @@
-# Developer Onboarding (Windows)
+# Developer Onboarding
 
-This guide helps new Windows developers get access, set up tools, and onboard to AI Fabrix or Workato.
+This guide helps new developers get access, set up tools, and onboard to AI Fabrix or Workato.
+
+**⚠️ Important: You need eSystems Twingate activated before you can use any services!**
+
+**Platform-specific guides:**
+
+- [Windows](#windows-developer-onboarding) - Full support for RDP and SSH
+- [macOS](#macos-developer-onboarding) - RDP only (recommended for Mac users)
 
 ## 1) Get access
 
 - Request a developer account via Service Desk:  
   `https://esystem.atlassian.net/servicedesk/customer/portal/2/group/6/create/17`
-  - Choose “Dev – Workato” or “Dev – AI Fabrix” as appropriate.
+  - Choose "Dev – Workato" or "Dev – AI Fabrix" as appropriate.
 
-## 2) Install tools (Windows)
+---
 
-- Cursor editor: `https://cursor.com/download`
-- For AI Fabrix developers (optional here, required for local infra):
-  - Node.js 18+
-  - Docker Desktop
+## Windows Developer Onboarding
 
-## 3) Onboarding script (Windows PowerShell)
+**Note**: When using RDP, you do not need to install Cursor on your local Windows machine. Cursor is pre-installed in the RDP session and available after connecting.
+
+### 2) Onboarding script (Windows PowerShell)
+
+**Starting point**: Begin here to set up your developer account.
 
 ### Step 1: Download the script
 
@@ -40,29 +48,32 @@ Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 2. When prompted by the script, paste your GitHub token
 3. The script will automatically set up GitHub SSH key for server-side commits
 
-### Step 4: Connect after onboarding
+### Step 4: Connect after onboarding (Windows)
 
-Once onboarding is complete, wait a few minutes for the Docker container to start up, then connect via RDP:
+Once onboarding is complete, wait a few minutes for the Docker container to start up. You have two connection options:
 
-**Windows:**
+#### Option 1: RDP (Recommended - Full Development Power)
+
+See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
+
+**Quick start:**
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:3389`
 - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
 
-**macOS:**
+#### Option 2: SSH (Lightweight - Terminal Only)
 
-- Install Microsoft Remote Desktop from App Store
-- Add new PC: `dev.aifabrix:3389`
-- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+SSH provides terminal-only access, suitable for lightweight development tasks such as Workato SDK development or quick terminal operations.
 
-**Linux:**
+**Install tools for SSH (Windows):**
 
-- Install Remmina: `sudo apt install remmina`
-- Create new RDP connection to `dev.aifabrix:3389`
-- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+- Cursor editor: `https://cursor.com/download` (required for SSH via Cursor)
+- For AI Fabrix developers (optional here, required for local infra):
+  - Node.js 18+
+  - Docker Desktop
 
-**Alternative: SSH Access (for terminal/automation)**
+**Connect via SSH:**
 
 ```powershell
 ssh dev<DeveloperId>.aifabrix
@@ -74,11 +85,179 @@ For example, if your Developer ID is `01`:
 ssh dev01.aifabrix
 ```
 
-## 4) Cursor basics
+**Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
+
+---
+
+## macOS Developer Onboarding
+
+**Important**: macOS developers can only use RDP connection. SSH via Cursor is not supported on Mac.
+
+**Note**: When using RDP, you do not need to install Cursor on your local Mac. Cursor is pre-installed in the RDP session and available after connecting.
+
+### 2) Install tools (macOS)
+
+- Microsoft Remote Desktop: Install from [Mac App Store](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466)
+
+### 3) Onboarding (macOS)
+
+You need to run the onboarding script once to create your developer account and Docker container. You have two options:
+
+#### Option A: Use PowerShell Core (Recommended)
+
+1. **Install PowerShell Core**:
+
+   ```bash
+   brew install --cask powershell
+   ```
+
+2. **Download and run the onboarding script**:
+
+   ```bash
+   mkdir -p ~/Setup
+   curl -o ~/Setup/OnboardDeveloper.ps1 https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1
+   pwsh ~/Setup/OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId <DeveloperId>
+   ```
+
+   Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+
+3. **Register GitHub token** (optional):
+   - When prompted, paste your GitHub Personal Access Token
+   - The script will automatically set up GitHub SSH key for server-side commits
+
+#### Option B: Manual onboarding with curl
+
+If you prefer not to use PowerShell, you can manually call the API:
+
+1. **Generate SSH key** (if you don't have one):
+
+   ```bash
+   ssh-keygen -t ed25519 -C "your-email@example.com"
+   ```
+
+2. **Get your public key**:
+
+   ```bash
+   cat ~/.ssh/id_ed25519.pub
+   ```
+
+3. **Call the onboarding API**:
+
+   ```bash
+   curl -X POST http://dev.aifabrix:9999/api/claim \
+     -H "Content-Type: application/json" \
+     -d '{
+       "developerId": "<DeveloperId>",
+       "pin": "<YourPIN>",
+       "publicKey": "your-public-key-here"
+     }'
+   ```
+
+   Replace `<DeveloperId>` and `<YourPIN>` with your actual values, and `your-public-key-here` with the output from step 2.
+
+### Step 4: Connect via RDP (macOS)
+
+**Note**: RDP is the only supported connection method for macOS developers.
+
+See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
+
+**Quick start:**
+
+1. **Open Microsoft Remote Desktop** (installed in Step 2)
+2. **Add a new PC**:
+   - Click "Add PC" or the "+" button
+   - Enter PC name: `dev.aifabrix:3389`
+   - Click "Add"
+3. **Connect**:
+   - Double-click the new connection
+   - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+   - You'll see the Xfce desktop environment
+
+**Note**: The onboarding script creates your account and enables passwordless RDP authentication. After onboarding, you only need Microsoft Remote Desktop to connect - no other software is required on your Mac.
+
+---
+
+## 4) RDP Connection Guide
+
+**Applies to**: Windows and macOS developers using RDP.
+
+### Connecting to RDP
+
+**Windows:**
+
+- Open Remote Desktop Connection
+- Enter server address: `dev.aifabrix:3389`
+- Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+
+**macOS:**
+
+- Open Microsoft Remote Desktop
+- Add new PC: `dev.aifabrix:3389`
+- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+
+### Using Development Tools
+
+Once connected via RDP, you'll see the Xfce desktop environment:
+
+1. **Bottom menu bar (dock)**: Access development tools directly from the bottom menu bar:
+
+   - **Cursor** - Code editor (pre-installed)
+   - **Postman** - API testing tool (pre-installed)
+   - **Web browser** - For testing web applications
+
+2. **Understanding your environment:**
+   - **RDP session**: Runs on the host OS (Linux server)
+   - **Terminal**: When you open a terminal, you're automatically dropped into your Docker container
+   - **Files**: `/home/dev01` on host = `/workspace` in container (same files, automatically synced)
+
+3. **Launch Cursor**:
+   - Click **Cursor** icon in the bottom menu bar
+   - Open workspace: `/home/dev<DeveloperId>` (e.g., `/home/dev01`)
+   - All development tools are available via terminal in Cursor
+
+4. **Using development tools:**
+   - When you open a terminal in Cursor, you're already in your container
+   - All tools are pre-installed: `node`, `pnpm`, `aifabrix`, `git`, etc.
+   - No need to run `docker exec` - you're already there!
+
+### Keyring Password Setup
+
+**Note**: This setup is only required when using RDP.
+
+On first use, you'll be prompted to set a keyring password. This is a one-time setup:
+
+1. **First Launch**: When Chrome, Cursor, or other apps try to save passwords, you'll see "Unlock Keyring" dialog
+2. **Set Password**: Enter a password (can be same as your login password for convenience)
+3. **Confirm**: Click "Unlock"
+4. **Future Sessions**: You'll only need to unlock once per session
+
+**Security Note**: The keyring encrypts stored passwords. Setting a password is recommended for security.
+
+### First-time setup
+
+When installing for the first time as a developer:
+
+- Open `/workspace/` root folder (or `/home/dev<DeveloperId>` on the host)
+- Clone repositories: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
+
+---
+
+## 5) SSH Connection Guide (Windows Only)
+
+**Applies to**: Windows developers only. macOS developers should use RDP.
+
+### SSH + Cursor (Lightweight - Terminal Only)
+
+**Best for**: Lightweight development tasks such as Workato SDK development or quick terminal operations.
+
+**Install tools for SSH (Windows):**
+
+- Cursor editor: `https://cursor.com/download` (required for SSH via Cursor)
+- For AI Fabrix developers (optional here, required for local infra):
+  - Node.js 18+
+  - Docker Desktop
 
 ![Cursor SSH Connection](images/cursor-1.png)
-
-To connect to your developer container:
 
 1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen.
 2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix`) or enter `user@host` format.
@@ -88,40 +267,27 @@ To connect to your developer container:
    - Clone a repository from your remote host
    - Open an existing folder on the remote host: select your working folder `/workspace/<your repo>`
 
-To use Cursor IDE:
+### SSH: First-time setup
 
-1. **Connect via RDP**: Follow Step 4 above to connect to your desktop session
-   - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed**
-   - You'll see the Xfce desktop environment
-
-2. **Understanding your environment:**
-   - **RDP session**: Runs on the host OS (Linux server)
-   - **Terminal**: When you open a terminal, you're automatically dropped into your Docker container
-   - **Files**: `/home/dev01` on host = `/workspace` in container (same files, automatically synced)
-
-3. **Launch Cursor** (choose one method):
-
-   **Method A: From Desktop (Recommended)**
-   - Click Applications menu → Development → Cursor
-   - Cursor runs on the host OS
-   - Open workspace: `/home/dev<DeveloperId>` (e.g., `/home/dev01`)
-   - All development tools are available via terminal in Cursor
-
-   **Method B: From Terminal**
-   - Open a terminal in RDP (you're automatically in your container)
-   - Run: `cursor`
-   - Cursor runs from within the container
-   - Open workspace: `/workspace` (same files as `/home/dev01`)
-
-4. **Using development tools:**
-   - When you open a terminal in Cursor, you're already in your container
-   - All tools are pre-installed: `node`, `pnpm`, `aifabrix`, `git`, etc.
-   - No need to run `docker exec` - you're already there!
-
-**First-time setup**: When installing for the first time as a developer:
+When installing for the first time as a developer:
 
 - Open `/workspace/` root folder
-- Clone the following repositories:
+- Clone repositories: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
+
+---
+
+## 6) Git configuration
+
+Configure your Git identity:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "you@esystems.fi"
+```
+
+### Clone repositories
+
+When installing for the first time as a developer, clone the following repositories:
 
 ```bash
 git clone git@github.com:esystemsdev/aifabrix-miso.git
@@ -139,16 +305,7 @@ git clone git@github.com:esystemsdev/openwebui-template.git
 git clone git@github.com:esystemsdev/flowise-template.git
 ```
 
-## 5) Git configuration
-
-Configure your Git identity:
-
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "you@esystems.fi"
-```
-
-## 6) AI Fabrix developer basics
+## 7) AI Fabrix developer basics
 
 ### Step 1: Install Builder CLI
 
@@ -201,7 +358,7 @@ Open your web browser and verify the services are running.
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
-## 7) AI Fabrix Developer Workspace
+## 8) AI Fabrix Developer Workspace
 
 This is your workspace root inside the container: `/workspace`.
 
@@ -224,18 +381,18 @@ Notes:
 - Docker access is via `aifabrix-docker` inside this container.
 - Editors available: `vim`, `nano`.
 
-## 8) Workato developer basics
+## 9) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
 
-## 9) Security notes
+## 10) Security notes
 
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
 - Never share private keys. Public keys only are used during onboarding.
 
-## 10) Reference information
+## 11) Reference information
 
 ### Onboarding script details
 
@@ -250,7 +407,7 @@ Follow the internal guide for org access, environments, and tooling:
 **Script parameters:**
 
 | Parameter | Type | Required | Default | Description |
-|-----------|------|----------|---------|-------------|
+| --- | --- | --- | --- | --- |
 | `-Server` | string | No | `"dev.aifabrix"` | The development server hostname |
 | `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
 | `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
