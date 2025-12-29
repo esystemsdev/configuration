@@ -224,6 +224,65 @@ try {
         throw "Invalid PIN."
     }
     
+    # Collect password for RDP authentication (with confirmation)
+    Write-Host "`nPassword Setup (Required for RDP):" -ForegroundColor Cyan
+    Write-Host "You will need this password to connect via RDP (Remote Desktop)." -ForegroundColor Yellow
+    Write-Host "Password requirements:" -ForegroundColor Yellow
+    Write-Host "  - Minimum 8 characters" -ForegroundColor White
+    Write-Host "  - At least one uppercase letter" -ForegroundColor White
+    Write-Host "  - At least one lowercase letter" -ForegroundColor White
+    Write-Host "  - At least one number" -ForegroundColor White
+    
+    $password = ""
+    $passwordConfirm = ""
+    $maxAttempts = 3
+    $attempt = 0
+    
+    while ($attempt -lt $maxAttempts) {
+        $password = Read-ValueIfEmpty -Value "" -Prompt "Enter password" -Type "secure"
+        if ([string]::IsNullOrWhiteSpace($password)) {
+            Write-Host "Password cannot be empty." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        
+        # Validate password strength
+        if ($password.Length -lt 8) {
+            Write-Host "Password must be at least 8 characters long." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        if ($password -notmatch '[A-Z]') {
+            Write-Host "Password must contain at least one uppercase letter." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        if ($password -notmatch '[a-z]') {
+            Write-Host "Password must contain at least one lowercase letter." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        if ($password -notmatch '[0-9]') {
+            Write-Host "Password must contain at least one number." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        
+        # Confirm password
+        $passwordConfirm = Read-ValueIfEmpty -Value "" -Prompt "Confirm password" -Type "secure"
+        if ($password -ne $passwordConfirm) {
+            Write-Host "Passwords do not match. Please try again." -ForegroundColor Red
+            $attempt++
+            continue
+        }
+        
+        break
+    }
+    
+    if ($attempt -ge $maxAttempts) {
+        throw "Failed to set password after $maxAttempts attempts. Please run the script again."
+    }
+    
     # Optionally collect GitHub token for server-side SSH key setup
     if ([string]::IsNullOrWhiteSpace($GitHubToken)) {
         Write-Host "`nGitHub Setup (Optional):" -ForegroundColor Cyan
@@ -249,6 +308,7 @@ try {
         developerId = $DeveloperId
         pin         = $Pin
         publicKey   = $pubKey
+        password    = $password
     }
     if (-not [string]::IsNullOrWhiteSpace($GitHubToken)) {
         $body.githubToken = $GitHubToken

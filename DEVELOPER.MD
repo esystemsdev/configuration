@@ -42,6 +42,8 @@ powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server
 
 Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 
+**Note**: The script will prompt you to set a password for RDP authentication. This password will be used when connecting via RDP.
+
 ### Step 3: Register GitHub token
 
 1. Create a GitHub Personal Access Token (if you don't have one)
@@ -63,7 +65,7 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
   - Example: `dev01` uses port `3489` (3389 + 100)
   - Example: `dev02` uses port `3589` (3389 + 200)
   - Example: `dev03` uses port `3689` (3389 + 300)
-- Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+- Log in with username `dev<DeveloperId>` (e.g., `dev01`) and the password you set during onboarding
 
 #### Option 2: SSH (Lightweight - Terminal Only)
 
@@ -124,6 +126,8 @@ You need to run the onboarding script once to create your developer account and 
 
    Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 
+   **Note**: The script will prompt you to set a password for RDP authentication. This password will be used when connecting via RDP.
+
 3. **Register GitHub token** (optional):
    - When prompted, paste your GitHub Personal Access Token
    - The script will automatically set up GitHub SSH key for server-side commits
@@ -152,11 +156,12 @@ If you prefer not to use PowerShell, you can manually call the API:
      -d '{
        "developerId": "<DeveloperId>",
        "pin": "<YourPIN>",
+       "password": "<YourPassword>",
        "publicKey": "your-public-key-here"
      }'
    ```
 
-   Replace `<DeveloperId>` and `<YourPIN>` with your actual values, and `your-public-key-here` with the output from step 2.
+   Replace `<DeveloperId>`, `<YourPIN>`, and `<YourPassword>` with your actual values, and `your-public-key-here` with the output from step 2. The password will be used for RDP authentication.
 
 ### Step 4: Connect via RDP (macOS)
 
@@ -173,10 +178,10 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
    - Click "Add"
 3. **Connect**:
    - Double-click the new connection
-   - Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+   - Log in with username `dev<DeveloperId>` (e.g., `dev01`) and the password you set during onboarding
    - You'll see the Xfce desktop environment
 
-**Note**: The onboarding script creates your account and enables passwordless RDP authentication. After onboarding, you only need Microsoft Remote Desktop to connect - no other software is required on your Mac.
+**Note**: The onboarding script creates your account and sets your RDP password. After onboarding, you only need Microsoft Remote Desktop to connect - no other software is required on your Mac.
 
 ---
 
@@ -199,58 +204,53 @@ Each developer has a unique RDP port calculated as: **3389 + (DeveloperId × 100
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:<your-port>` (use your calculated port from above)
-- Log in with username `dev<DeveloperId>` (e.g., `dev01`) - **no password needed** (passwordless authentication enabled)
+- Log in with username `dev<DeveloperId>` (e.g., `dev01`) and the password you set during onboarding
 
 **macOS:**
 
 - Open Microsoft Remote Desktop
 - Add new PC: `dev.aifabrix:<your-port>` (use your calculated port from above)
-- Log in with username `dev<DeveloperId>` - **no password needed** (passwordless authentication enabled)
+- Log in with username `dev<DeveloperId>` and the password you set during onboarding
 
 ### Using Development Tools
 
 Once connected via RDP, you'll see the Xfce desktop environment:
 
-1. **Bottom menu bar (dock)**: Access development tools directly from the bottom menu bar:
+1. **Bottom menu bar (dock)**: Access basic tools from the bottom menu bar:
+
+   - **Terminal** - Command line interface
+   - **Web browser** - For testing web applications
+
+2. **Top menu - Applications > Development**: Access development tools from the top menu:
 
    - **Cursor** - Code editor (pre-installed)
    - **Postman** - API testing tool (pre-installed)
-   - **Web browser** - For testing web applications
 
-2. **Understanding your environment:**
+3. **Understanding your environment:**
    - **RDP session**: Runs on the host OS (Linux server)
    - **Terminal**: When you open a terminal, you're automatically dropped into your Docker container
    - **Files**: `/home/dev01` on host = `/workspace` in container (same files, automatically synced)
 
-3. **Launch Cursor**:
-   - Click **Cursor** icon in the bottom menu bar
-   - Open workspace: `/home/dev<DeveloperId>` (e.g., `/home/dev01`)
+4. **Launch Cursor**:
+   - Go to **Applications > Development > Cursor** from the top menu
+   - Open workspace: `/workspace`
+   - Go to the **Extensions** tab - you'll automatically be asked to install recommended extensions
+   - **GitHub login**: It's easier to use Cursor's HTTP GitHub login, or you can use terminal for Git operations
    - All development tools are available via terminal in Cursor
 
-4. **Using development tools:**
+5. **Using development tools:**
    - When you open a terminal in Cursor, you're already in your container
    - All tools are pre-installed: `node`, `pnpm`, `aifabrix`, `git`, etc.
    - No need to run `docker exec` - you're already there!
-
-### Keyring Password Setup
-
-**Note**: This setup is only required when using RDP.
-
-On first use, you'll be prompted to set a keyring password. This is a one-time setup:
-
-1. **First Launch**: When Chrome, Cursor, or other apps try to save passwords, you'll see "Unlock Keyring" dialog
-2. **Set Password**: Enter a password (can be same as your login password for convenience)
-3. **Confirm**: Click "Unlock"
-4. **Future Sessions**: You'll only need to unlock once per session
-
-**Security Note**: The keyring encrypts stored passwords. Setting a password is recommended for security.
 
 ### First-time setup
 
 When installing for the first time as a developer:
 
-- Open `/workspace/` root folder (or `/home/dev<DeveloperId>` on the host)
-- Clone repositories: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
+1. **Open Cursor** and open workspace: `/workspace`
+2. **Install extensions**: Go to the **Extensions** tab - you'll automatically be asked to install recommended extensions
+3. **Clone repositories**: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
+4. **Start coding**: Once repositories are cloned, you're ready to start coding!
 
 ---
 
@@ -411,7 +411,8 @@ Follow the internal guide for org access, environments, and tooling:
 **What the script does:**
 
 - Automatically generates SSH keys (ed25519) if they don't exist
-- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key using a temporary PIN
+- Prompts you to set a password for RDP authentication
+- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key and set your password using a temporary PIN
 - Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
 - Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
@@ -430,10 +431,11 @@ Follow the internal guide for org access, environments, and tooling:
 **Onboarding process:**
 
 1. The script prompts for your Developer ID and PIN if not provided as parameters
-2. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
-3. Sends your public SSH key to the onboarding API endpoint to claim access
-4. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
-5. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+2. Prompts you to set a password for RDP authentication (with confirmation)
+3. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
+4. Sends your public SSH key and password to the onboarding API endpoint to claim access
+5. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
+6. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
 
 **Troubleshooting:**
 
