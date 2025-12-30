@@ -233,7 +233,7 @@ disable cursor setting:i:0
 bitmapcachepersistenable:i:1
 full address:s:${Server}:${Port}
 use redirection server name:i:1
-alternate full address:s:${Username}@${Server}:${Port}
+alternate full address:s:${Username}-${Server}:${Port}
 audiomode:i:0
 redirectprinters:i:1
 redirectcomports:i:0
