@@ -59,13 +59,22 @@ Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.) a
 
 - Script prompts you to set a password for RDP authentication (with confirmation)
 - Sets your RDP password using the PIN code
+- Creates an RDP file on your Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp`
 - No SSH keys are generated
 - No GitHub setup required
-- Ready to connect via RDP immediately
+- Ready to connect via RDP immediately (double-click the RDP file)
 
 **Step 3: Connect via RDP**
 
 Once onboarding is complete, wait a few minutes for the Docker container to start up, then:
+
+**Option A: Use the RDP file (Easiest)**
+
+- An RDP file has been automatically created on your Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp`
+- Simply double-click the RDP file to connect
+- Enter your password when prompted
+
+**Option B: Manual connection**
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:<port>` where port = `3389 + (DeveloperId * 100)`
@@ -166,6 +175,7 @@ Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 - Registers your SSH public key
 - Sets up GitHub SSH key (if token provided)
 - Creates SSH config entry for easy access
+- Creates an RDP file on your Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp`
 - You can now use both SSH and RDP
 
 **Step 4: Connect after onboarding**
@@ -173,6 +183,14 @@ Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
 Once onboarding is complete, wait a few minutes for the Docker container to start up. You can use either connection method:
 
 **Option 1: RDP (Recommended - Full Development Power)**
+
+**Option A: Use the RDP file (Easiest)**
+
+- An RDP file has been automatically created on your Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp`
+- Simply double-click the RDP file to connect
+- Enter your password when prompted
+
+**Option B: Manual connection**
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:<port>` where port = `3389 + (DeveloperId * 100)`
@@ -201,6 +219,7 @@ See [SSH Connection Guide](#5-ssh-connection-guide-windows-only) for detailed in
 **Best for**: macOS users (RDP is the only supported connection method).
 
 **What you need:**
+
 - Developer ID and PIN (provided by admin)
 - Microsoft Remote Desktop: Install from [Mac App Store](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466)
 
@@ -291,6 +310,15 @@ Each developer has a unique RDP port calculated as: **3389 + (DeveloperId × 100
 - `dev10` → Port `4389` (3389 + 1000)
 
 **Windows:**
+
+**Option A: Use the RDP file (Easiest - Windows only)**
+
+- During onboarding, an RDP file is automatically created on your Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp`
+- Simply double-click the RDP file to connect
+- Enter your password when prompted
+- The RDP file contains all connection settings (server, port, username) - you only need to enter your password
+
+**Option B: Manual connection**
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:<your-port>` (use your calculated port from above)
@@ -507,6 +535,7 @@ Follow the internal guide for org access, environments, and tooling:
 - Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key and set your password using a temporary PIN
 - Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
 - Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
+- Creates an RDP file on Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp` (contains server, port, and username)
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
 
 **RDP-only mode (`-RDPOnly` flag):**
@@ -515,6 +544,7 @@ Follow the internal guide for org access, environments, and tooling:
 - Skips GitHub token collection
 - Only collects PIN and password (with validation)
 - Calls the onboarding service on `http://<server>:9999/api/set-password` to set your RDP password
+- Creates an RDP file on Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp` (contains server, port, and username)
 - Does not add SSH config entries
 - Perfect for users who only need RDP access (simplest onboarding method)
 - Also useful for changing your password after initial onboarding without going through the full setup process
@@ -540,15 +570,17 @@ Follow the internal guide for org access, environments, and tooling:
 3. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
 4. Sends your public SSH key and password to the onboarding API endpoint (`/api/claim`) to claim access
 5. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
-6. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+6. Creates an RDP file on Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp` (contains server, port, and username)
+7. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
 
 **RDP-only mode (`-RDPOnly` flag):**
 
 1. The script prompts for your Developer ID and PIN if not provided as parameters
 2. Prompts you to set a password for RDP authentication (with confirmation)
 3. Sends PIN and password to the password API endpoint (`/api/set-password`) to set your RDP password
-4. Shows simplified success message with RDP connection information
-5. Note: PIN is marked as used after successful password change (single-use)
+4. Creates an RDP file on Windows desktop: `dev.aifabrix - dev<DeveloperId>.rdp` (contains server, port, and username)
+5. Shows simplified success message with RDP connection information
+6. Note: PIN is marked as used after successful password change (single-use)
 
 **Troubleshooting:**
 

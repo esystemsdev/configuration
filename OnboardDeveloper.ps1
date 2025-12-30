@@ -199,6 +199,81 @@ Host $Alias
     Add-Content -Path $configPath -Value "`n$entry"
 }
 
+function New-RDPFile {
+    param(
+        [string]$Server,
+        [int]$Port,
+        [string]$Username,
+        [string]$DesktopPath
+    )
+    
+    $rdpContent = @"
+screen mode id:i:2
+use multimon:i:0
+desktopwidth:i:2560
+desktopheight:i:1440
+session bpp:i:32
+winposstr:s:0,1,125,21,2174,1104
+compression:i:1
+keyboardhook:i:2
+audiocapturemode:i:0
+videoplaybackmode:i:1
+connection type:i:7
+networkautodetect:i:1
+bandwidthautodetect:i:1
+displayconnectionbar:i:1
+enableworkspacereconnect:i:0
+disable wallpaper:i:0
+allow font smoothing:i:0
+allow desktop composition:i:0
+disable full window drag:i:1
+disable menu anims:i:1
+disable themes:i:0
+disable cursor setting:i:0
+bitmapcachepersistenable:i:1
+full address:s:${Server}:${Port}
+audiomode:i:0
+redirectprinters:i:1
+redirectcomports:i:0
+redirectsmartcards:i:1
+redirectclipboard:i:1
+redirectposdevices:i:0
+autoreconnection enabled:i:1
+authentication level:i:2
+prompt for credentials:i:0
+negotiate security layer:i:1
+remoteapplicationmode:i:0
+alternate shell:s:
+shell working directory:s:
+gatewayhostname:s:
+gatewayusagemethod:i:4
+gatewaycredentialssource:i:4
+gatewayprofileusagemethod:i:0
+promptcredentialonce:i:0
+gatewaybrokeringtype:i:0
+use redirection server name:i:0
+rdgiskdcproxy:i:0
+kdcproxyname:s:
+redirectwebauthn:i:1
+enablerdsaadauth:i:0
+remoteappmousemoveinject:i:1
+redirectlocation:i:0
+username:s:${Username}
+drivestoredirect:s:
+"@
+    
+    try {
+        $rdpFileName = "${Server} - ${Username}.rdp"
+        $rdpFilePath = Join-Path $DesktopPath $rdpFileName
+        $rdpContent | Out-File -FilePath $rdpFilePath -Encoding ASCII -NoNewline
+        Write-Host "RDP file created: $rdpFilePath" -ForegroundColor Green
+        return $rdpFilePath
+    } catch {
+        Write-Host "Warning: Failed to create RDP file: $($_.Exception.Message)" -ForegroundColor Yellow
+        return $null
+    }
+}
+
 
 try {
     $DeveloperId = Read-ValueIfEmpty -Value $DeveloperId -Prompt "Enter developer ID (e.g., 01)"
@@ -440,6 +515,19 @@ try {
     $rdpPort = 3389 + ([int]$DeveloperId * 100)
     $rdpAddress = "${Server}:${rdpPort}"
     
+    # Create RDP file on desktop
+    try {
+        $desktopPath = [Environment]::GetFolderPath("Desktop")
+        if (-not (Test-Path $desktopPath)) {
+            $desktopPath = Join-Path ([Environment]::GetFolderPath("UserProfile")) "Desktop"
+        }
+        if (Test-Path $desktopPath) {
+            $rdpFile = New-RDPFile -Server $Server -Port ([int]$rdpPort) -Username $username -DesktopPath $desktopPath
+        }
+    } catch {
+        Write-Host "Warning: Could not create RDP file on desktop: $($_.Exception.Message)" -ForegroundColor Yellow
+    }
+    
     # RDP-only mode: show simplified success message
     if ($RDPOnly) {
         Write-Host "`nPassword set successfully!" -ForegroundColor Green
@@ -448,6 +536,9 @@ try {
         Write-Host "  Username: $username" -ForegroundColor White
         Write-Host "  Password: [The password you just set]" -ForegroundColor White
         Write-Host "  Use Windows Remote Desktop Connection or mstsc.exe" -ForegroundColor White
+        if ($rdpFile) {
+            Write-Host "  RDP file created on desktop: ${Server} - ${username}.rdp" -ForegroundColor Green
+        }
         Write-Host "`nNote: The Docker container needs time to start up." -ForegroundColor Yellow
         Write-Host "Please wait a few minutes before connecting via RDP." -ForegroundColor Yellow
     } else {
@@ -475,6 +566,9 @@ try {
         Write-Host "    Username: $username" -ForegroundColor Gray
         Write-Host "    Password: [The password you just set]" -ForegroundColor Gray
         Write-Host "    Use Windows Remote Desktop Connection or mstsc.exe" -ForegroundColor Gray
+        if ($rdpFile) {
+            Write-Host "    RDP file created on desktop: ${Server} - ${username}.rdp" -ForegroundColor Green
+        }
     }
 } catch {
     $errorMessage = $_.Exception.Message
