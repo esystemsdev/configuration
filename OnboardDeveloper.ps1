@@ -436,12 +436,15 @@ try {
     }
 
     $username = "dev$DeveloperId"
+    # Calculate RDP port: 3389 + (DeveloperId * 100)
+    $rdpPort = 3389 + ([int]$DeveloperId * 100)
+    $rdpAddress = "${Server}:${rdpPort}"
     
     # RDP-only mode: show simplified success message
     if ($RDPOnly) {
         Write-Host "`nPassword set successfully!" -ForegroundColor Green
         Write-Host "`nRDP Connection Information:" -ForegroundColor Cyan
-        Write-Host "  Server: $Server" -ForegroundColor White
+        Write-Host "  Server: $rdpAddress" -ForegroundColor White
         Write-Host "  Username: $username" -ForegroundColor White
         Write-Host "  Password: [The password you just set]" -ForegroundColor White
         Write-Host "  Use Windows Remote Desktop Connection or mstsc.exe" -ForegroundColor White
@@ -468,7 +471,7 @@ try {
         Write-Host "    Command: ssh $hostAlias" -ForegroundColor Gray
         Write-Host "    Or via Cursor: Select '$hostAlias' when connecting via SSH" -ForegroundColor Gray
         Write-Host "  RDP (Remote Desktop):" -ForegroundColor White
-        Write-Host "    Server: $Server" -ForegroundColor Gray
+        Write-Host "    Server: $rdpAddress" -ForegroundColor Gray
         Write-Host "    Username: $username" -ForegroundColor Gray
         Write-Host "    Password: [The password you just set]" -ForegroundColor Gray
         Write-Host "    Use Windows Remote Desktop Connection or mstsc.exe" -ForegroundColor Gray
