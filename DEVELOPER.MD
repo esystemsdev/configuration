@@ -6,7 +6,7 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 **Platform-specific guides:**
 
-- [Windows](#windows-developer-onboarding) - Full support for RDP and SSH
+- [Windows](#windows-developer-onboarding) - Choose from RDP-only, SSH-only, or SSH+RDP
 - [macOS](#macos-developer-onboarding) - RDP only (recommended for Mac users)
 
 ## 1) Get access
@@ -21,44 +21,51 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 **Note**: When using RDP, you do not need to install Cursor on your local Windows machine. Cursor is pre-installed in the RDP session and available after connecting.
 
-### 2) Onboarding script (Windows PowerShell)
+### 2) Choose your onboarding method
 
-**Starting point**: Begin here to set up your developer account.
+Windows developers have three options for onboarding:
 
-### Step 1: Download the script
+1. **[RDP Only](#rdp-only-onboarding-windows)** - Simplest option, PIN + password only
+2. **[SSH Only](#ssh-only-onboarding-windows)** - Lightweight, terminal-only access
+3. **[SSH + RDP](#ssh--rdp-full-onboarding-windows)** - Full setup with both SSH and RDP access
+
+---
+
+### RDP Only Onboarding (Windows)
+
+**Best for**: Users who only need RDP access. Simplest and fastest onboarding method.
+
+**What you need:**
+
+- Developer ID and PIN (provided by admin)
+- No additional software required
+
+**Step 1: Download the script**
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
 ```
 
-### Step 2: Run the onboarding script
-
-Use the developer ID that was delivered to you:
+**Step 2: Run the onboarding script (RDP-only mode)**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId> -Password -Pin <YourPIN>
 ```
 
-Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.) and `<YourPIN>` with your PIN code.
 
-**Note**: The script will prompt you to set a password for RDP authentication. This password will be used when connecting via RDP.
+**What happens:**
 
-### Step 3: Register GitHub token
+- Script prompts you to set a password for RDP authentication (with confirmation)
+- Sets your RDP password using the PIN code
+- No SSH keys are generated
+- No GitHub setup required
+- Ready to connect via RDP immediately
 
-1. Create a GitHub Personal Access Token (if you don't have one)
-2. When prompted by the script, paste your GitHub token
-3. The script will automatically set up GitHub SSH key for server-side commits
+**Step 3: Connect via RDP**
 
-### Step 4: Connect after onboarding (Windows)
-
-Once onboarding is complete, wait a few minutes for the Docker container to start up. You have two connection options:
-
-#### Option 1: RDP (Recommended - Full Development Power)
-
-See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
-
-**Quick start:**
+Once onboarding is complete, wait a few minutes for the Docker container to start up, then:
 
 - Open Remote Desktop Connection
 - Enter server address: `dev.aifabrix:<port>` where port = `3389 + (DeveloperId * 100)`
@@ -67,30 +74,119 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
   - Example: `dev03` uses port `3689` (3389 + 300)
 - Log in with username `dev<DeveloperId>` (e.g., `dev01`) and the password you set during onboarding
 
-#### Option 2: SSH (Lightweight - Terminal Only)
+See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
 
-SSH provides terminal-only access, suitable for lightweight development tasks such as Workato SDK development or quick terminal operations.
+---
 
-**Install tools for SSH (Windows):**
+### SSH Only Onboarding (Windows)
 
+**Best for**: Lightweight development tasks, terminal-only access, Workato SDK development.
+
+**What you need:**
+
+- Developer ID and PIN (provided by admin)
 - Cursor editor: `https://cursor.com/download` (required for SSH via Cursor)
 - For AI Fabrix developers (optional here, required for local infra):
   - Node.js 18+
   - Docker Desktop
 
-**Connect via SSH:**
+**Step 1: Download the script**
+
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+```
+
+**Step 2: Run the onboarding script**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
+```
+
+Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+
+**What happens:**
+
+- Script generates SSH keys (ed25519) if they don't exist
+- Prompts you to set a password for RDP authentication (required even for SSH-only)
+- Registers your SSH public key
+- Optionally sets up GitHub SSH key (if you provide a GitHub token)
+- Creates SSH config entry for easy access
+
+**Step 3: Connect via SSH**
+
+Once onboarding is complete, wait a few minutes for the Docker container to start up, then:
+
+1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen
+2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix`) or enter `user@host` format
+3. **Automatic connection**: Cursor will automatically connect you to your developer container
+   - **Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
+
+See [SSH Connection Guide](#5-ssh-connection-guide-windows-only) for detailed instructions.
+
+---
+
+### SSH + RDP Full Onboarding (Windows)
+
+**Best for**: Full development power with both SSH and RDP access. Recommended for most developers.
+
+**What you need:**
+
+- Developer ID and PIN (provided by admin)
+- Cursor editor: `https://cursor.com/download` (for SSH via Cursor)
+- For AI Fabrix developers (optional here, required for local infra):
+  - Node.js 18+
+  - Docker Desktop
+
+**Step 1: Download the script**
+
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+```
+
+**Step 2: Run the onboarding script**
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
+```
+
+Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+
+**Step 3: Register GitHub token (optional)**
+
+1. Create a GitHub Personal Access Token (if you don't have one)
+2. When prompted by the script, paste your GitHub token
+3. The script will automatically set up GitHub SSH key for server-side commits
+
+**What happens:**
+
+- Script generates SSH keys (ed25519) if they don't exist
+- Prompts you to set a password for RDP authentication (with confirmation)
+- Registers your SSH public key
+- Sets up GitHub SSH key (if token provided)
+- Creates SSH config entry for easy access
+- You can now use both SSH and RDP
+
+**Step 4: Connect after onboarding**
+
+Once onboarding is complete, wait a few minutes for the Docker container to start up. You can use either connection method:
+
+**Option 1: RDP (Recommended - Full Development Power)**
+
+- Open Remote Desktop Connection
+- Enter server address: `dev.aifabrix:<port>` where port = `3389 + (DeveloperId * 100)`
+- Log in with username `dev<DeveloperId>` and your password
+
+See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
+
+**Option 2: SSH (Lightweight - Terminal Only)**
 
 ```powershell
 ssh dev<DeveloperId>.aifabrix
 ```
 
-For example, if your Developer ID is `01`:
-
-```powershell
-ssh dev01.aifabrix
-```
-
-**Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
+See [SSH Connection Guide](#5-ssh-connection-guide-windows-only) for detailed instructions.
 
 ---
 
@@ -100,15 +196,23 @@ ssh dev01.aifabrix
 
 **Note**: When using RDP, you do not need to install Cursor on your local Mac. Cursor is pre-installed in the RDP session and available after connecting.
 
-### 2) Install tools (macOS)
+### 2) RDP Only Onboarding (macOS)
 
+**Best for**: macOS users (RDP is the only supported connection method).
+
+**What you need:**
+- Developer ID and PIN (provided by admin)
 - Microsoft Remote Desktop: Install from [Mac App Store](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466)
 
-### 3) Onboarding (macOS)
+**Step 1: Install Microsoft Remote Desktop**
+
+Install from [Mac App Store](https://apps.apple.com/app/microsoft-remote-desktop/id1295203466)
+
+**Step 2: Onboarding (macOS)**
 
 You need to run the onboarding script once to create your developer account and Docker container. You have two options:
 
-#### Option A: Use PowerShell Core (Recommended)
+#### Option A: Use PowerShell Core with RDP-only mode (Recommended)
 
 1. **Install PowerShell Core**:
 
@@ -116,54 +220,40 @@ You need to run the onboarding script once to create your developer account and 
    brew install --cask powershell
    ```
 
-2. **Download and run the onboarding script**:
+2. **Download and run the onboarding script (RDP-only mode)**:
 
    ```bash
    mkdir -p ~/Setup
    curl -o ~/Setup/OnboardDeveloper.ps1 https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1
-   pwsh ~/Setup/OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId <DeveloperId>
+   pwsh ~/Setup/OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId <DeveloperId> -Password -Pin <YourPIN>
    ```
 
-   Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+   Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.) and `<YourPIN>` with your PIN code.
 
-   **Note**: The script will prompt you to set a password for RDP authentication. This password will be used when connecting via RDP.
+   **What happens:**
+   - Script prompts you to set a password for RDP authentication (with confirmation)
+   - Sets your RDP password using the PIN code
+   - No SSH keys are generated
+   - No GitHub setup required
+   - Ready to connect via RDP immediately
 
-3. **Register GitHub token** (optional):
-   - When prompted, paste your GitHub Personal Access Token
-   - The script will automatically set up GitHub SSH key for server-side commits
+#### Option B: Manual onboarding with curl (RDP-only)
 
-#### Option B: Manual onboarding with curl
+If you prefer not to use PowerShell, you can manually call the password API:
 
-If you prefer not to use PowerShell, you can manually call the API:
+```bash
+curl -X POST http://dev.aifabrix:9999/api/set-password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "developerId": "<DeveloperId>",
+    "pin": "<YourPIN>",
+    "password": "<YourPassword>"
+  }'
+```
 
-1. **Generate SSH key** (if you don't have one):
+Replace `<DeveloperId>`, `<YourPIN>`, and `<YourPassword>` with your actual values. The password must be at least 8 characters and contain uppercase, lowercase, and number.
 
-   ```bash
-   ssh-keygen -t ed25519 -C "your-email@example.com"
-   ```
-
-2. **Get your public key**:
-
-   ```bash
-   cat ~/.ssh/id_ed25519.pub
-   ```
-
-3. **Call the onboarding API**:
-
-   ```bash
-   curl -X POST http://dev.aifabrix:9999/api/claim \
-     -H "Content-Type: application/json" \
-     -d '{
-       "developerId": "<DeveloperId>",
-       "pin": "<YourPIN>",
-       "password": "<YourPassword>",
-       "publicKey": "your-public-key-here"
-     }'
-   ```
-
-   Replace `<DeveloperId>`, `<YourPIN>`, and `<YourPassword>` with your actual values, and `your-public-key-here` with the output from step 2. The password will be used for RDP authentication.
-
-### Step 4: Connect via RDP (macOS)
+**Step 3: Connect via RDP (macOS)**
 
 **Note**: RDP is the only supported connection method for macOS developers.
 
@@ -181,7 +271,7 @@ See [RDP Connection Guide](#4-rdp-connection-guide) for detailed instructions.
    - Log in with username `dev<DeveloperId>` (e.g., `dev01`) and the password you set during onboarding
    - You'll see the Xfce desktop environment
 
-**Note**: The onboarding script creates your account and sets your RDP password. After onboarding, you only need Microsoft Remote Desktop to connect - no other software is required on your Mac.
+**Note**: The onboarding script sets your RDP password. After onboarding, you only need Microsoft Remote Desktop to connect - no other software is required on your Mac.
 
 ---
 
@@ -410,12 +500,24 @@ Follow the internal guide for org access, environments, and tooling:
 
 **What the script does:**
 
+**Full onboarding mode (default):**
+
 - Automatically generates SSH keys (ed25519) if they don't exist
 - Prompts you to set a password for RDP authentication
 - Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key and set your password using a temporary PIN
 - Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
 - Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
+
+**RDP-only mode (`-Password` flag):**
+
+- Skips SSH key generation and validation
+- Skips GitHub token collection
+- Only collects PIN and password (with validation)
+- Calls the onboarding service on `http://<server>:9999/api/set-password` to set your RDP password
+- Does not add SSH config entries
+- Perfect for users who only need RDP access (simplest onboarding method)
+- Also useful for changing your password after initial onboarding without going through the full setup process
 
 **Script parameters:**
 
@@ -425,17 +527,28 @@ Follow the internal guide for org access, environments, and tooling:
 | `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
 | `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
 | `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
+| `-Password` | switch | No | - | Password-only mode: Sets/changes RDP password without SSH key generation or GitHub setup. Requires `-Pin` parameter. |
 
 *Required but can be provided interactively if not specified as parameters.
 
 **Onboarding process:**
 
+**Full onboarding (default):**
+
 1. The script prompts for your Developer ID and PIN if not provided as parameters
 2. Prompts you to set a password for RDP authentication (with confirmation)
 3. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
-4. Sends your public SSH key and password to the onboarding API endpoint to claim access
+4. Sends your public SSH key and password to the onboarding API endpoint (`/api/claim`) to claim access
 5. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
 6. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+
+**RDP-only mode (`-Password` flag):**
+
+1. The script prompts for your Developer ID and PIN if not provided as parameters
+2. Prompts you to set a password for RDP authentication (with confirmation)
+3. Sends PIN and password to the password API endpoint (`/api/set-password`) to set your RDP password
+4. Shows simplified success message with RDP connection information
+5. Note: PIN is marked as used after successful password change (single-use)
 
 **Troubleshooting:**
 
@@ -445,3 +558,4 @@ Follow the internal guide for org access, environments, and tooling:
 - **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
 - **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
 - **If the SSH test fails**, run once to trust the host key.
+- **Password change failed**: If using `-Password` flag, ensure your PIN is valid and hasn't been used. PINs are single-use - if you've already used your PIN, request a new one from the admin.
