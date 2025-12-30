@@ -509,7 +509,7 @@ Follow the internal guide for org access, environments, and tooling:
 - Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
 - Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
 
-**RDP-only mode (`-RDPOnly` or `-Password` flag):**
+**RDP-only mode (`-RDPOnly` flag):**
 
 - Skips SSH key generation and validation
 - Skips GitHub token collection
@@ -519,8 +519,6 @@ Follow the internal guide for org access, environments, and tooling:
 - Perfect for users who only need RDP access (simplest onboarding method)
 - Also useful for changing your password after initial onboarding without going through the full setup process
 
-**Important**: Use `-RDPOnly` instead of `-Password` when specifying `-Pin` to avoid parameter name conflicts. The `-Password` parameter is available as an alias for backward compatibility.
-
 **Script parameters:**
 
 | Parameter | Type | Required | Default | Description |
@@ -529,8 +527,7 @@ Follow the internal guide for org access, environments, and tooling:
 | `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
 | `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
 | `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
-| `-RDPOnly` | switch | No | - | RDP-only mode: Sets/changes RDP password without SSH key generation or GitHub setup. Requires `-Pin` parameter. Use `-RDPOnly` instead of `-Password` to avoid conflict with `-Pin`. |
-| `-Password` | switch | No | - | Alias for `-RDPOnly`. Use `-RDPOnly` to avoid conflict with `-Pin` parameter. |
+| `-RDPOnly` | switch | No | - | RDP-only mode: Sets/changes RDP password without SSH key generation or GitHub setup. Requires `-Pin` parameter. |
 
 *Required but can be provided interactively if not specified as parameters.
 
@@ -545,15 +542,13 @@ Follow the internal guide for org access, environments, and tooling:
 5. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
 6. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
 
-**RDP-only mode (`-RDPOnly` or `-Password` flag):**
+**RDP-only mode (`-RDPOnly` flag):**
 
 1. The script prompts for your Developer ID and PIN if not provided as parameters
 2. Prompts you to set a password for RDP authentication (with confirmation)
 3. Sends PIN and password to the password API endpoint (`/api/set-password`) to set your RDP password
 4. Shows simplified success message with RDP connection information
 5. Note: PIN is marked as used after successful password change (single-use)
-
-**Important**: Use `-RDPOnly` instead of `-Password` when specifying `-Pin` to avoid parameter name conflicts. The `-Password` parameter is available as an alias for backward compatibility.
 
 **Troubleshooting:**
 
@@ -563,5 +558,4 @@ Follow the internal guide for org access, environments, and tooling:
 - **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
 - **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
 - **If the SSH test fails**, run once to trust the host key.
-- **Password change failed**: If using `-RDPOnly` or `-Password` flag, ensure your PIN is valid and hasn't been used. PINs are single-use - if you've already used your PIN, request a new one from the admin.
-- **Parameter conflict error**: If you see an error about "Cannot convert value to SwitchParameter" when using `-Pin`, use `-RDPOnly` instead of `-Password` to avoid the parameter name conflict.
+- **Password change failed**: If using `-RDPOnly` flag, ensure your PIN is valid and hasn't been used. PINs are single-use - if you've already used your PIN, request a new one from the admin.
