@@ -3,7 +3,9 @@ Param(
     [string]$DeveloperId,
     [string]$Pin,
     [string]$GitHubToken,
-    [switch]$Password
+    [switch]$RDPOnly,
+    [Alias("Password")]
+    [switch]$PasswordOnly
 )
 
 function Test-CommandAvailable {
@@ -206,8 +208,8 @@ try {
         throw "Invalid DeveloperId. Use digits only."
     }
     
-    # Password-only mode: skip SSH key generation and GitHub token
-    if ($Password) {
+    # RDP-only mode: skip SSH key generation and GitHub token
+    if ($RDPOnly -or $PasswordOnly) {
         Write-Host "Password-only mode: Setting password via PIN code." -ForegroundColor Cyan
         $Pin = Read-ValueIfEmpty -Value $Pin -Prompt "Enter PIN (4-8 digits)"
         if ($Pin -notmatch '^[0-9]{4,8}$') {
@@ -293,8 +295,8 @@ try {
         throw "Failed to set password after $maxAttempts attempts. Please run the script again."
     }
     
-    # Password-only mode: call /api/set-password endpoint
-    if ($Password) {
+    # RDP-only mode: call /api/set-password endpoint
+    if ($RDPOnly -or $PasswordOnly) {
         $body = @{
             developerId = $DeveloperId
             pin         = $Pin
@@ -428,7 +430,7 @@ try {
     }
 
     if (-not $response.ok) {
-        if ($Password) {
+        if ($RDPOnly -or $PasswordOnly) {
             throw "Password change failed: $($response | ConvertTo-Json -Compress)"
         } else {
             throw "Claim failed: $($response | ConvertTo-Json -Compress)"
@@ -437,8 +439,8 @@ try {
 
     $username = "dev$DeveloperId"
     
-    # Password-only mode: show simplified success message
-    if ($Password) {
+    # RDP-only mode: show simplified success message
+    if ($RDPOnly -or $PasswordOnly) {
         Write-Host "`nPassword set successfully!" -ForegroundColor Green
         Write-Host "`nRDP Connection Information:" -ForegroundColor Cyan
         Write-Host "  Server: $Server" -ForegroundColor White
