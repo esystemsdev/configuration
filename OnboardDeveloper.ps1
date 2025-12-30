@@ -232,6 +232,8 @@ disable themes:i:0
 disable cursor setting:i:0
 bitmapcachepersistenable:i:1
 full address:s:${Server}:${Port}
+use redirection server name:i:1
+alternate full address:s:${Username}@${Server}:${Port}
 audiomode:i:0
 redirectprinters:i:1
 redirectcomports:i:0
@@ -251,7 +253,6 @@ gatewaycredentialssource:i:4
 gatewayprofileusagemethod:i:0
 promptcredentialonce:i:0
 gatewaybrokeringtype:i:0
-use redirection server name:i:0
 rdgiskdcproxy:i:0
 kdcproxyname:s:
 redirectwebauthn:i:1
