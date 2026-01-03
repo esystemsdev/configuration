@@ -411,8 +411,8 @@ When installing for the first time as a developer:
 Configure your Git identity:
 
 ```bash
-git config --global user.name "Your Name"
-git config --global user.email "you@esystems.fi"
+git config --global user.name
+git config --global user.email
 ```
 
 ### Clone repositories
