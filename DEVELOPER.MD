@@ -339,10 +339,11 @@ Once connected via RDP, you'll see the Xfce desktop environment:
    - **Terminal** - Command line interface
    - **Web browser** - For testing web applications
 
-2. **Top menu - Applications > Development**: Access development tools from the top menu:
+2. **Top menu - Applications > Development and Internet**: Access development tools from the top menu:
 
-   - **Cursor** - Code editor (pre-installed)
-   - **Postman** - API testing tool (pre-installed)
+   - **Cursor** - Code editor (pre-installed, auto-updates nightly if closed)
+   - **Postman** - API testing tool (pre-installed, auto-updates nightly if closed)
+   - **Chrome** - Web browser (pre-installed, auto-updates nightly if closed)
 
 3. **Understanding your environment:**
    - **RDP session**: Runs on the host OS (Linux server)
@@ -367,8 +368,17 @@ When installing for the first time as a developer:
 
 1. **Open Cursor** and open workspace: `/workspace`
 2. **Install extensions**: Go to the **Extensions** tab - you'll automatically be asked to install recommended extensions
-3. **Clone repositories**: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
-4. **Start coding**: Once repositories are cloned, you're ready to start coding!
+3. **Activate multiple keyboard layout** (optional):
+   - Open **Settings → Keyboard → Layout**
+   - Set **"User system defaults"** to passive
+   - Set **"Change layout option"** to `Ctrl + Space`
+   - Save changes and close
+   - You can now change your layout with `Ctrl+Space`
+
+   ![Keyboard Layout Settings](images/keyboard.jpg)
+
+4. **Clone repositories**: See [Git configuration](#6-git-configuration) section below for repository cloning instructions
+5. **Start coding**: Once repositories are cloned, you're ready to start coding!
 
 ---
 
