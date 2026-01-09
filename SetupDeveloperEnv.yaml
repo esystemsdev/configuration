@@ -140,7 +140,7 @@ applications:
 
   - name: Cursor
     group: "Development"
-    url: "https://api2.cursor.sh/updates/download/golden/win32-x64/cursor/2.0"
+    url: "https://api2.cursor.sh/updates/download/golden/win32-x64/cursor/latest"
     silentArguments: "/SILENT"
     programCheck: "cursor\\Cursor.exe"
  
