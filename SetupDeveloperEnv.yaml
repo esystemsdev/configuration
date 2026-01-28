@@ -28,7 +28,7 @@ applications:
     install: true
     url: "https://update.code.visualstudio.com/latest/win32-x64/stable"
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
-    programCheck: "Programs\\Microsoft VS Code\\Code.exe"
+    programCheck: "Microsoft VS Code\\Code.exe"
     commandCheck: code
 
   - name: Node.js
