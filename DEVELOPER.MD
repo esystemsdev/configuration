@@ -31,6 +31,8 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 **Step 1: Download the script**
 
+Run the commands below on a terminal - you can use Cursor's terminal for that, for instance.
+
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
 Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
