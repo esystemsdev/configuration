@@ -65,7 +65,30 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
 ### Initial Developer Computer Setup - macOS
 
-The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, install required tools manually (e.g. [Homebrew](https://brew.sh): `brew install git node`), then use the shell script for Git workspace and npm packages.
+The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, install tools manually (e.g. via [Homebrew](https://brew.sh)), then use the shell script for Git workspace and npm packages.
+
+**Equivalent apps on macOS** (install via [Homebrew](https://brew.sh) where applicable):
+
+| Windows (Development group) | macOS install |
+|----------------------------|---------------|
+| Cursor | `brew install --cask cursor` |
+| Git | Xcode Command Line Tools or `brew install git` |
+| GitHub CLI | `brew install gh` |
+| Node.js | `brew install node` |
+| Twingate | `brew install --cask twingate` or [twingate.com](https://www.twingate.com/download/) |
+| 7-Zip | Built-in Archive Utility, or `brew install --cask the-unarchiver` / `brew install p7zip` |
+| Slack | `brew install --cask slack` |
+| Google Chrome | `brew install --cask google-chrome` |
+| Postman | `brew install --cask postman` |
+| PowerShell | `brew install --cask powershell` |
+
+| Windows (Local Dev group) | macOS install |
+|---------------------------|---------------|
+| Docker | `brew install --cask docker` |
+| VS Code | `brew install --cask visual-studio-code` (extensions: install from VS Code or see `SetupDeveloperEnv.yaml` vscodeExtensions) |
+| Python | `brew install python@3.11` |
+| Ruby | Built-in or `brew install ruby` |
+| JDK | `brew install openjdk@21` or `brew install --cask oracle-jdk` |
 
 1. **Install Git and Node.js** (if not already installed):
    - **Option A:** [Xcode Command Line Tools](https://developer.apple.com/xcode/) for Git, then [Node.js](https://nodejs.org/) or `brew install node`
