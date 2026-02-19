@@ -7,7 +7,7 @@ applications:
     commandCheck: docker
 
   - name: Git
-    group: "Local Dev"
+    group: "Development"
     url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
@@ -15,7 +15,7 @@ applications:
     environmentVariable : true
 
   - name: GitHub CLI
-    group: "Local Dev"
+    group: "Development"
     url: "https://github.com/cli/cli/releases/download/v2.78.0/gh_2.78.0_windows_amd64.msi"
     installer: "GitHub CLI.msi"
     programCheck: "GitHub CLI\\gh.exe"
@@ -32,7 +32,7 @@ applications:
     commandCheck: code
 
   - name: Node.js
-    group: "Local Dev"
+    group: "Development"
     url: "https://nodejs.org/dist/v22.19.0/node-v22.19.0-x64.msi"
     installer: "nodejs.msi"
     programCheck: "nodejs\\node.exe"
