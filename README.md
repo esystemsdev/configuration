@@ -63,6 +63,8 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
      powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
      ```
 
+5. **Authenticate with GitHub CLI** (optional): In PowerShell, run `gh auth login` to sign in to GitHub for CLI operations (e.g. cloning, PRs).
+
 ### Initial Developer Computer Setup - macOS
 
 The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, install tools manually (e.g. via [Homebrew](https://brew.sh)), then use the shell script for Git workspace and npm packages.
@@ -109,7 +111,9 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
    ```
    Optional: override defaults with env vars, e.g. `GIT_FOLDER=$HOME/git ORGANIZATION=esystemsdev REPOSITORIES=configuration,aifabrix-training PACKAGES=@aifabrix/builder ./SetupGitEnv.sh`
 
-4. **Remote development onboarding** uses the same commands as Windows (see below); `aifabrix dev init` works on macOS.
+4. **Authenticate with GitHub CLI** (optional): In Terminal, run `gh auth login` to sign in to GitHub for CLI operations (e.g. cloning, PRs).
+
+5. **Remote development onboarding** uses the same commands as Windows (see below); `aifabrix dev init` works on macOS.
 
 ## Repository Contents
 
