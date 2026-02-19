@@ -1,8 +1,8 @@
 # Define the directories
 $gitFolder      = "C:\git"
 $organization   = "esystemsdev"
-$repositories   = "configuration,aifabrix-training,"  # Comma-separated list of repositories
-$packages       = ""  # Comma-separated list of npm packages
+$repositories   = "configuration,aifabrix-training"  # Comma-separated list of repositories
+$packages       = "@aifabrix/builder"  # Comma-separated list of npm packages
 
 $orgFolder = "$gitFolder\$organization"
 

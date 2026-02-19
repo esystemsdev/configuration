@@ -4,7 +4,7 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
 ## Prerequisites
 
-### Initial Developer Computer Setup
+### Initial Developer Computer Setup - Windows
 
 1. **Download the Setup Script to C:\Setup folder**:
    - **Download all files at once** (recommended):
@@ -12,23 +12,12 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
      ```powershell
      New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
      $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-     $files = @("OnboardDeveloper.ps1", "SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1")
+     $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1")
      foreach ($file in $files) {
          Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
      }
      ```
 
-   - **Or download files individually**:
-   - Download the [OnboardDeveloper.ps1](https://github.com/esystemsdev/configuration/blob/main/OnboardDeveloper.ps1) script from GitHub:
-
-     ```powershell
-     New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-     Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
-     ```
-
-   - Download the [SetupDeveloperEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.ps1) script from GitHub.
-   - Download the [SetupDeveloperEnv.yaml](https://github.com/esystemsdev/configuration/blob/main/SetupDeveloperEnv.yaml) script from GitHub.
-   - Download the [SetupGitEnv.ps1](https://github.com/esystemsdev/configuration/blob/main/SetupGitEnv.ps1) script from GitHub.
 2. **Run the Script**:
    - Run the script with administrator rights. Open PowerShell as an administrator and navigate to the location of the script.
    - Execute the script:
@@ -43,6 +32,9 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
    **Development Group:**
    - **Cursor**: AI-powered code editor
+   - **Git**: Version control system
+   - **GitHub CLI**: Command-line interface for GitHub
+   - **Node.js**: JavaScript runtime and package manager
    - **Twingate**: Secure remote access tool
    - **7-Zip**: File archiver
    - **Slack**: Communication platform
@@ -53,12 +45,9 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
    **Local Dev Group:**
    - **Docker**: Containerization platform
    - **Visual Studio Code (VS Code)**: Code editor with essential extensions (ESLint, GitLens, Prettier, GitHub Copilot, Docker, Python, PowerShell, and more)
-   - **Node.js**: JavaScript runtime and package manager
    - **Python**: Programming language
-   - **JDK (Java Development Kit)**: Development environment for building applications using Java
-   - **Git**: Version control system
-   - **GitHub CLI**: Command-line interface for GitHub
    - **Ruby**: Programming language with development kit
+   - **JDK (Java Development Kit)**: Development environment for building applications using Java
 
    **Database Group:**
    - **pgAdmin 4**: PostgreSQL management tool
@@ -74,207 +63,70 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
      powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
      ```
 
+### Initial Developer Computer Setup - macOS
+
+The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, install required tools manually (e.g. [Homebrew](https://brew.sh): `brew install git node`), then use the shell script for Git workspace and npm packages.
+
+1. **Install Git and Node.js** (if not already installed):
+   - **Option A:** [Xcode Command Line Tools](https://developer.apple.com/xcode/) for Git, then [Node.js](https://nodejs.org/) or `brew install node`
+   - **Option B:** `brew install git node`
+
+2. **Get the setup script** (clone this repo or download the file):
+   ```bash
+   mkdir -p ~/git/esystemsdev
+   cd ~/git/esystemsdev
+   git clone https://github.com/esystemsdev/configuration.git
+   cd configuration
+   ```
+
+3. **Run the Git/env setup script** (creates `~/git/esystemsdev`, clones repos, installs global npm packages such as `@aifabrix/builder`):
+   ```bash
+   chmod +x SetupGitEnv.sh
+   ./SetupGitEnv.sh
+   ```
+   Optional: override defaults with env vars, e.g. `GIT_FOLDER=$HOME/git ORGANIZATION=esystemsdev REPOSITORIES=configuration,aifabrix-training PACKAGES=@aifabrix/builder ./SetupGitEnv.sh`
+
+4. **Remote development onboarding** uses the same commands as Windows (see below); `aifabrix dev init` works on macOS.
+
 ## Repository Contents
 
-### 1. `OnboardDeveloper.ps1`
+- **SetupGitEnv.ps1** – Windows: creates `C:\git\esystemsdev`, clones repos, installs global npm packages.
+- **SetupGitEnv.sh** – macOS/Unix: creates `~/git/esystemsdev`, clones same repos, installs same npm packages; use for Mac onboarding.
 
-This script automates the onboarding process for developers by setting up SSH access to development servers. It generates SSH keys, claims access through an API endpoint, and configures SSH settings for seamless connectivity.
+### 1. Developer onboarding (remote development)
 
-**Quick Download:**
+One-time setup for remote development uses the **aifabrix** CLI: it issues a client certificate (mTLS), fetches server settings, and registers your SSH keys so Mutagen sync works without a password. Requires the [aifabrix-builder](https://github.com/esystemsdev/aifabrix-builder) CLI (`npm install -g @aifabrix/builder`) and a Builder Server URL plus a one-time PIN from your admin.
 
-```powershell
-New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+**Usage (aifabrix dev init):**
+
+```bash
+# One-time onboarding with Builder Server URL and PIN
+aifabrix dev init --developer-id 01 --server https://builder01.aifabrix.dev --pin 123456
+
+# Interactive (will prompt for developer-id, server, pin if omitted)
+aifabrix dev init
 ```
 
-**Features:**
+**Options:**
 
-- Automatically generates SSH keys (ed25519) if they don't exist.
-- Claims developer access via API endpoint with developer ID and PIN.
-- Configures SSH config entries for easy server access.
-- Optionally sets up GitHub SSH key for server-side commits.
-
-**Usage:**
-
-```powershell
-# Run the script with your user account
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1"
-
-# Or specify parameters directly
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -DeveloperId "01" -Pin "123456"
-
-# Optionally specify a different server
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server "dev.aifabrix" -DeveloperId "01" -Pin "123456"
-```
-
-**Parameters:**
-
-- `-Server` (optional): The development server hostname. Defaults to `"dev.aifabrix"`.
-- `-DeveloperId` (optional): Your developer ID (1-6 digits). Will be prompted if not provided.
-- `-Pin` (optional): Your PIN (4-8 digits). Will be prompted if not provided.
-- `-GitHubToken` (optional): GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided.
+- `--developer-id <id>` – Developer ID (e.g. `01`).
+- `--server <url>` – Builder Server base URL (e.g. `https://builder01.aifabrix.dev`).
+- `--pin <pin>` – One-time PIN for onboarding (from your admin).
 
 **Process:**
 
-1. The script will prompt for your Developer ID and PIN if not provided as parameters.
-2. It checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed.
-3. Your public SSH key is sent to the onboarding API endpoint to claim access.
-4. An SSH config entry is created for easy access using `ssh dev<DeveloperId>.<domain>`.
-5. Optionally, you can provide a GitHub Personal Access Token to enable server-side commits to GitHub repositories.
+1. Issue or use an existing client certificate (mTLS for dev APIs).
+2. GET `/api/dev/settings` (cert-authenticated) to receive sync and Docker parameters.
+3. POST SSH keys so Mutagen can sync without a password prompt.
 
-**After Onboarding:**
+**After onboarding:**
 
-Once onboarding is complete, you can connect to the development server using:
+- Config is written to `~/.aifabrix/config.yaml` (e.g. `remote-server`, `docker-endpoint`, `sync-ssh-host`, `sync-ssh-user`).
+- To refresh settings or renew the certificate: `aifabrix dev refresh` (use `aifabrix dev refresh --cert` to force certificate refresh).
+- See [Developer Isolation Commands](https://github.com/esystemsdev/aifabrix-builder/blob/2.41.0/docs/commands/developer-isolation.md) for `dev refresh`, `dev config`, `dev down`, and related commands.
 
-```powershell
-ssh dev<DeveloperId>.<domain>
-```
+**macOS validation:** The onboarding flow is validated for macOS: use [Initial Developer Computer Setup - macOS](#initial-developer-computer-setup---macos) (Git, Node, `SetupGitEnv.sh`), then run `aifabrix dev init` as above. The same `~/.aifabrix/config.yaml` and CLI commands apply on Windows and macOS.
 
-For example, if your Developer ID is `01` and the server is `dev.aifabrix`, you would use:
-
-```powershell
-ssh dev01.aifabrix
-```
-
-**Note:** SSH connects directly to your Docker container, which needs time to start up. Please wait a few minutes after onboarding before connecting via SSH or Cursor.
-
-### 2. `SetupDeveloperEnv.ps1`
-
-This PowerShell script automates the installation of essential tools and dependencies required for development. It reads configuration data from `SetupDeveloperEnv.yaml` and installs the necessary software, ensuring that your development environment is fully equipped.
-
-**Features:**
-
-- Installs tools organized by groups: Development, Local Dev, Database, and Development OutSystems.
-- Verifies if tools are already installed and skips reinstallation if unnecessary.
-- Allows the user to choose which groups of applications to install, with a default installation of the "Development" group.
-- Supports an optional `-groups` parameter to automate the selection process, allowing for a faster setup without user prompts.
-- Automatically sets environment variables for installed applications if needed.
-- Installs VS Code with essential extensions for development.
-- Configures your environment according to company standards.
-
-**Usage:**
-
-```powershell
-# Run the script with administrator rights
-.\SetupDeveloperEnv.ps1
-
-# Optionally, specify the groups to install without prompts
-.\SetupDeveloperEnv.ps1 -groups "Development, Local Dev, Database"
-```
-
-**Installation Process:**
-
-- The script will either prompt you to select which groups of applications you wish to install or automatically install based on the `-groups` parameter.
-- The "Development" group, containing essential development tools, will always be installed by default if no groups are specified.
-- If the `-groups` parameter is set to `"all"`, all applications in the YAML configuration will be installed.
-- The script installs the necessary software and ensures that the appropriate environment variables are set, updating the system `PATH` if needed.
-
-### 3. `SetupDeveloperEnv.yaml`
-
-This YAML file contains the configuration data used by `SetupDeveloperEnv.ps1`. It lists all the software that needs to be installed, along with their respective download URLs, installation arguments, and checks to ensure they are installed correctly. It also defines VS Code extensions that will be automatically installed with VS Code.
-
-**Features:**
-
-- Customizable: You can modify this file to adjust which tools are installed or to change installation parameters.
-- Supports both `.exe` and `.msi` installers.
-- Organized by application groups: Development, Local Dev, Database, and Development OutSystems.
-- Includes options to set environment variables automatically after installation.
-- Defines VS Code extensions to be installed automatically with VS Code.
-- Allows for targeted installation based on development needs.
-
-**Sample Configuration:**
-
-```yaml
-applications:
-  - name: Docker
-    group: "Local Dev"
-    url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
-    silentArguments: "install --quiet"
-    programCheck: "Docker\\Docker\\DockerCli.exe"
-    commandCheck: docker
-
-  - name: Git
-    group: "Local Dev"
-    url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
-    silentArguments: "/SILENT"
-    programCheck: "Git\\cmd\\git.exe"
-    commandCheck: git
-    environmentVariable: true
-
-  - name: JDK
-    group: "Local Dev"
-    url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
-    installer: "java.msi"
-    programCheck: "Java\\jdk-21\\bin\\java.exe"
-    environmentVariable: true
-
-  - name: Microsoft SQL Server Management Studio
-    group: "Database"
-    url: "https://aka.ms/ssmsfullsetup"
-    programCheck: "Microsoft SQL Server Management Studio 18\\Common7\\IDE\\Ssms.exe,Microsoft SQL Server Management Studio 20\\Common7\\IDE\\Ssms.exe"
-    installer: "SSMS-Setup-ENU.exe"
-  # Additional applications...
-
-vscodeExtensions:
-  - davidanson.vscode-markdownlint
-  - dbaeumer.vscode-eslint
-  - eamodio.gitlens
-  - esbenp.prettier-vscode
-  - github.copilot
-  - ms-azuretools.vscode-docker
-  - ms-python.python
-  # Additional extensions...
-```
-
-### 4. `SetupGitEnv.ps1`
-
-This script is designed to help developers quickly clone all necessary repositories and install global npm packages. It supports multiple repositories, making it easy to set up the development environment for different projects.
-
-**Features:**
-
-- Clones repositories from GitHub based on configuration.
-- Installs global npm packages required for development.
-- Ensures that all repositories are up-to-date with the latest changes.
-
-**Usage:**
-
-```powershell
-# Run the script with your user account
-C:\git\esystemsdev\configuration\SetupGitEnv.ps1
-```
-
-## How to Use This Repository
-
-### Step 1: Set Up Your Development Environment
-
-1. Clone this repository to your local machine.
-2. Open a PowerShell terminal with administrator rights.
-3. Navigate to the directory where you cloned the repository.
-4. Run the `SetupDeveloperEnv.ps1` script to install all necessary tools.
-
-### Step 2: Select Application Groups
-
-1. If you do not use the `-groups` parameter, you will be prompted to select which groups of applications to install. Review the descriptions provided for each group and make your selections.
-2. Alternatively, specify the `-groups` parameter to install applications from selected groups automatically, or use `"all"` to install all available applications.
-
-### Step 3: Clone Necessary Repositories
-
-1. After setting up your environment, run the `SetupGitEnv.ps1` script.
-2. This will clone all necessary repositories and install global npm packages for your projects.
-
-### Step 4: Onboard to Development Servers (Optional)
-
-1. If you need access to development servers, run the `OnboardDeveloper.ps1` script.
-2. Provide your Developer ID and PIN when prompted, or pass them as parameters.
-3. The script will set up SSH access and verify connectivity.
-
-### Step 5: Begin Development
-
-With your environment set up, you can now begin working on your projects. Clone additional repositories as needed, and use the provided scripts to manage your development environment efficiently.
-
-## Project-Specific Configuration
-
-While this repository is designed to provide general configuration for all projects at eSystems Nordic Ltd, individual projects (like `agilenowdev`) may have their own specific configurations. These configurations will be similar but tailored to the specific needs of the project.
 
 ## About eSystems Nordic Ltd
 
