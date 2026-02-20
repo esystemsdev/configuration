@@ -1,13 +1,13 @@
 # Developer Onboarding
 
-This guide helps new developers get access, set up tools, and onboard to AI Fabrix or Workato.
+This guide helps new developers get access, set up tools, and onboard to AI Fabrix.
 
 **⚠️ Important: You need eSystems Twingate activated before you can use any services!**
 
 **Platform-specific guides:**
 
-- [Windows](#windows-developer-onboarding) - SSH onboarding
-- [macOS](#macos-developer-onboarding) - SSH onboarding
+- [Windows](#windows-developer-onboarding) – Full setup or minimal WSL; then remote dev via `aifabrix dev init`
+- [macOS](#macos-developer-onboarding) – Git/env setup; then remote dev via `aifabrix dev init`
 
 ## 1) Get access
 
@@ -21,53 +21,142 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 ### 2) Onboarding (Windows)
 
-**What you need:**
+Choose one of two paths: **full developer setup** (all tools on Windows) or **minimal WSL setup** (Linux dev environment via WSL). After your machine is set up, use **remote development onboarding** (`aifabrix dev init`) when you need access to Builder Server and sync.
 
-- Developer ID and PIN (provided by admin)
-- Cursor editor: `https://cursor.com/download` (required for SSH via Cursor)
-- For AI Fabrix developers (optional here, required for local infra):
-  - Node.js 18+
-  - Docker Desktop
+**What you need (before starting):**
 
-**Step 1: Download the script**
+- Twingate activated (required for any eSystems services)
+- Developer account requested via Service Desk (see [Get access](#1-get-access))
+
+---
+
+#### Option A: Full developer computer setup (Windows)
+
+Best if you want all tools installed on Windows (Cursor, Git, Node, Docker, VS Code, etc.).
+
+**Step 1: Download setup scripts to `C:\Setup`**
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-Invoke-WebRequest -Uri "https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1" -OutFile "C:\Setup\OnboardDeveloper.ps1"
+$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
+$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1", "SetupWslUbuntuDev.ps1")
+foreach ($file in $files) {
+    Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
+}
 ```
 
-**Step 2: Run the onboarding script**
+**Step 2: Run the full environment script (as Administrator)**
+
+Open PowerShell **as Administrator**, then:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\OnboardDeveloper.ps1" -Server dev.aifabrix -DeveloperId <DeveloperId>
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1"
 ```
 
-Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+Answer the prompts during installation. This installs Cursor, Git, GitHub CLI, Node.js, Twingate, Docker, VS Code, Python, and other tools (see [README – Installed Applications](https://github.com/esystemsdev/configuration#installed-applications)).
 
-**Step 3: Register GitHub token (optional)**
+**Step 3: Run the Git/workspace script (as your user)**
 
-1. Create a GitHub Personal Access Token (if you don't have one)
-2. When prompted by the script, paste your GitHub token
-3. The script will automatically set up GitHub SSH key for server-side commits
+Open PowerShell as your **normal user** (not Administrator):
 
-**What happens:**
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
+```
 
-- Script generates SSH keys (ed25519) if they don't exist
-- Prompts you to set a password for your server account (with confirmation)
-- Registers your SSH public key
-- Optionally sets up GitHub SSH key (if you provide a GitHub token)
-- Creates SSH config entry for easy access
+This creates `C:\git\esystemsdev`, clones configured repos, and installs global npm packages (e.g. `@aifabrix/builder`).
 
-**Step 4: Connect via SSH**
+**Step 4: GitHub CLI (optional)**
 
-Once onboarding is complete, wait a few minutes for the Docker container to start up, then:
+In PowerShell: `gh auth login` to sign in for cloning, PRs, etc.
 
-1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen
-2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix`) or enter `user@host` format
-3. **Automatic connection**: Cursor will automatically connect you to your developer container
-   - **Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
+**Step 5: Remote development onboarding (when needed)**
 
-See [SSH Connection Guide](#4-ssh-connection-guide) for detailed instructions.
+When you need access to the Builder Server and Mutagen sync, run the one-time onboarding:
+
+```powershell
+aifabrix dev init --developer-id <id> --server https://builder01.aifabrix.dev --pin <pin>
+```
+
+Use the developer ID and one-time PIN from your admin. Omit arguments to be prompted interactively. See [README – Developer onboarding (remote development)](https://github.com/esystemsdev/configuration#1-developer-onboarding-remote-development).
+
+---
+
+#### Option B: WSL Ubuntu dev (Windows)
+
+Same repos and tooling as Option A – only the runtime is Linux (WSL) instead of native Windows. You use the same `C:\git\esystemsdev` workspace; WSL mounts it as `/workspace` inside the distro.
+
+**Prerequisites:** WSL installed (`wsl --install --no-distribution` if needed).
+
+**Step 1: Same scripts and Git/workspace as Option A**
+
+Download the same setup files to `C:\Setup\` (same block as Option A):
+
+```powershell
+New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
+$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
+$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1", "SetupWslUbuntuDev.ps1")
+foreach ($file in $files) {
+    Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
+}
+```
+
+Run the **Git/workspace script** as your normal user (so you have the same repos and npm packages as full Windows):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
+```
+
+This creates `C:\git\esystemsdev`, clones the same repos, and installs global npm packages (e.g. `@aifabrix/builder`).
+
+**Step 2: Install the WSL dev image (as Administrator)**
+
+From `C:\Setup\`, run PowerShell **as Administrator**:
+
+```powershell
+cd C:\Setup
+powershell -ExecutionPolicy Bypass -File ".\SetupWslUbuntuDev.ps1" -WindowsReposPath "C:\git\esystemsdev" -TarPath "C:\git\esystemsdev\configuration\wsl-ubuntu-dev.tar"
+```
+
+- **-WindowsReposPath** – Same path as Option A (`C:\git\esystemsdev`); WSL exposes it as `/workspace`.
+- **-TarPath** – Path to the pre-built image (e.g. from cloned repo as above).
+
+Full details: [WSL Ubuntu dev setup](docs/SetupWslUbuntuDev.md).
+
+**Step 3: Use the WSL image**
+
+Start WSL (default distro **aifabrix-dev**; username `aifabrix`, password `admin123`):
+
+```powershell
+wsl
+```
+
+Inside WSL, run the on-start script to set `/workspace` (and optionally Git identity):
+
+```bash
+sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev
+```
+
+With Git identity:
+
+```bash
+sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev --git-name "Your Name" --git-email "you@example.com"
+```
+
+Use **aifabrix-dev** in Cursor via **File → Open Folder in WSL**. Your repos are under `/workspace` – the same content as `C:\git\esystemsdev`.
+
+**Step 4: Remote development onboarding (when needed)**
+
+Same as Option A: run `aifabrix dev init` (from WSL or Windows) with your developer ID, Builder Server URL, and PIN.
+
+---
+
+#### After onboarding (both options)
+
+- **Full setup (Option A):** Use Cursor, VS Code, or terminal from Windows; repos under `C:\git\esystemsdev`.
+- **WSL (Option B):** Same repos and tooling; use Cursor **File → Open Folder in WSL** and work in the Linux environment; repos under `/workspace` (same as `C:\git\esystemsdev`).
+- **Remote dev:** After `aifabrix dev init`, config is in `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to refresh settings or renew the certificate. Then use [Goal 1: Start and test the AI Fabrix platform](#goal-1-start-and-test-the-ai-fabrix-platform) to run the platform locally.
+
+See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflows and [5) Git configuration](#5-git-configuration) for clone and identity setup.
 
 ---
 
@@ -75,45 +164,37 @@ See [SSH Connection Guide](#4-ssh-connection-guide) for detailed instructions.
 
 ### 2) Onboarding (macOS)
 
-**What you need:**
+**What you need:** Cursor, Git, Node.js (e.g. via Homebrew). See [README – Initial Developer Computer Setup - macOS](https://github.com/esystemsdev/configuration#initial-developer-computer-setup---macos) for the full app list and install commands.
 
-- Developer ID and PIN (provided by admin)
-- Cursor editor: `https://cursor.com/download` (required for SSH via Cursor)
-- PowerShell Core (to run the onboarding script)
-
-**Step 1: Install PowerShell Core**
+**Step 1: Clone this repo and run Git/env setup**
 
 ```bash
-brew install --cask powershell
+mkdir -p ~/git/esystemsdev
+cd ~/git/esystemsdev
+git clone https://github.com/esystemsdev/configuration.git
+cd configuration
+chmod +x SetupGitEnv.sh
+./SetupGitEnv.sh
 ```
 
-**Step 2: Download and run the onboarding script**
+This creates `~/git/esystemsdev`, clones configured repos, and installs global npm packages (e.g. `@aifabrix/builder`).
+
+**Step 2: Remote development onboarding (when needed)**
+
+One-time onboarding with Builder Server URL and PIN (from your admin):
 
 ```bash
-mkdir -p ~/Setup
-curl -o ~/Setup/OnboardDeveloper.ps1 https://raw.githubusercontent.com/esystemsdev/configuration/main/OnboardDeveloper.ps1
-pwsh ~/Setup/OnboardDeveloper.ps1 -Server dev.aifabrix -DeveloperId <DeveloperId>
+aifabrix dev init --developer-id <id> --server https://builder01.aifabrix.dev --pin <pin>
+# Or interactive: aifabrix dev init
 ```
 
-Replace `<DeveloperId>` with your actual developer ID (e.g., `01`, `02`, etc.).
+Config is written to `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to refresh settings or renew the certificate.
 
-**What happens:**
+**Step 3: Optional – GitHub CLI**
 
-- Script generates SSH keys (ed25519) if they don't exist
-- Prompts you to set a password for your server account (with confirmation)
-- Registers your SSH public key
-- Optionally sets up GitHub SSH key (if you provide a GitHub token)
-- Creates SSH config entry for easy access
+Run `gh auth login` in Terminal for CLI operations (clone, PRs).
 
-**Step 3: Connect via SSH**
-
-Once onboarding is complete, wait a few minutes for the Docker container to start up, then use Cursor to connect via SSH (e.g., `dev01.aifabrix`) or run:
-
-```bash
-ssh dev<DeveloperId>.aifabrix
-```
-
-See [SSH Connection Guide](#4-ssh-connection-guide) for detailed instructions.
+See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflows and [5) Git configuration](#5-git-configuration) for clone and identity setup.
 
 ---
 
@@ -180,51 +261,40 @@ git clone git@github.com:esystemsdev/flowise-template.git
 
 ## 6) AI Fabrix developer basics
 
-### Step 1: Install Builder CLI
+### Install Builder CLI
 
 ```bash
 npm install -g @aifabrix/builder
 ```
 
-### Step 2: Quick start (minimal)
+(Already installed if you ran `SetupGitEnv.ps1` or `SetupGitEnv.sh`.)
 
-1. **Put infra up:**
+### Goal 1: Start and test the AI Fabrix platform
 
-```bash
-aifabrix up
-```
+Get the platform running locally so you can try it. Do this after `aifabrix dev init` when you need the platform.
 
-1. **Open miso-controller project:**
+1. **Start local infrastructure** (Postgres, Redis, optional Traefik):
 
-Navigate to the miso-controller project directory.
+   ```bash
+   aifabrix up-infra
+   ```
 
-1. **Build Keycloak Docker image:**
+2. **Start the platform** (Keycloak, Miso Controller, Dataplane) from community images:
 
-```bash
-aifabrix build keycloak
-```
+   ```bash
+   aifabrix up-platform
+   ```
 
-1. **Run Keycloak locally:**
+   Or run platform apps separately: `aifabrix up-miso` then `aifabrix up-dataplane`. Infra must be up first.
 
-```bash
-aifabrix run keycloak
-```
+### Building and running specific services (optional)
 
-1. **Build Docker image:**
-
-```bash
-aifabrix build miso-controller
-```
-
-1. **Run in local Docker:**
-
-```bash
-aifabrix run miso-controller
-```
-
-1. **Validate via web-browser:**
-
-Open your web browser and verify the services are running.
+- **Open miso-controller project:** Navigate to the miso-controller project directory.
+- **Build Keycloak Docker image:** `aifabrix build keycloak`
+- **Run Keycloak locally:** `aifabrix run keycloak`
+- **Build Docker image:** `aifabrix build miso-controller`
+- **Run in local Docker:** `aifabrix run miso-controller`
+- **Validate:** Open your web browser and verify the services are running.
 
 **Happy coding!**
 
@@ -254,7 +324,7 @@ Notes:
 - Docker access is via `aifabrix-docker` inside this container.
 - Editors available: `vim`, `nano`.
 
-## 9) Workato developer basics
+## 8) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
@@ -267,42 +337,27 @@ Follow the internal guide for org access, environments, and tooling:
 
 ## 10) Reference information
 
-### Onboarding script details
+### Remote development onboarding (`aifabrix dev init`)
 
-**What the script does:**
+**What it does:**
 
-- Automatically generates SSH keys (ed25519) if they don't exist
-- Prompts you to set a password for your server account (with confirmation)
-- Calls the onboarding service on `http://<server>:9999/api/claim` to register your public key and set your password using a temporary PIN
-- Optionally sets up GitHub SSH key for server-side commits (requires a Personal Access Token)
-- Adds an SSH config entry for quick access using `ssh dev<DeveloperId>.<domain>`
-- Note: SSH connects directly to your Docker container, which needs time to start up. If the container is not running, SSH will not work.
+- Issues or reuses a client certificate (mTLS for dev APIs)
+- GET `/api/dev/settings` (cert-authenticated) to receive sync and Docker parameters
+- Registers your SSH keys so Mutagen can sync without a password prompt
 
-**Script parameters:**
+**Options:**
 
-| Parameter | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `-Server` | string | No | `"dev.aifabrix"` | The development server hostname |
-| `-DeveloperId` | string | Yes* | - | Your developer ID (1-6 digits). Will be prompted if not provided |
-| `-Pin` | string | Yes* | - | Your PIN (4-8 digits). Will be prompted if not provided |
-| `-GitHubToken` | string | No | - | GitHub Personal Access Token for server-side SSH key setup. Will be prompted if not provided |
+| Option | Description |
+| --- | --- |
+| `--developer-id <id>` | Developer ID (e.g. `01`) |
+| `--server <url>` | Builder Server base URL (e.g. `https://builder01.aifabrix.dev`) |
+| `--pin <pin>` | One-time PIN from your admin |
 
-*Required but can be provided interactively if not specified as parameters.
-
-**Onboarding process:**
-
-1. The script prompts for your Developer ID and PIN if not provided as parameters
-2. Prompts you to set a password for your server account (with confirmation)
-3. Checks for existing SSH keys in `~/.ssh/` and generates new ed25519 keys if needed
-4. Sends your public SSH key and password to the onboarding API endpoint (`/api/claim`) to claim access
-5. Creates an SSH config entry for easy access using `ssh dev<DeveloperId>.<domain>`
-6. Optionally, if a GitHub token is provided, the server will generate an SSH key and add it to your GitHub account
+Omit arguments to be prompted interactively. After onboarding, config is in `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` (or `aifabrix dev refresh --cert` to force certificate refresh). See [aifabrix-builder – Developer Isolation Commands](https://github.com/esystemsdev/aifabrix-builder/blob/main/docs/commands/developer-isolation.md).
 
 **Troubleshooting:**
 
-- **Twingate connectivity**: Validate that your Twingate is up and running and can ping `dev.aifabrix`. If Twingate is not connected or cannot reach the server, SSH connections will fail.
-- **Container startup**: SSH connects directly to your Docker container. The container needs time to start up. If the container is not running, SSH connections will fail. Wait a few minutes after onboarding and try again.
-- **Connection fails immediately after onboarding**: Wait a few minutes for the Docker container to start up. The container needs time to initialize after onboarding.
-- **Invalid Developer ID or PIN error**: Verify your Developer ID and PIN are correct. Ensure the PIN hasn't expired (request a new one if needed). Check that you're using the correct server address.
-- **SSH connection refused**: Ensure the onboarding service is reachable from your network on port `9999`. Verify the server address is correct. Check that the container has finished starting up.
-- **If the SSH test fails**, run once to trust the host key.
+- **Twingate**: Ensure Twingate is connected and can reach the Builder Server. Required for eSystems services.
+- **Invalid Developer ID or PIN**: Verify ID and PIN with your admin; request a new PIN if it has expired.
+- **Certificate or sync issues**: Run `aifabrix dev refresh --cert` to refresh the client certificate and settings.
+- **SSH / container access**: If you use SSH to a dev container, ensure the container has started; wait a few minutes after first-time setup. Run once to trust the host key if prompted.

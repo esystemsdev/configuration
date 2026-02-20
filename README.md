@@ -12,7 +12,7 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
      ```powershell
      New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
      $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-     $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1")
+     $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1","SetupWslUbuntuDev.ps1")
      foreach ($file in $files) {
          Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
      }
@@ -65,6 +65,30 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
 5. **Authenticate with GitHub CLI** (optional): In PowerShell, run `gh auth login` to sign in to GitHub for CLI operations (e.g. cloning, PRs).
 
+### Minimal installation – aifabrix WSL (Windows)
+
+For a minimal aifabrix development environment on Windows using WSL (no full app installer), see [WSL Ubuntu dev setup](docs/SetupWslUbuntuDev.md). In short:
+
+1. Ensure **WSL** is installed on Windows.
+2. Run PowerShell as **Administrator** from `C:\Setup\`:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File ".\SetupWslUbuntuDev.ps1" -WindowsReposPath "C:\git\esystemsdev" -TarPath "C:\git\esystemsdev\configuration\wsl-ubuntu-dev.tar"
+   ```
+
+3. Using the image
+   Start WSL (default distro is **aifabrix-dev** and username aifabrix and password admin123):
+
+   ```powershell
+   wsl
+   ```
+
+   Inside WSL, run the on-start script to set `/workspace` (and optionally git config). The script lives in the image at `/usr/local/share/aifabrix-wsl/wsl-on-start.sh`, so no repo is needed:
+
+   ```bash
+   sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev
+   ```
+
 ### Initial Developer Computer Setup - macOS
 
 The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, install tools manually (e.g. via [Homebrew](https://brew.sh)), then use the shell script for Git workspace and npm packages.
@@ -72,7 +96,7 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
 **Equivalent apps on macOS** (install via [Homebrew](https://brew.sh) where applicable):
 
 | Windows (Development group) | macOS install |
-|----------------------------|---------------|
+| ---------------------------- | ------------- |
 | Cursor | `brew install --cask cursor` |
 | Git | Xcode Command Line Tools or `brew install git` |
 | GitHub CLI | `brew install gh` |
@@ -85,7 +109,7 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
 | PowerShell | `brew install --cask powershell` |
 
 | Windows (Local Dev group) | macOS install |
-|---------------------------|---------------|
+| --------------------------- | ------------- |
 | Docker | `brew install --cask docker` |
 | VS Code | `brew install --cask visual-studio-code` (extensions: install from VS Code or see `SetupDeveloperEnv.yaml` vscodeExtensions) |
 | Python | `brew install python@3.11` |
@@ -97,6 +121,7 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
    - **Option B:** `brew install git node`
 
 2. **Get the setup script** (clone this repo or download the file):
+
    ```bash
    mkdir -p ~/git/esystemsdev
    cd ~/git/esystemsdev
@@ -105,10 +130,12 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
    ```
 
 3. **Run the Git/env setup script** (creates `~/git/esystemsdev`, clones repos, installs global npm packages such as `@aifabrix/builder`):
+
    ```bash
    chmod +x SetupGitEnv.sh
    ./SetupGitEnv.sh
    ```
+
    Optional: override defaults with env vars, e.g. `GIT_FOLDER=$HOME/git ORGANIZATION=esystemsdev REPOSITORIES=configuration,aifabrix-training PACKAGES=@aifabrix/builder ./SetupGitEnv.sh`
 
 4. **Authenticate with GitHub CLI** (optional): In Terminal, run `gh auth login` to sign in to GitHub for CLI operations (e.g. cloning, PRs).
@@ -119,6 +146,7 @@ The full app installer (`SetupDeveloperEnv.ps1`) is Windows-only. On macOS, inst
 
 - **SetupGitEnv.ps1** – Windows: creates `C:\git\esystemsdev`, clones repos, installs global npm packages.
 - **SetupGitEnv.sh** – macOS/Unix: creates `~/git/esystemsdev`, clones same repos, installs same npm packages; use for Mac onboarding.
+- **SetupWslUbuntuDev.ps1** – Windows: minimal aifabrix WSL setup; installs pre-built Ubuntu dev image. See [WSL Ubuntu dev setup](docs/SetupWslUbuntuDev.md).
 
 ### 1. Developer onboarding (remote development)
 
@@ -153,7 +181,6 @@ aifabrix dev init
 - See [Developer Isolation Commands](https://github.com/esystemsdev/aifabrix-builder/blob/2.41.0/docs/commands/developer-isolation.md) for `dev refresh`, `dev config`, `dev down`, and related commands.
 
 **macOS validation:** The onboarding flow is validated for macOS: use [Initial Developer Computer Setup - macOS](#initial-developer-computer-setup---macos) (Git, Node, `SetupGitEnv.sh`), then run `aifabrix dev init` as above. The same `~/.aifabrix/config.yaml` and CLI commands apply on Windows and macOS.
-
 
 ## About eSystems Nordic Ltd
 
