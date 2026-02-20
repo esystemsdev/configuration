@@ -66,7 +66,7 @@ applications:
     group: "Local Dev"
     url: "https://download.oracle.com/java/21/latest/jdk-21_windows-x64_bin.msi"
     installer: "java.msi"
-    programCheck: "Java\\jdk-21\\bin\\java.exe"
+    programCheck: "Java\\jdk-21.0.10\\bin\\jar.exe"
     environmentVariable: true
 
   - name: Visual Studio 2022
@@ -117,11 +117,11 @@ applications:
   #  programCheck: "Programs\\Azure Dev CLI\\azd.exe"
   #  environmentVariable : true
 
-  - name: Azure CLI
-    group: "Local Dev"
-    url: "https://aka.ms/installazurecliwindowsx64"
-    installer: "azure-cli.msi"
-    programCheck: "Azure CLI\\az.exe"
+  #- name: Azure CLI
+  #  group: "Local Dev"
+  #  url: "https://aka.ms/installazurecliwindowsx64"
+  #  installer: "azure-cli.msi"
+  #  programCheck: "Azure CLI\\az.exe"
 
   - name: PowerShell
     group: "Development"

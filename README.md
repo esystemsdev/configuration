@@ -11,8 +11,7 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
      ```powershell
      New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-     #$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-     $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/refs/heads/1.1.0/"
+     $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
      $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml","SetupWslUbuntuDev.ps1")
      foreach ($file in $files) {
          Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
@@ -42,7 +41,6 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
    - **PowerShell**: Cross-platform automation and configuration tool
 
    **Local Dev Group:**
-   - **Azure CLI**: Command-line interface for Azure
    - **Git**: Version control system
    - **GitHub CLI**: Command-line interface for GitHub
    - **Docker**: Containerization platform
@@ -57,7 +55,7 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
    **Development OutSystems Group:**
    - **Microsoft Visual Studio 2022**: IDE for .NET, C#, and other languages
-4. **Run the Script**:
+4. **Run the Script** (optional):
    - Run the script with your own account. Open PowerShell navigate to the location of the script.
    - Execute the script:
 
@@ -75,7 +73,7 @@ For a minimal aifabrix development environment on Windows using WSL (no full app
 2. Run PowerShell as **Administrator** from `C:\Setup\`:
 
    ```powershell
-   powershell -ExecutionPolicy Bypass -File ".\SetupWslUbuntuDev.ps1" -WindowsReposPath "C:\git\esystemsdev" -TarPath "C:\git\esystemsdev\configuration\wsl-ubuntu-dev.tar"
+   powershell -ExecutionPolicy Bypass -File ".\SetupWslUbuntuDev.ps1" -TarPath "http://builder01.aifabrix.dev/wsl-image"
    ```
 
 3. Using the image
@@ -83,12 +81,6 @@ For a minimal aifabrix development environment on Windows using WSL (no full app
 
    ```powershell
    wsl
-   ```
-
-   Inside WSL, run the on-start script to set `/workspace` (and optionally git config). The script lives in the image at `/usr/local/share/aifabrix-wsl/wsl-on-start.sh`, so no repo is needed:
-
-   ```bash
-   sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev
    ```
 
 ### Initial Developer Computer Setup - macOS

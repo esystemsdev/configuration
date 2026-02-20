@@ -6,8 +6,8 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 **Platform-specific guides:**
 
-- [Windows](#windows-developer-onboarding) – Full setup or minimal WSL; then remote dev via `aifabrix dev init`
-- [macOS](#macos-developer-onboarding) – Git/env setup; then remote dev via `aifabrix dev init`
+- [Windows](#windows-developer-onboarding) – One setup: dev tools + WSL image; then remote dev via `aifabrix dev init`
+- [macOS](#macos-developer-onboarding) – One setup: Git/env; then remote dev via `aifabrix dev init`
 
 ## 1) Get access
 
@@ -21,7 +21,7 @@ This guide helps new developers get access, set up tools, and onboard to AI Fabr
 
 ### 2) Onboarding (Windows)
 
-Choose one of two paths: **full developer setup** (all tools on Windows) or **minimal WSL setup** (Linux dev environment via WSL). After your machine is set up, use **remote development onboarding** (`aifabrix dev init`) when you need access to Builder Server and sync.
+One installation path: install developer tools on Windows, then the WSL dev image. When you need access to Builder Server and sync, run **remote development onboarding** (`aifabrix dev init`).
 
 **What you need (before starting):**
 
@@ -30,44 +30,63 @@ Choose one of two paths: **full developer setup** (all tools on Windows) or **mi
 
 ---
 
-#### Option A: Full developer computer setup (Windows)
+#### Developer computer setup (Windows)
 
-Best if you want all tools installed on Windows (Cursor, Git, Node, Docker, VS Code, etc.).
+Install basic tools on your Windows (Cursor, Node, etc.).
 
 **Step 1: Download setup scripts to `C:\Setup`**
 
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
 $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1", "SetupWslUbuntuDev.ps1")
+$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupWslUbuntuDev.ps1")
 foreach ($file in $files) {
     Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
 }
 ```
 
-**Step 2: Run the full environment script (as Administrator)**
+**Step 2: Run the developer environment script (as Administrator)**
 
 Open PowerShell **as Administrator**, then:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1"
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1" -groups "Development"
 ```
 
-Answer the prompts during installation. This installs Cursor, Git, GitHub CLI, Node.js, Twingate, Docker, VS Code, Python, and other tools (see [README – Installed Applications](https://github.com/esystemsdev/configuration#installed-applications)).
+Omit `-groups "Development,Local Dev"` to be prompted for which groups to install. Development group is always included.
 
-**Step 3: Run the Git/workspace script (as your user)**
+**Step 3: Install the WSL dev image (as Administrator)**
 
-Open PowerShell as your **normal user** (not Administrator):
+Run the setup script with **-TarPath** set to either an **HTTP(S) URL** (script downloads the image) or a **local .tar path**. PowerShell **as Administrator**:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupWslUbuntuDev.ps1" -TarPath "https://builder01.aifabrix.dev/wsl-image"
 ```
 
-This creates `C:\git\esystemsdev`, clones configured repos, and installs global npm packages (e.g. `@aifabrix/builder`).
+Or with a local file:
 
-**Step 4: GitHub CLI (optional)**
+```powershell
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupWslUbuntuDev.ps1" -TarPath "C:\Setup\wsl-ubuntu-dev.tar"
+```
 
-In PowerShell: `gh auth login` to sign in for cloning, PRs, etc.
+- **-TarPath** – URL (http/https) or local path to the .tar image; the script downloads when given a URL.
+
+Full details: [WSL Ubuntu dev setup](docs/SetupWslUbuntuDev.md).
+
+**Step 4: Use the WSL image**
+
+Start WSL (default distro **aifabrix-dev**; username `aifabrix`, password `admin123`):
+
+```powershell
+wsl
+```
+
+**Open Cursor in WSL**
+
+1. In Cursor, press **Ctrl+Shift+P** (Command Palette).
+2. Run **WSL: Connect to WSL Using Distro...** and select **aifabrix-dev**.
+3. When connected, open the folder **`/workspace/`** (File → Open Folder).
+4. Clone your repos – see [4) Git configuration](#4-git-configuration).
 
 **Step 5: Remote development onboarding (when needed)**
 
@@ -81,90 +100,13 @@ Use the developer ID and one-time PIN from your admin. Omit arguments to be prom
 
 ---
 
-#### Option B: WSL Ubuntu dev (Windows)
-
-Same repos and tooling as Option A – only the runtime is Linux (WSL) instead of native Windows. You use the same `C:\git\esystemsdev` workspace; WSL mounts it as `/workspace` inside the distro.
-
-**Prerequisites:** WSL installed (`wsl --install --no-distribution` if needed).
-
-**Step 1: Same scripts and Git/workspace as Option A**
-
-Download the same setup files to `C:\Setup\` (same block as Option A):
-
-```powershell
-New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1", "SetupWslUbuntuDev.ps1")
-foreach ($file in $files) {
-    Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
-}
-```
-
-Run the **Git/workspace script** as your normal user (so you have the same repos and npm packages as full Windows):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
-```
-
-This creates `C:\git\esystemsdev`, clones the same repos, and installs global npm packages (e.g. `@aifabrix/builder`).
-
-**Step 2: Install the WSL dev image (as Administrator)**
-
-From `C:\Setup\`, run PowerShell **as Administrator**:
-
-```powershell
-cd C:\Setup
-powershell -ExecutionPolicy Bypass -File ".\SetupWslUbuntuDev.ps1" -WindowsReposPath "C:\git\esystemsdev" -TarPath "C:\git\esystemsdev\configuration\wsl-ubuntu-dev.tar"
-```
-
-- **-WindowsReposPath** – Same path as Option A (`C:\git\esystemsdev`); WSL exposes it as `/workspace`.
-- **-TarPath** – Path to the pre-built image (e.g. from cloned repo as above).
-
-Full details: [WSL Ubuntu dev setup](docs/SetupWslUbuntuDev.md).
-
-**Step 3: Use the WSL image**
-
-Start WSL (default distro **aifabrix-dev**; username `aifabrix`, password `admin123`):
-
-```powershell
-wsl
-```
-
-Inside WSL, run the on-start script to set `/workspace` (and optionally Git identity):
-
-```bash
-sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev
-```
-
-With Git identity:
-
-```bash
-sudo /usr/local/share/aifabrix-wsl/wsl-on-start.sh --workspace /mnt/c/git/esystemsdev --git-name "Your Name" --git-email "you@example.com"
-```
-
-Use **aifabrix-dev** in Cursor via **File → Open Folder in WSL**. Your repos are under `/workspace` – the same content as `C:\git\esystemsdev`.
-
-**Step 4: Remote development onboarding (when needed)**
-
-Same as Option A: run `aifabrix dev init` (from WSL or Windows) with your developer ID, Builder Server URL, and PIN.
-
----
-
-#### After onboarding (both options)
-
-- **Full setup (Option A):** Use Cursor, VS Code, or terminal from Windows; repos under `C:\git\esystemsdev`.
-- **WSL (Option B):** Same repos and tooling; use Cursor **File → Open Folder in WSL** and work in the Linux environment; repos under `/workspace` (same as `C:\git\esystemsdev`).
-- **Remote dev:** After `aifabrix dev init`, config is in `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to refresh settings or renew the certificate. Then use [Goal 1: Start and test the AI Fabrix platform](#goal-1-start-and-test-the-ai-fabrix-platform) to run the platform locally.
-
-See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflows and [5) Git configuration](#5-git-configuration) for clone and identity setup.
-
----
-
 ## macOS Developer Onboarding
 
 ### 2) Onboarding (macOS)
 
-**What you need:** Cursor, Git, Node.js (e.g. via Homebrew). See [README – Initial Developer Computer Setup - macOS](https://github.com/esystemsdev/configuration#initial-developer-computer-setup---macos) for the full app list and install commands.
+Single installation path: install Cursor, Git, and Node.js (e.g. via Homebrew), then clone this repo and run the Git/env setup script. When you need Builder Server and sync, run `aifabrix dev init`.
+
+**What you need:** Cursor, Git, Node.js. See [README – Initial Developer Computer Setup - macOS](https://github.com/esystemsdev/configuration#initial-developer-computer-setup---macos) for the full app list and install commands.
 
 **Step 1: Clone this repo and run Git/env setup**
 
@@ -194,11 +136,11 @@ Config is written to `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to re
 
 Run `gh auth login` in Terminal for CLI operations (clone, PRs).
 
-See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflows and [5) Git configuration](#5-git-configuration) for clone and identity setup.
+See [SSH Connection Guide](#3-ssh-connection-guide) for SSH-based remote workflows and [4) Git configuration](#4-git-configuration) for clone and identity setup.
 
 ---
 
-## 4) SSH Connection Guide
+## 3) SSH Connection Guide
 
 ### SSH + Cursor (Lightweight - Terminal Only)
 
@@ -211,10 +153,8 @@ See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflo
   - Node.js 18+
   - Docker Desktop
 
-![Cursor SSH Connection](images/cursor-1.png)
-
 1. **Connect via SSH**: Click "Connect via SSH" in Cursor's welcome screen.
-2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix`) or enter `user@host` format.
+2. **Select your SSH user**: Choose your configured SSH host (e.g., `dev01.aifabrix.dev`) or enter `user@host` format.
 3. **Automatic connection**: Cursor will automatically connect you to your developer container.
    - **Note**: SSH connects directly to your Docker container. The container needs time to start up after onboarding. If the connection fails, wait a few minutes and try again.
 4. **Clone repo or open existing folder**: Once connected, you can:
@@ -226,11 +166,11 @@ See [SSH Connection Guide](#4-ssh-connection-guide) for SSH-based remote workflo
 When installing for the first time as a developer:
 
 - Open `/workspace/` root folder
-- Clone repositories: See [Git configuration](#5-git-configuration) section below for repository cloning instructions
+- Clone repositories: See [Git configuration](#4-git-configuration) section below for repository cloning instructions
 
 ---
 
-## 5) Git configuration
+## 4) Git configuration
 
 Configure your Git identity:
 
@@ -259,7 +199,7 @@ git clone git@github.com:esystemsdev/openwebui-template.git
 git clone git@github.com:esystemsdev/flowise-template.git
 ```
 
-## 6) AI Fabrix developer basics
+## 5) AI Fabrix developer basics
 
 ### Install Builder CLI
 
@@ -267,7 +207,7 @@ git clone git@github.com:esystemsdev/flowise-template.git
 npm install -g @aifabrix/builder
 ```
 
-(Already installed if you ran `SetupGitEnv.ps1` or `SetupGitEnv.sh`.)
+(Already installed if you ran the setup script: `SetupDeveloperEnv.ps1` on Windows or `SetupGitEnv.sh` on macOS.)
 
 ### Goal 1: Start and test the AI Fabrix platform
 
@@ -301,7 +241,7 @@ Get the platform running locally so you can try it. Do this after `aifabrix dev 
 See the Builder docs and CLI reference:  
 `https://github.com/esystemsdev/aifabrix-builder`
 
-## 7) AI Fabrix Developer Workspace
+## 6) AI Fabrix Developer Workspace
 
 This is your workspace root inside the container: `/workspace`.
 
@@ -324,18 +264,18 @@ Notes:
 - Docker access is via `aifabrix-docker` inside this container.
 - Editors available: `vim`, `nano`.
 
-## 8) Workato developer basics
+## 7) Workato developer basics
 
 Follow the internal guide for org access, environments, and tooling:  
 `https://esystem.atlassian.net/wiki/spaces/EWKT/pages/209879302147/Custom+Connector+SDK`
 
-## 9) Security notes
+## 8) Security notes
 
 - Do not paste or commit PINs or secrets. Prefer interactive prompts.
 - PINs are single‑use and time‑limited. If a claim fails, request a new PIN.
 - Never share private keys. Public keys only are used during onboarding.
 
-## 10) Reference information
+## 9) Reference information
 
 ### Remote development onboarding (`aifabrix dev init`)
 

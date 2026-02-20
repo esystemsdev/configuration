@@ -6,22 +6,17 @@
   Ensures WSL is available, imports the .tar as a distro, sets it default, and runs wsl-on-start.sh
   to link /workspace to your Windows repos path. Run in an elevated PowerShell.
   The image is built separately (see install-wsl-ubuntu-dev.sh and wsl --export).
-.PARAMETER WindowsReposPath
-  Windows path to your repos (e.g. C:\git\esystemsdev). If set, /workspace in WSL is symlinked here.
 .PARAMETER TarPath
-  Path to the .tar image. Default: repo root\wsl-ubuntu-dev.tar.
+  Path to the .tar image (local file or http/https URL). Default: repo root\wsl-ubuntu-dev.tar.
 .PARAMETER DistroName
   Name of the imported distro (default: aifabrix-dev).
 .PARAMETER InstallLocation
   Directory where the distro is stored (default: C:\wsl-data\aifabrix-dev).
 .EXAMPLE
-  .\Setup-WslUbuntuDev.ps1 -WindowsReposPath "C:\git\esystemsdev"
-.EXAMPLE
-  .\Setup-WslUbuntuDev.ps1 -TarPath "C:\path\to\wsl-ubuntu-dev.tar" -WindowsReposPath "C:\git\esystemsdev"
+  .\Setup-WslUbuntuDev.ps1 -TarPath "C:\path\to\wsl-ubuntu-dev.tar"
 #>
 [CmdletBinding()]
 param(
-    [string]$WindowsReposPath = "",
     [string]$TarPath = "",
     [string]$DistroName = "aifabrix-dev",
     [string]$InstallLocation = "C:\wsl-data\aifabrix-dev"
@@ -38,16 +33,30 @@ if (-not $wslOk) {
     exit 1
 }
 
-# ---------- Resolve tar path ----------
+# ---------- Resolve tar path (file or http download) ----------
 if ([string]::IsNullOrWhiteSpace($TarPath)) {
     $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
     $repoRoot = (Resolve-Path (Join-Path $scriptDir "..\..")).Path
     $TarPath = Join-Path $repoRoot "wsl-ubuntu-dev.tar"
 }
-$TarPath = (Resolve-Path $TarPath -ErrorAction Stop).Path
-if (-not (Test-Path -LiteralPath $TarPath)) {
-    Write-Host "Tar file not found: $TarPath" -ForegroundColor Red
-    exit 1
+
+$tarIsUrl = $TarPath -match '^https?://'
+if ($tarIsUrl) {
+    $tempTar = Join-Path $env:TEMP "wsl-ubuntu-dev-$(Get-Date -Format 'yyyyMMddHHmmss').tar"
+    Write-Host "Downloading image from $TarPath..." -ForegroundColor Cyan
+    try {
+        Invoke-WebRequest -Uri $TarPath -OutFile $tempTar -UseBasicParsing
+    } catch {
+        Write-Host "Download failed: $_" -ForegroundColor Red
+        exit 1
+    }
+    $TarPath = $tempTar
+} else {
+    $TarPath = (Resolve-Path $TarPath -ErrorAction Stop).Path
+    if (-not (Test-Path -LiteralPath $TarPath)) {
+        Write-Host "Tar file not found: $TarPath" -ForegroundColor Red
+        exit 1
+    }
 }
 
 # ---------- Import image ----------
@@ -63,20 +72,10 @@ if ($existing -match [regex]::Escape($DistroName)) {
 }
 Write-Host "Importing $TarPath as '$DistroName' to $InstallLocation..." -ForegroundColor Cyan
 wsl --import $DistroName $InstallLocation $TarPath
+if ($tarIsUrl -and (Test-Path -LiteralPath $TarPath)) {
+    Remove-Item -LiteralPath $TarPath -Force
+}
 Write-Host "Setting default WSL distro to $DistroName..." -ForegroundColor Cyan
 wsl -s $DistroName
-
-# ---------- User specs (workspace, etc.) ----------
-$onStartScript = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "wsl-on-start.sh"
-if (Test-Path -LiteralPath $onStartScript) {
-    $onStartWslPath = (wsl -d $DistroName -u root -e wslpath -a $onStartScript).Trim()
-    if ($WindowsReposPath) {
-        $wslReposPath = (wsl -d $DistroName -u root -e wslpath -a $WindowsReposPath.Trim()).Trim()
-        Write-Host "Applying user specs (workspace -> $WindowsReposPath)..." -ForegroundColor Cyan
-        wsl -d $DistroName -u root -e bash -c "bash '$onStartWslPath' --workspace '$wslReposPath'"
-    } else {
-        Write-Host "To link /workspace later: wsl -d $DistroName -u root -e bash '$onStartWslPath' --workspace /mnt/c/path/to/repos" -ForegroundColor Gray
-    }
-}
 
 Write-Host "Done. Open Cursor and use WSL: $DistroName (e.g. File > Open Folder in WSL)." -ForegroundColor Green
