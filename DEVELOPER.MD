@@ -86,7 +86,8 @@ wsl
 1. In Cursor, press **Ctrl+Shift+P** (Command Palette).
 2. Run **WSL: Connect to WSL Using Distro...** and select **aifabrix-dev**.
 3. When connected, open the folder **`/workspace/`** (File → Open Folder).
-4. Clone your repos – see [4) Git configuration](#4-git-configuration).
+4. In the WSL terminal, run GitHub CLI authentication (see below) so you can clone via SSH.
+5. Clone your repos – see [4) Git configuration](#4-git-configuration).
 
 **Step 5: Remote development onboarding (when needed)**
 
@@ -172,11 +173,24 @@ When installing for the first time as a developer:
 
 ## 4) Git configuration
 
+**GitHub CLI authentication**
+
+Run `gh auth login` in the WSL terminal for clone/PR operations. When prompted, use:
+
+| Prompt | Choice |
+|--------|--------|
+| Where do you use GitHub? | GitHub.com |
+| Preferred protocol for Git operations? | SSH |
+| Generate a new SSH key to add to your GitHub account? | Yes |
+| Passphrase for your new SSH key | (optional – press Enter to skip) |
+| Title for your SSH key | GitHub CLI |
+| How would you like to authenticate GitHub CLI? | Login with a web browser |
+
 Configure your Git identity:
 
 ```bash
-git config --global user.name
-git config --global user.email
+git config --global user.name "Your Name"
+git config --global user.email firstname.lastname@esystems.fi
 ```
 
 ### Clone repositories
