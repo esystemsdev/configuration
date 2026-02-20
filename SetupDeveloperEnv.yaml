@@ -7,7 +7,7 @@ applications:
     commandCheck: docker
 
   - name: Git
-    group: "Development"
+    group: "Local Dev"
     url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
@@ -15,13 +15,12 @@ applications:
     environmentVariable : true
 
   - name: GitHub CLI
-    group: "Development"
+    group: "Local Dev"
     url: "https://github.com/cli/cli/releases/download/v2.78.0/gh_2.78.0_windows_amd64.msi"
     installer: "GitHub CLI.msi"
     programCheck: "GitHub CLI\\gh.exe"
     commandCheck: gh
     environmentVariable: true
-
 
   - name: VSCode
     group: "Local Dev"
@@ -118,11 +117,11 @@ applications:
   #  programCheck: "Programs\\Azure Dev CLI\\azd.exe"
   #  environmentVariable : true
 
-  #- name: Azure CLI
-  #  group: "Development AI"
-  #  url: "https://aka.ms/installazurecliwindowsx64"
-  #  installer: "azure-cli.msi"
-  #  programCheck: "Programs\\Azure CLI\\az.exe"
+  - name: Azure CLI
+    group: "Local Dev"
+    url: "https://aka.ms/installazurecliwindowsx64"
+    installer: "azure-cli.msi"
+    programCheck: "Azure CLI\\az.exe"
 
   - name: PowerShell
     group: "Development"

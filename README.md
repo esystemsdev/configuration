@@ -11,8 +11,9 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
      ```powershell
      New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-     $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-     $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupGitEnv.ps1","SetupWslUbuntuDev.ps1")
+     #$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
+     $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/refs/heads/1.1.0/"
+     $files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml","SetupWslUbuntuDev.ps1")
      foreach ($file in $files) {
          Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
      }
@@ -32,8 +33,6 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
 
    **Development Group:**
    - **Cursor**: AI-powered code editor
-   - **Git**: Version control system
-   - **GitHub CLI**: Command-line interface for GitHub
    - **Node.js**: JavaScript runtime and package manager
    - **Twingate**: Secure remote access tool
    - **7-Zip**: File archiver
@@ -43,6 +42,9 @@ Welcome to the eSystems Nordic configuration repository. This repository contain
    - **PowerShell**: Cross-platform automation and configuration tool
 
    **Local Dev Group:**
+   - **Azure CLI**: Command-line interface for Azure
+   - **Git**: Version control system
+   - **GitHub CLI**: Command-line interface for GitHub
    - **Docker**: Containerization platform
    - **Visual Studio Code (VS Code)**: Code editor with essential extensions (ESLint, GitLens, Prettier, GitHub Copilot, Docker, Python, PowerShell, and more)
    - **Python**: Programming language
