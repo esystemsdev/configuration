@@ -1,10 +1,15 @@
-# SetupGitEnv.ps1
+# SetupGitEnv.ps1 / SetupGitEnv.sh
 
-This PowerShell script automates the setup of your Git workspace and development dependencies. It creates the required folder structure, configures Git safe directories, clones or updates repositories from GitHub, and installs global npm packages. Run it with your user account (no administrator rights required).
+These scripts automate the setup of your Git workspace and development dependencies. They create the folder structure, configure Git safe directories, clone or update repositories from GitHub, and install global npm packages. Run with your user account (no administrator rights required). **SetupGitEnv.ps1** is for Windows; **SetupGitEnv.sh** is for macOS/Unix.
+
+**Workspace path:**
+
+- **Integration path:** Use `C:\workspace` (Windows) or `GIT_FOLDER=$HOME/workspace` / `GIT_FOLDER=/workspace` (macOS). Edit `$gitFolder` at the top of the PS1 script, or set the `GIT_FOLDER` env var when running the shell script. See [Setup-integration.md](../Setup-integration.md).
+- **Full developer path:** For the complete repository list, see [Setup-developer.md](../Setup-developer.md); set `$repositories` / `REPOSITORIES` accordingly.
 
 **Features:**
 
-- Creates the Git root folder and organization folder (e.g. `C:\git\esystemsdev`) if they do not exist.
+- Creates the Git root folder and organization folder (e.g. `C:\git\esystemsdev` or `C:\workspace\esystemsdev`) if they do not exist.
 - Sets full access permissions for the Users group on the Git and organization folders so tools can access repositories reliably.
 - Configures Git safe directory for the Git root and each cloned repository, so Git can work with them without trust prompts.
 - Clones repositories from GitHub if they are not present, or pulls the latest changes if they are already cloned.
@@ -35,7 +40,7 @@ The script is configured by editing variables at the top of `SetupGitEnv.ps1`:
 
 | Variable        | Purpose                                                                 | Example                          |
 |----------------|-------------------------------------------------------------------------|----------------------------------|
-| `$gitFolder`   | Root folder for all Git repositories                                   | `C:\git`                         |
+| `$gitFolder`   | Root folder for all Git repositories (use `C:\workspace` for integration path) | `C:\git` or `C:\workspace`       |
 | `$organization`| GitHub organization or user name                                       | `esystemsdev`                    |
 | `$repositories`| Comma-separated list of repository names to clone or update            | `configuration,aifabrix-training`|
 | `$packages`    | Comma-separated list of global npm packages to install                 | `@aifabrix/builder`              |
@@ -60,8 +65,10 @@ $packages       = "@aifabrix/builder"  # Comma-separated list of npm packages
 
 ## How this fits into the setup process
 
-1. **Set up your development environment** – Run `SetupDeveloperEnv.ps1` (with administrator rights) to install tools such as Git and Node.js.
-2. **Clone repositories and install global packages** – Run `SetupGitEnv.ps1` with your user account to create folders, clone/update repos, and install global npm packages.
-3. **Onboard to development servers (optional)** – Use `aifabrix dev init` or `OnboardDeveloper.ps1` if you need remote development access.
+1. **Set up your development environment** – Run [SetupDeveloperEnv.ps1](SetupDeveloperEnv.md) (Windows) or SetupDeveloperEnv.sh (macOS) to install tools such as Git and Node.js.
+2. **Clone repositories and install global packages** – Run this script with your user account to create folders, clone/update repos, and install global npm packages.
+3. **Onboard to development servers (optional)** – Use `aifabrix dev init` if you need remote development access.
 
-For the full workflow, see [SetupDeveloperEnv.md](SetupDeveloperEnv.md).
+- **Full developer path:** [Setup-developer.md](../Setup-developer.md)
+- **Integration specialist path:** [Setup-integration.md](../Setup-integration.md)
+- **Tool installer details:** [SetupDeveloperEnv.md](SetupDeveloperEnv.md)

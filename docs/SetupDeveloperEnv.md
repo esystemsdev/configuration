@@ -1,17 +1,24 @@
-# SetupDeveloperEnv.ps1
+# SetupDeveloperEnv.ps1 / SetupDeveloperEnv.sh
 
-This PowerShell script automates the installation of essential tools and dependencies required for development. It reads configuration data from `SetupDeveloperEnv.yaml` (in the same directory as the script) and installs the necessary software, ensuring that your development environment is fully equipped.
+These scripts automate the installation of essential tools for development. They read **the same** `SetupDeveloperEnv.yaml` (in the same directory as the script). **SetupDeveloperEnv.ps1** is for Windows (PowerShell); **SetupDeveloperEnv.sh** is for macOS (Homebrew, using `homebrewCask` and `homebrewFormula` in the YAML).
 
-**Features:**
+**Groups:**
 
-- Installs tools organized by groups: **Development**, **Local Dev**, **Database**, and **Development OutSystems**.
+- **Basic** – Integration path: Cursor, Node.js, Git. Use `-groups "Basic"` for [Setup-integration.md](../Setup-integration.md).
+- **Development** and **Local Dev** – Full developer path. Use `-groups "Basic,Development,Local Dev"` or `"Development,Local Dev"` for [Setup-developer.md](../Setup-developer.md).
+- **Database**, **Development OutSystems** – Optional.
+
+**Features (Windows PS1):**
+
+- Installs tools by group; **Basic** = integration path, **Development** + **Local Dev** = developer path.
 - Verifies if tools are already installed (via `commandCheck` or `programCheck`) and skips reinstallation when not needed.
-- Lets you choose which groups to install (interactive prompts) or use the `-groups` parameter for unattended setup.
-- Always includes the **Development** group when using interactive selection if you do not choose it.
-- Sets environment variables for configured applications (and updates existing installs) so their paths are on the user `PATH`.
-- Installs or updates VS Code and installs/updates the list of VS Code extensions defined in the YAML.
-- If Docker is installed, ensures WSL 2 is enabled (may prompt for a reboot).
-- Installs the `powershell-yaml` module automatically if it is not already installed.
+- Lets you choose which groups to install (interactive prompts) or use the `-groups` parameter. If you select only **Basic**, the Development group is not auto-added.
+- Sets environment variables for configured applications so their paths are on the user `PATH`.
+- Installs or updates VS Code and VS Code extensions from the YAML when VS Code is in the selected groups.
+- If Docker is selected, ensures WSL 2 is enabled (may prompt for a reboot).
+- Installs the `powershell-yaml` module automatically if not already installed.
+
+**Features (macOS SH):** Reads the same YAML and installs applications via Homebrew (`brew install --cask` / `brew install`). Creates a workspace directory (default `~/workspace`). See [Setup-developer.md](../Setup-developer.md) and [Setup-integration.md](../Setup-integration.md).
 
 **Prerequisites:**
 
@@ -25,12 +32,17 @@ This PowerShell script automates the installation of essential tools and depende
 # Run the script with administrator rights
 .\SetupDeveloperEnv.ps1
 
-# Specify groups to install without prompts (comma-separated)
-.\SetupDeveloperEnv.ps1 -groups "Development, Local Dev, Database"
+# Basic only (integration path – Cursor, Node, Git)
+.\SetupDeveloperEnv.ps1 -groups "Basic"
+
+# Full developer path
+.\SetupDeveloperEnv.ps1 -groups "Basic,Development,Local Dev"
 
 # Install all applications from the YAML configuration
 .\SetupDeveloperEnv.ps1 -groups "all"
 ```
+
+**macOS:** From the repo directory, run `./SetupDeveloperEnv.sh --groups "Basic"` or `./SetupDeveloperEnv.sh --groups "Basic,Development,Local Dev"`.
 
 **Installation process:**
 
@@ -48,7 +60,8 @@ This file must be in the same directory as `SetupDeveloperEnv.ps1`. It defines w
 
 - **Customizable:** Edit the file to add or remove tools, change URLs, or adjust install arguments.
 - **Installer types:** Supports both `.exe` and `.msi` installers (use the `installer` field to set the downloaded filename when it differs from the default).
-- **Groups:** Applications are grouped (e.g. Development, Local Dev, Database, Development OutSystems); the script installs only applications in the selected groups.
+- **Groups:** Applications are grouped (Basic, Development, Local Dev, Database, Development OutSystems). An application can be in multiple groups (YAML `group: [Basic, Development]`). Basic = integration path; Development + Local Dev = developer path.
+- **macOS:** The same YAML is used by `SetupDeveloperEnv.sh`; use `homebrewCask` (for `brew install --cask`) and `homebrewFormula` (for `brew install`) per application.
 - **Detection:** `commandCheck` (e.g. `git`) and `programCheck` (path(s) under Program Files or LocalAppData) determine if an app is already installed; the script skips install but still updates `PATH` when `environmentVariable: true`.
 - **Optional install:** Set `install: false` for an application to exclude it from installation even when its group is selected.
 - **VS Code:** The `vscodeExtensions` list is used to install or update extensions whenever VS Code is in the selected groups.
@@ -97,9 +110,12 @@ vscodeExtensions:
   # Additional extensions...
 ```
 
-## Next step: Git and repositories
+## Next steps by persona
 
-After installing tools with this script, use [SetupGitEnv.ps1](SetupGitEnv.md) to clone the configured repositories and install global npm packages. Run that script with your user account (no administrator rights required).
+- **Full developer (all repos, WSL on Windows or native Mac):** See [Setup-developer.md](../Setup-developer.md).
+- **Integration specialist (Cursor + Node + Git, aifabrix-builder CLI):** See [Setup-integration.md](../Setup-integration.md).
+
+After installing tools, use [SetupGitEnv.ps1](SetupGitEnv.md) (Windows) or [SetupGitEnv.sh](SetupGitEnv.md) (macOS) to clone repositories and install global npm packages. Run with your user account (no administrator rights required).
 
 ## How to use this repository
 

@@ -34,17 +34,41 @@ if (-not (Test-Path -Path $yamlFilePath)) {
 # Parse the YAML file
 $config = ConvertFrom-Yaml (Get-Content -Path $yamlFilePath -Raw)
 
+# Helper: get all unique group names (group can be string or array in YAML)
+function Get-AllGroupNames {
+    $all = @()
+    foreach ($app in $config.applications) {
+        $g = $app.group
+        if ($null -ne $g) {
+            if ($g -is [Array]) { $all += $g } else { $all += $g }
+        }
+    }
+    return $all | Sort-Object -Unique
+}
+
+# Helper: return true if app is in the selected groups (group can be string or array)
+function Test-AppInSelectedGroups {
+    param ($app, [array]$selectedGroups)
+    $g = $app.group
+    if ($null -eq $g) { return $false }
+    if ($g -is [Array]) {
+        foreach ($grp in $g) { if ($selectedGroups -contains $grp) { return $true } }
+        return $false
+    }
+    return ($selectedGroups -contains $g)
+}
+
 # Function to prompt user for application group selection
+# Groups: Basic (integration path), Development, Local Dev, Database, Development OutSystems
 function Prompt-UserForGroupSelection {
     Write-Host "Please select the groups of applications you want to install."
     Write-Host "The following groups are available:"
     
-    $groupNames = $config.applications.group | Sort-Object -Unique
+    $groupNames = Get-AllGroupNames
     $groupSelections = @()
     
     foreach ($group in $groupNames) {
-        # Provide a brief description of the group contents
-        $appsInGroup = $config.applications | Where-Object { $_.group -eq $group } | ForEach-Object { $_.name }
+        $appsInGroup = $config.applications | Where-Object { Test-AppInSelectedGroups -app $_ -selectedGroups @($group) } | ForEach-Object { $_.name }
         Write-Host "`n[$group] includes:"
         $appsInGroup | ForEach-Object { Write-Host "- $_" }
         
@@ -54,9 +78,9 @@ function Prompt-UserForGroupSelection {
         }
     }
 
-    # Automatically include the "Development" group
-    if (-not ($groupSelections -contains "Development")) {
-        Write-Host "`nThe 'Development' group is required and will be installed automatically."
+    # Auto-include Development only when user selected something but not "Basic" only (integration path = Basic only)
+    if (-not ($groupSelections -contains "Development") -and -not ($groupSelections.Count -eq 1 -and $groupSelections -contains "Basic")) {
+        Write-Host "`nThe 'Development' group will be installed automatically (developer path)."
         $groupSelections += "Development"
     }
 
@@ -71,7 +95,7 @@ function Get-SelectedGroups {
 
     if ($groups) {
         if ($groups -ieq "all") {
-            return $config.applications.group | Sort-Object -Unique
+            return @(Get-AllGroupNames)
         } else {
             return $groups -split ',' | ForEach-Object { $_.Trim() }
         }
@@ -234,7 +258,7 @@ $installDocker = $false
 $installVSCode = $false
 
 foreach ($app in $config.applications) {
-    if ($selectedGroups -contains $app.group) {
+    if (Test-AppInSelectedGroups -app $app -selectedGroups $selectedGroups) {
         # Default install to true if not explicitly set
         $install = $app.install
         if ($null -eq $install) {

@@ -1,3 +1,5 @@
+# Groups: Basic (integration path: Cursor + Node + Git), Development, Local Dev, Database, Development OutSystems.
+# macOS: SetupDeveloperEnv.sh uses homebrewCask (brew install --cask) or homebrewFormula (brew install).
 applications:
   - name: Docker
     group: "Local Dev"
@@ -5,14 +7,16 @@ applications:
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
     commandCheck: docker
+    homebrewCask: docker
 
   - name: Git
-    group: "Local Dev"
+    group: ["Basic", "Local Dev"]
     url: "https://github.com/git-for-windows/git/releases/download/v2.51.0.windows.1/Git-2.51.0-64-bit.exe"
     silentArguments: "/SILENT"
     programCheck: "Git\\cmd\\git.exe"
     commandCheck: git
     environmentVariable : true
+    homebrewFormula: git
 
   - name: GitHub CLI
     group: "Local Dev"
@@ -21,6 +25,7 @@ applications:
     programCheck: "GitHub CLI\\gh.exe"
     commandCheck: gh
     environmentVariable: true
+    homebrewFormula: gh
 
   - name: VSCode
     group: "Local Dev"
@@ -29,19 +34,22 @@ applications:
     silentArguments: "/VERYSILENT /MERGETASKS=!runcode"
     programCheck: "Microsoft VS Code\\Code.exe"
     commandCheck: code
+    homebrewCask: visual-studio-code
 
   - name: Node.js
-    group: "Development"
+    group: ["Basic", "Development"]
     url: "https://nodejs.org/dist/v22.19.0/node-v22.19.0-x64.msi"
     installer: "nodejs.msi"
     programCheck: "nodejs\\node.exe"
     commandCheck: node
-    
+    homebrewFormula: node
+
   - name: Python
     group: "Local Dev"
     url: "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe"
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
     programCheck: "Python311\\python.exe"
+    homebrewFormula: python@3.11
 
   - name: Ruby
     group: "Local Dev"
@@ -49,6 +57,7 @@ applications:
     silentArguments: "/VERYSILENT /NORESTART /ALLUSERS"
     programCheck: "C:\\Ruby33-x64\\bin\\ruby.exe"
     environmentVariable: true
+    homebrewFormula: ruby
 
   - name: pgAdmin 4
     group: "Database"
@@ -61,6 +70,7 @@ applications:
     url: "https://api.twingate.com/download/windows"
     silentArguments: "/quiet"
     programCheck: "Twingate\\Twingate.exe"
+    homebrewCask: twingate
 
   - name: JDK
     group: "Local Dev"
@@ -68,6 +78,7 @@ applications:
     installer: "java.msi"
     programCheck: "Java\\jdk-21.0.10\\bin\\jar.exe"
     environmentVariable: true
+    homebrewFormula: openjdk@21
 
   - name: Visual Studio 2022
     group: "Development OutSystems"
@@ -87,23 +98,27 @@ applications:
     silentArguments: "/S"
     programCheck: "7-Zip\\7z.exe"
     environmentVariable : true
+    homebrewFormula: p7zip
 
   - name: Slack
     group: "Development"
     url: "https://downloads.slack-edge.com/releases/windows/4.32.122/prod/x64/SlackSetup.exe"
     programCheck: "Slack\\slack.exe"
+    homebrewCask: slack
 
   - name: Google Chrome
     group: "Development"
     url: "https://dl.google.com/tag/s/appguid%3D%7B8A69D345-D564-463C-AFF1-A69D9E530F96%7D%26iid%3D%7B743FF219-1E25-35A1-2BE5-CAAAAE003F78%7D%26lang%3Den%26browser%3D4%26usagestats3D0%26appname%3DGoogle%2520Chrome%26needsadmin%3Dfalse%26ap%3Dx64-stable%26brand%3DGCEU/dl/chrome/install/googlechromestandaloneenterprise64.msi"
     installer: "chrome.msi"
     programCheck: "Google\\Chrome\\Application\\chrome.exe"
+    homebrewCask: google-chrome
 
   - name: Postman
     group: "Development"
     url: "https://dl.pstmn.io/download/latest/win64"
     silentArguments: "/S"
     programCheck: "Postman\\Postman.exe"
+    homebrewCask: postman
 
   ###
   # There is no executable file to download anymore.
@@ -129,7 +144,8 @@ applications:
     installer: "PowerShell.msi"
     programCheck: "PowerShell\\7\\pwsh.exe"
     environmentVariable : true
-  
+    homebrewCask: powershell
+
   # - name: Promptflow
   #  group: "Development AI"
   #  url: "https://promptflowartifact.blob.core.windows.net/msi-installer/promptflow-1.14.0.msi"
@@ -138,11 +154,12 @@ applications:
   #  environmentVariable : true
 
   - name: Cursor
-    group: "Development"
+    group: ["Basic", "Development"]
     url: "https://api2.cursor.sh/updates/download/golden/win32-x64/cursor/latest"
     silentArguments: "/SILENT"
     programCheck: "cursor\\Cursor.exe"
- 
+    homebrewCask: cursor
+
 
 vscodeExtensions:
   - davidanson.vscode-markdownlint
