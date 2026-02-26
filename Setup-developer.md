@@ -44,7 +44,7 @@ Omit `-groups` to be prompted for which groups to install. Use `Basic` only for 
 The WSL image **already has `/workspace` configured**; no extra steps needed. Run from **`C:\Setup`** as Administrator:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupWslUbuntuDev.ps1" -TarPath "https://builder01.aifabrix.dev/wsl-image"
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupWslUbuntuDev.ps1" -TarPath "https://builder01.local/wsl-image"
 ```
 
 Or with a local .tar file:
@@ -111,7 +111,7 @@ Alternatively, use [SetupGitEnv.ps1](SetupGitEnv.ps1) or [SetupGitEnv.sh](SetupG
 When you need access to the Builder Server and Mutagen sync:
 
 ```bash
-aifabrix dev init --developer-id <id> --server https://builder01.aifabrix.dev --pin <pin>
+aifabrix dev init --developer-id <id> --server https://builder01.local --pin <pin>
 ```
 
 Use the developer ID and one-time PIN from your admin. Omit arguments to be prompted. Config is written to `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to refresh settings.
@@ -138,7 +138,7 @@ See [AI Fabrix developer basics](#ai-fabrix-developer-basics) below.
 For lightweight terminal-only work (e.g. Workato SDK):
 
 1. In Cursor, click **Connect via SSH** on the welcome screen.
-2. Choose your SSH host (e.g. `dev01.aifabrix.dev`) or enter `user@host`.
+2. Choose your SSH host (e.g. `dev01.builder01.local`) or enter `user@host`.
 3. Once connected, open folder `/workspace` or `/workspace/<repo>`.
 
 The container may need a few minutes to start after first-time onboarding.
@@ -197,7 +197,7 @@ Or clone the repos manually (see the list under [Step 6: Get all repos](#step-6-
 **Step 6: Remote development onboarding**
 
 ```bash
-aifabrix dev init --developer-id <id> --server https://builder01.aifabrix.dev --pin <pin>
+aifabrix dev init --developer-id <id> --server https://builder01.local --pin <pin>
 ```
 
 **Step 7: Set AI Fabrix developer environment up**
@@ -214,7 +214,7 @@ Same as Windows: Connect via SSH in Cursor and open `/workspace` or `/workspace/
 
 - **Workspace root:** `/workspace` (WSL image or your Mac workspace folder).
 - **Per-developer config:** `~/.aifabrix/config.yaml` (after `aifabrix dev init`).
-- **Builder Server:** e.g. `https://builder01.aifabrix.dev` – provides dev settings, certificates, sync parameters.
+- **Builder Server:** e.g. `https://builder01.local` – provides dev settings, certificates, sync parameters.
 - **CLI:** `aifabrix` (from `@aifabrix/builder`) for infra, platform, and dev isolation.
 
 For diagrams and flows, see the **aifabrix-builder** repo: [.cursor/rules/flows-and-visuals.md](https://github.com/esystemsdev/aifabrix-builder/blob/main/.cursor/rules/flows-and-visuals.md) (or `aifabrix-builder/.cursor/rules/flows-and-visuals.md` in your workspace once cloned).
