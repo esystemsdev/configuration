@@ -64,7 +64,7 @@ Open Cursor and use **File → Open Folder** to open your workspace (e.g. `C:\wo
 When you need access to the Builder Server and sync:
 
 ```bash
-aifabrix dev init --developer-id <id> --server https://builder01.aifabrix.dev --pin <pin>
+aifabrix dev init --developer-id <id> --server https://builder01.local --pin <pin>
 ```
 
 Get developer ID and one-time PIN from your admin. Omit arguments to be prompted. Config is written to `~/.aifabrix/config.yaml`. Use `aifabrix dev refresh` to refresh.
@@ -88,7 +88,7 @@ See the Builder docs: [aifabrix-builder](https://github.com/esystemsdev/aifabrix
 If you use SSH to a dev container:
 
 1. In Cursor, click **Connect via SSH** on the welcome screen.
-2. Enter your SSH host (e.g. `user@dev01.aifabrix.dev`).
+2. Enter your SSH host (e.g. `user@dev01.local`).
 3. Once connected, open folder `/workspace` or `/workspace/<repo>`.
 
 ---
