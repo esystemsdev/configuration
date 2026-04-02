@@ -21,7 +21,7 @@ Choose your path:
 ### Initial Developer Computer Setup - macOS
 
 1. Clone this repo and run **SetupDeveloperEnv.sh** with `--groups "Basic,Development,Local Dev"` (uses same [SetupDeveloperEnv.yaml](SetupDeveloperEnv.yaml) via Homebrew). See [Setup-developer.md](Setup-developer.md).
-2. Run **SetupGitEnv.sh** (optionally with `GIT_FOLDER=$HOME/workspace`). See [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
+2. Run **SetupGitEnv.sh** (defaults to `/workspace`, same idea as `C:\workspace` on Windows; use `GIT_FOLDER=$HOME/workspace` on a local Mac if needed). See [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
 3. Open Cursor in your workspace; run `gh auth login`; run `aifabrix dev init` when needed.
 
 ### Minimal installation – aifabrix WSL (Windows)
@@ -35,7 +35,7 @@ See [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md). Run `SetupWslUbuntuD
 - **SetupDeveloperEnv.ps1** / **SetupDeveloperEnv.yaml** – Windows: install tools by group (Basic, Development, Local Dev, etc.). [docs/SetupDeveloperEnv.md](docs/SetupDeveloperEnv.md).
 - **SetupDeveloperEnv.sh** – macOS: reads same YAML, installs via Homebrew.
 - **SetupGitEnv.ps1** – Windows: create Git folder, clone repos, install global npm packages. [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
-- **SetupGitEnv.sh** – macOS/Unix: same as PS1; use `GIT_FOLDER` for workspace path.
+- **SetupGitEnv.sh** – macOS/Unix: same as PS1; default `GIT_FOLDER` is `/workspace`.
 - **SetupWslUbuntuDev.ps1** – Windows: import pre-built WSL dev image. [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md).
 
 ### Developer onboarding (remote development)

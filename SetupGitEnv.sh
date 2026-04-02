@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # macOS/Unix equivalent of SetupGitEnv.ps1
 # Creates git workspace, clones/updates repos, installs global npm packages.
-# Run with your user account (no sudo required for typical use).
+# Run with your user account. Default root is /workspace (same role as C:\workspace on Windows in SetupGitEnv.ps1).
+# On a local Mac, or if you cannot create /workspace, use: GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
 #
-# For integration path (Setup-integration.md): use GIT_FOLDER=$HOME/workspace or GIT_FOLDER=/workspace.
 # For full developer path: see Setup-developer.md for the complete repository list and set REPOSITORIES accordingly.
 
 set -e
 
-# Configuration (mirror SetupGitEnv.ps1)
-GIT_FOLDER="${GIT_FOLDER:-$HOME/git}"
+# Configuration (mirror SetupGitEnv.ps1: $gitFolder = "C:\workspace")
+GIT_FOLDER="${GIT_FOLDER:-/workspace}"
 ORGANIZATION="${ORGANIZATION:-esystemsdev}"
 REPOSITORIES="${REPOSITORIES:-configuration,aifabrix-training}"  # Full list in Setup-developer.md
 PACKAGES="${PACKAGES:-@aifabrix/builder}"

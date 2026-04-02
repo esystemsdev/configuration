@@ -1,7 +1,7 @@
 # Define the directories and repo list.
-# For integration path (Setup-integration.md): use $gitFolder = "C:\workspace" to clone into C:\workspace.
+# Default root is C:\workspace (integration + typical dev layout). Edit $gitFolder here if you use another path.
 # For full developer path: see Setup-developer.md for the complete repository list and set $repositories accordingly.
-$gitFolder      = "C:\git"
+$gitFolder      = "C:\workspace"
 $organization   = "esystemsdev"
 $repositories   = "configuration,aifabrix-training"  # Comma-separated; full list in Setup-developer.md
 $packages       = "@aifabrix/builder"  # Comma-separated list of npm packages

@@ -4,12 +4,12 @@ These scripts automate the setup of your Git workspace and development dependenc
 
 **Workspace path:**
 
-- **Integration path:** Use `C:\workspace` (Windows) or `GIT_FOLDER=$HOME/workspace` / `GIT_FOLDER=/workspace` (macOS). Edit `$gitFolder` at the top of the PS1 script, or set the `GIT_FOLDER` env var when running the shell script. See [Setup-integration.md](../Setup-integration.md).
+- **Default:** `C:\workspace` (Windows, `SetupGitEnv.ps1`) and `/workspace` (macOS/Linux, `SetupGitEnv.sh`)—same convention on both platforms. The macOS tool installer still uses `~/workspace` for Cursor (see [SetupDeveloperEnv.md](SetupDeveloperEnv.md)); use `GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh` when you are not using a `/workspace` root. Edit `$gitFolder` in the PS1 script, or set `GIT_FOLDER` for the shell script, if you need another path. See [Setup-integration.md](../Setup-integration.md).
 - **Full developer path:** For the complete repository list, see [Setup-developer.md](../Setup-developer.md); set `$repositories` / `REPOSITORIES` accordingly.
 
 **Features:**
 
-- Creates the Git root folder and organization folder (e.g. `C:\git\esystemsdev` or `C:\workspace\esystemsdev`) if they do not exist.
+- Creates the Git root folder and organization folder (e.g. `C:\workspace\esystemsdev` or `/workspace/esystemsdev`) if they do not exist.
 - Sets full access permissions for the Users group on the Git and organization folders so tools can access repositories reliably.
 - Configures Git safe directory for the Git root and each cloned repository, so Git can work with them without trust prompts.
 - Clones repositories from GitHub if they are not present, or pulls the latest changes if they are already cloned.
@@ -23,12 +23,19 @@ These scripts automate the setup of your Git workspace and development dependenc
 .\SetupGitEnv.ps1
 
 # Or using full path
-C:\git\esystemsdev\configuration\SetupGitEnv.ps1
+C:\workspace\esystemsdev\configuration\SetupGitEnv.ps1
+```
+
+**SetupGitEnv.sh** (default root `/workspace`):
+
+```bash
+./SetupGitEnv.sh
+# Local Mac or when /workspace is not writable: GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
 ```
 
 **What the script does:**
 
-1. Ensures the Git root directory (default `C:\git`) and the organization directory (e.g. `C:\git\esystemsdev`) exist.
+1. Ensures the Git root directory (default `C:\workspace` on Windows, `/workspace` on macOS/Linux) and the organization directory (e.g. `C:\workspace\esystemsdev` or `/workspace/esystemsdev`) exist.
 2. Sets full access for the Users group on those directories so IDEs and other tools can access the repos.
 3. Adds the Git root and (after cloning) each repo path to Git’s global `safe.directory` list.
 4. For each repository in the configuration list, either clones it from `https://github.com/<organization>/<repo>.git` or runs `git pull` if it is already cloned.
@@ -40,7 +47,7 @@ The script is configured by editing variables at the top of `SetupGitEnv.ps1`:
 
 | Variable        | Purpose                                                                 | Example                          |
 |----------------|-------------------------------------------------------------------------|----------------------------------|
-| `$gitFolder`   | Root folder for all Git repositories (use `C:\workspace` for integration path) | `C:\git` or `C:\workspace`       |
+| `$gitFolder`   | Root folder for all Git repositories                                         | `C:\workspace` (default) or another path |
 | `$organization`| GitHub organization or user name                                       | `esystemsdev`                    |
 | `$repositories`| Comma-separated list of repository names to clone or update            | `configuration,aifabrix-training`|
 | `$packages`    | Comma-separated list of global npm packages to install                 | `@aifabrix/builder`              |
@@ -48,7 +55,7 @@ The script is configured by editing variables at the top of `SetupGitEnv.ps1`:
 **Sample configuration:**
 
 ```powershell
-$gitFolder      = "C:\git"
+$gitFolder      = "C:\workspace"
 $organization   = "esystemsdev"
 $repositories   = "configuration,aifabrix-training"  # Comma-separated list of repositories
 $packages       = "@aifabrix/builder"  # Comma-separated list of npm packages
@@ -56,7 +63,7 @@ $packages       = "@aifabrix/builder"  # Comma-separated list of npm packages
 
 - To add or remove repos, edit the `$repositories` string (e.g. add `,my-other-repo`).
 - To add or remove global npm packages, edit the `$packages` string (e.g. add `,typescript`).
-- Repositories are cloned to `$gitFolder\$organization\<repository-name>` (e.g. `C:\git\esystemsdev\configuration`).
+- Repositories are cloned to `$gitFolder\$organization\<repository-name>` (e.g. `C:\workspace\esystemsdev\configuration`).
 
 **Prerequisites:**
 

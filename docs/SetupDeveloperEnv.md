@@ -121,7 +121,7 @@ After installing tools, use [SetupGitEnv.ps1](SetupGitEnv.md) (Windows) or [Setu
 
 ### Step 1: Get the repository and run the setup script
 
-1. Clone or download this repository to your machine (e.g. to `C:\git\esystemsdev\configuration`).
+1. Clone or download this repository to your machine (e.g. to `C:\workspace\esystemsdev\configuration`).
 2. Open PowerShell **as Administrator**, navigate to the repository directory, and run:
    ```powershell
    .\SetupDeveloperEnv.ps1
