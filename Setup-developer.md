@@ -37,7 +37,7 @@ Open PowerShell **as Administrator**, then run with **basic and developer** grou
 powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1" -groups "Basic,Development"
 ```
 
-Omit `-groups` to be prompted for which groups to install. Use `Basic` only for the integration path; for full developer setup use `Development` with out Docker (and optionally `Local Dev` and `Database`).
+Omit `-groups` to be prompted for which groups to install. Use `Basic` for the integration path (includes **Docker CLI** in YAML). For full developer setup use `Development` with **`Local Dev`** (includes **Docker Desktop** in YAML; `enableWsl2` on Windows) and optionally `Database`. **Docker CLI** and **Docker Desktop** are separate applications in `SetupDeveloperEnv.yaml`.
 
 **Step 3: Install the WSL dev image (as Administrator)**
 

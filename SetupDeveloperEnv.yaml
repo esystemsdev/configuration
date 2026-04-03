@@ -1,12 +1,31 @@
-# Groups: Basic (integration path: Cursor + Node + Git), Development, Local Dev, Database, Development OutSystems.
+# Groups: Basic (integration path: Cursor + Node + Git + Docker CLI), Development, Local Dev, Database, Development OutSystems.
+# Deploy side-by-side with SetupDeveloperEnv.ps1 (same folder). The script does not fetch this file from Git.
 # macOS: SetupDeveloperEnv.sh uses homebrewCask (brew install --cask) or homebrewFormula (brew install).
+#
+# Windows archive installs: optional windowsArchiveUrl + windowsArchiveMainBinary + windowsArchiveInstallRelativePath
+# (under %LOCALAPPDATA%). Optional windowsExtraFiles: url + destRelativeToUserProfile (Invoke-WebRequest; use a real GitHub release tag).
+# Optional enableWsl2 after exe/msi install.
 applications:
-  - name: Docker
+  - name: Docker CLI
+    group: Basic
+    windowsArchiveUrl: "https://download.docker.com/win/static/stable/x86_64/docker-29.3.1.zip"
+    windowsArchiveMainBinary: docker.exe
+    windowsArchiveInstallRelativePath: "Programs\\DockerCLI"
+    windowsExtraFiles:
+      - url: "https://github.com/docker/compose/releases/download/v5.1.1/docker-compose-windows-x86_64.exe"
+        destRelativeToUserProfile: ".docker/cli-plugins/docker-compose.exe"
+    programCheck: "Programs\\DockerCLI\\docker.exe"
+    environmentVariable: true
+    homebrewFormula:
+      - docker
+      - docker-compose
+
+  - name: Docker Desktop
     group: "Local Dev"
     url: "https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe"
     silentArguments: "install --quiet"
     programCheck: "Docker\\Docker\\DockerCli.exe"
-    commandCheck: docker
+    enableWsl2: true
     homebrewCask: docker
 
   - name: Git

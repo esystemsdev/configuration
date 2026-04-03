@@ -30,7 +30,7 @@ fi
 if [ ${#SELECTED_GROUPS[@]} -eq 0 ]; then
   echo "Usage: $0 --groups 'Basic,Development,Local Dev'"
   echo "   or: $0 Basic Development \"Local Dev\""
-  echo "Groups: Basic (Cursor+Node+Git), Development, Local Dev, Database, Development OutSystems"
+  echo "Groups: Basic (Cursor+Node+Git+Docker CLI), Development, Local Dev, Database, Development OutSystems"
   exit 1
 fi
 
@@ -40,10 +40,11 @@ if ! command -v brew &>/dev/null; then
   exit 1
 fi
 
-# Use Ruby (built-in on macOS) to parse YAML and output "cask:name" or "formula:name" per line
-# Pass selected groups as comma-separated in env to avoid shell escaping issues
 export SETUP_GROUPS_CSV
 SETUP_GROUPS_CSV=$(IFS=,; echo "${SELECTED_GROUPS[*]}")
+export YAML_PATH
+
+# Emit brew lines from YAML for selected groups (Windows-only fields are ignored here).
 install_items() {
   ruby -r yaml -e "
     data = YAML.load_file(ENV['YAML_PATH'])
@@ -53,11 +54,15 @@ install_items() {
       app_groups = g.is_a?(Array) ? g : [g.to_s]
       next unless (app_groups & selected).any?
       puts \"cask:\#{app['homebrewCask']}\" if app['homebrewCask'].to_s != ''
-      puts \"formula:\#{app['homebrewFormula']}\" if app['homebrewFormula'].to_s != ''
+      fm = app['homebrewFormula']
+      if fm.is_a?(Array)
+        fm.each { |f| puts \"formula:\#{f}\" if f.to_s.strip != '' }
+      elsif fm.to_s != ''
+        puts \"formula:\#{fm}\"
+      end
     end
   "
 }
-export YAML_PATH
 
 # Ensure workspace directory for macOS (documented as \$HOME/workspace when not using /workspace)
 WORKSPACE_DIR="${WORKSPACE_DIR:-$HOME/workspace}"

@@ -2,7 +2,7 @@
 
 **Persona: Integration specialist** – Use your own AI Fabrix environment and the **aifabrix-builder CLI** to create integrations and learn the platform. Windows and macOS. No full repo set or WSL required.
 
-This guide gets you Cursor, Node, Git, and the Git workspace so you can work with the Builder CLI and integrations.
+This guide gets you Cursor, Node, Git, **Docker** (via the same installer), and the Git workspace so you can work with the Builder CLI and integrations.
 
 **Important: You need eSystems Twingate activated before you can use Builder Server sync, shared dev hosts, or other internal services.** Request access via Service Desk if needed (see [DEVELOPER.MD](DEVELOPER.MD)).
 
@@ -32,7 +32,7 @@ chmod +x SetupDeveloperEnv.sh
 ./SetupDeveloperEnv.sh --groups "Basic"
 ```
 
-This installs Cursor, Node.js, and Git via Homebrew on Mac (or the Windows installers on Windows).
+This installs Cursor, Node.js, Git, and **Docker CLI** via Homebrew.
 
 ---
 
@@ -138,7 +138,7 @@ See the Builder repo: [aifabrix-builder](https://github.com/esystemsdev/aifabrix
 
 | Step | Windows | macOS / Linux |
 |------|---------|----------------|
-| 1. Install Cursor + Node + Git | `SetupDeveloperEnv.ps1` with `-groups "Basic"` | `SetupDeveloperEnv.sh --groups "Basic"` |
+| 1. Install Cursor + Node + Git + Docker CLI | `SetupDeveloperEnv.ps1` with `-groups "Basic"` | `SetupDeveloperEnv.sh --groups "Basic"` |
 | 2. Git workspace | Run `SetupGitEnv.ps1` (default `C:\workspace`; edit `$gitFolder` if needed) | Run `SetupGitEnv.sh` (default `/workspace`; use `GIT_FOLDER=$HOME/workspace` on local Mac if needed) |
 | 3. Open Cursor | Open `C:\workspace` or `C:\workspace\esystemsdev` | Open `/workspace` or `/workspace/esystemsdev` (or `~/workspace` if you cloned there) |
 | 4. Remote onboarding | `aifabrix dev init` when needed | Same |

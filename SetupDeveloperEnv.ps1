@@ -22,17 +22,44 @@ Import-Module powershell-yaml
 # Determine the script directory
 $scriptDir = Split-Path -Path $MyInvocation.MyCommand.Definition -Parent
 
-# Set the path to the YAML file
+# Manifest always lives next to this script (same folder).
 $yamlFilePath = Join-Path -Path $scriptDir -ChildPath "SetupDeveloperEnv.yaml"
 
-# Check if the YAML file exists
 if (-not (Test-Path -Path $yamlFilePath)) {
-    Write-Error "The SetupDeveloperEnv.yaml file was not found in the script directory: $scriptDir"
+    Write-Error "SetupDeveloperEnv.yaml was not found next to this script: $yamlFilePath"
     exit 1
 }
 
-# Parse the YAML file
 $config = ConvertFrom-Yaml (Get-Content -Path $yamlFilePath -Raw)
+
+Write-Host "Manifest (same folder as script): $yamlFilePath"
+
+# Fail fast: known-invalid Compose URL (script does not fetch YAML from the network).
+function Test-ManifestContainsBadComposeV2344 {
+    param ($Cfg)
+    foreach ($manifestApp in $Cfg.applications) {
+        $xf = $manifestApp.windowsExtraFiles
+        if ($null -eq $xf) { continue }
+        foreach ($xfItem in @($xf)) {
+            if ($null -eq $xfItem) { continue }
+            $u = $xfItem.url
+            if ([string]::IsNullOrWhiteSpace($u) -and $xfItem -is [hashtable]) { $u = $xfItem['url'] }
+            if ($u -match 'docker/compose/releases/download/v2\.34\.4') {
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
+if (Test-ManifestContainsBadComposeV2344 -Cfg $config) {
+    Write-Error @"
+SetupDeveloperEnv.yaml next to this script lists Compose v2.34.4 (not available). Replace that file with the SetupDeveloperEnv.yaml from your configuration package (same folder as SetupDeveloperEnv.ps1).
+
+$yamlFilePath
+"@
+    exit 1
+}
 
 # Helper: get all unique group names (group can be string or array in YAML)
 function Get-AllGroupNames {
@@ -149,6 +176,187 @@ function Install-Software {
     }
 }
 
+# True if any windowsExtraFiles target path is missing (same rules as Install-WindowsArchiveApplication).
+function Test-AnyWindowsExtraFileMissing {
+    param (
+        [hashtable]$App
+    )
+    $extras = $App.windowsExtraFiles
+    if ($null -eq $extras) {
+        return $false
+    }
+    foreach ($item in @($extras)) {
+        if ($null -eq $item) { continue }
+        $rel = $item.destRelativeToUserProfile
+        if ([string]::IsNullOrWhiteSpace($rel) -and $item -is [hashtable]) {
+            $rel = $item['destRelativeToUserProfile']
+        }
+        if ([string]::IsNullOrWhiteSpace($rel)) { continue }
+        $relNorm = $rel -replace '/', '\'
+        $destPath = Join-Path $env:USERPROFILE $relNorm
+        if (-not (Test-Path -LiteralPath $destPath)) {
+            return $true
+        }
+    }
+    return $false
+}
+
+# HTTPS download with redirect support (GitHub release assets, etc.). Tries IWR then WebClient (some PS 5.1 / TLS setups close IWR mid-transfer).
+function Save-UrlToFile {
+    param (
+        [string]$Url,
+        [string]$DestinationPath
+    )
+    $proto12 = [Net.SecurityProtocolType]::Tls12
+    try {
+        $proto13 = [Net.SecurityProtocolType]::Tls13
+        [Net.ServicePointManager]::SecurityProtocol = $proto13 -bor $proto12
+    } catch {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor $proto12
+    }
+    $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+
+    $iwrError = $null
+    try {
+        $params = @{
+            Uri                = $Url
+            OutFile            = $DestinationPath
+            UseBasicParsing    = $true
+            MaximumRedirection = 10
+            UserAgent          = $userAgent
+            ErrorAction        = 'Stop'
+        }
+        $iwrCmd = Get-Command Invoke-WebRequest -ErrorAction Stop
+        if ($iwrCmd.Parameters.ContainsKey('TimeoutSec')) {
+            $params['TimeoutSec'] = 600
+        }
+        Invoke-WebRequest @params
+        return
+    } catch {
+        $iwrError = $_
+    }
+
+    try {
+        $wc = New-Object System.Net.WebClient
+        $wc.Headers.Add('User-Agent', $userAgent)
+        $wc.DownloadFile($Url, $DestinationPath)
+    } catch {
+        $wcMsg = $_.Exception.Message
+        $hint = ""
+        if ($wcMsg -match '404|Not Found') {
+            $hint = "`n`n(404) The URL in SetupDeveloperEnv.yaml may be wrong or the release was removed. Replace SetupDeveloperEnv.yaml next to this script with the copy from your configuration package."
+        }
+        throw "Download failed ($Url). Invoke-WebRequest: $($iwrError.Exception.Message); WebClient: $wcMsg$hint"
+    }
+}
+
+# Generic Windows install from a zip URL: copies windowsArchiveMainBinary into %LOCALAPPDATA%\<relative path>.
+# Optional windowsExtraFiles: list of { url, destRelativeToUserProfile }.
+function Install-WindowsArchiveApplication {
+    param (
+        [hashtable]$App
+    )
+
+    if ([string]::IsNullOrWhiteSpace($App.windowsArchiveUrl)) {
+        throw "windowsArchiveUrl is required for archive install ($($App.name))."
+    }
+    if ([string]::IsNullOrWhiteSpace($App.windowsArchiveMainBinary)) {
+        throw "windowsArchiveMainBinary is required for archive install ($($App.name))."
+    }
+    if ([string]::IsNullOrWhiteSpace($App.windowsArchiveInstallRelativePath)) {
+        throw "windowsArchiveInstallRelativePath is required for archive install ($($App.name))."
+    }
+
+    $destDir = Join-Path $env:LOCALAPPDATA $App.windowsArchiveInstallRelativePath
+    if (-not (Test-Path -LiteralPath $destDir)) {
+        New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+    }
+
+    $zipSource = $App.windowsArchiveUrl
+    $zipName = if ($App.windowsArchiveSaveAs) {
+        $App.windowsArchiveSaveAs
+    } else {
+        try {
+            ([uri]$zipSource).Segments[-1] -replace '^/', ''
+        } catch {
+            "archive.zip"
+        }
+    }
+    if ([string]::IsNullOrWhiteSpace($zipName)) {
+        $zipName = "archive.zip"
+    }
+    $zipPath = Join-Path $env:TEMP $zipName
+    $destFile = Join-Path $destDir $App.windowsArchiveMainBinary
+
+    if (-not (Test-Path -LiteralPath $destFile)) {
+        if (-not (Test-Path -LiteralPath $zipPath)) {
+            Write-Host "Downloading archive for $($App.name) to $zipPath..."
+            try {
+                Save-UrlToFile -Url $zipSource -DestinationPath $zipPath
+            } catch {
+                Write-Error $_.Exception.Message
+                exit 1
+            }
+        } else {
+            Write-Host "Archive already at $zipPath. Skipping download."
+        }
+
+        $extractRoot = Join-Path $env:TEMP ("archive-extract-" + [Guid]::NewGuid().ToString())
+        try {
+            Expand-Archive -LiteralPath $zipPath -DestinationPath $extractRoot -Force
+            $binName = $App.windowsArchiveMainBinary
+            $src = Get-ChildItem -LiteralPath $extractRoot -Filter $binName -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+            if (-not $src) {
+                throw "$binName not found inside archive for $($App.name)."
+            }
+            Copy-Item -LiteralPath $src.FullName -Destination $destFile -Force
+            Write-Host "$($App.name): installed $destFile"
+        } catch {
+            Write-Error $_.Exception.Message
+            exit 1
+        } finally {
+            Remove-Item -LiteralPath $extractRoot -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    } else {
+        Write-Host "$($App.name): $($App.windowsArchiveMainBinary) already present under $destDir; skipping archive extract."
+    }
+
+    $extras = $App.windowsExtraFiles
+    if ($null -ne $extras) {
+        foreach ($item in @($extras)) {
+            if ($null -eq $item) { continue }
+            $eu = $item.url
+            if ([string]::IsNullOrWhiteSpace($eu) -and $item -is [hashtable]) {
+                $eu = $item['url']
+            }
+            $rel = $item.destRelativeToUserProfile
+            if ([string]::IsNullOrWhiteSpace($rel) -and $item -is [hashtable]) {
+                $rel = $item['destRelativeToUserProfile']
+            }
+            if ([string]::IsNullOrWhiteSpace($eu) -or [string]::IsNullOrWhiteSpace($rel)) {
+                continue
+            }
+            $relNorm = $rel -replace '/', '\'
+            $destPath = Join-Path $env:USERPROFILE $relNorm
+            if (Test-Path -LiteralPath $destPath) {
+                Write-Host "Extra file already present: $destPath"
+                continue
+            }
+            $parentDir = Split-Path -Path $destPath -Parent
+            if (-not (Test-Path -LiteralPath $parentDir)) {
+                New-Item -ItemType Directory -Path $parentDir -Force | Out-Null
+            }
+            Write-Host "Downloading extra file for $($App.name) -> $destPath"
+            try {
+                Save-UrlToFile -Url $eu -DestinationPath $destPath
+            } catch {
+                Write-Error $_.Exception.Message
+                exit 1
+            }
+        }
+    }
+}
+
 # Helper function to check if a command exists
 function Test-CommandExists {
     param (
@@ -254,8 +462,8 @@ function Set-EnvironmentVariable {
 $selectedGroups = Get-SelectedGroups -groups $groups
 
 # Check and install applications based on the configuration
-$installDocker = $false
 $installVSCode = $false
+$pendingWsl2 = $false
 
 foreach ($app in $config.applications) {
     if (Test-AppInSelectedGroups -app $app -selectedGroups $selectedGroups) {
@@ -272,15 +480,18 @@ foreach ($app in $config.applications) {
 
         $shouldInstall = $true
 
-        # Check based on command
-        if ($app.commandCheck -and (Test-CommandExists -Command $app.commandCheck)) {
-            $shouldInstall = $false
-        }
-
-        # Check based on paths
-        if ($app.programCheck -and $shouldInstall) {
-            if (Test-AllProgramLocations -paths $app.programCheck) {
+        if ($app.windowsArchiveUrl) {
+            $mainMissing = (-not $app.programCheck) -or -not (Test-AllProgramLocations -paths $app.programCheck)
+            $extrasMissing = Test-AnyWindowsExtraFileMissing -App $app
+            $shouldInstall = $mainMissing -or $extrasMissing
+        } else {
+            if ($app.commandCheck -and (Test-CommandExists -Command $app.commandCheck)) {
                 $shouldInstall = $false
+            }
+            if ($app.programCheck -and $shouldInstall) {
+                if (Test-AllProgramLocations -paths $app.programCheck) {
+                    $shouldInstall = $false
+                }
             }
         }
         # vscode is a special case and we updated extensions if installed
@@ -289,20 +500,23 @@ foreach ($app in $config.applications) {
         }
         # Install if not installed
         if ($shouldInstall) {
-            # Handle specific cases
-            if ($app.name -eq "Docker") {
-                $installDocker = $true
+            if ($app.windowsArchiveUrl) {
+                Install-WindowsArchiveApplication -App $app
+            } elseif ($app.url) {
+                if ($app.enableWsl2 -eq $true) {
+                    $pendingWsl2 = $true
+                }
+                $installerFileName = "$($app.name).exe"
+                if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
+                    $installerFileName = $app.installer
+                }
+                if ([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
+                    $app.silentArguments = "/quiet /norestart"
+                }
+                Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
+            } else {
+                Write-Warning "Skipping $($app.name): no windowsArchiveUrl or url for Windows."
             }
-
-            # Determine installer type
-            $installerFileName = "$($app.name).exe"
-            if ([string]::IsNullOrEmpty($app.installer) -eq $false) {
-                $installerFileName = $app.installer
-            }
-            if ([string]::IsNullOrEmpty($app.silentArguments) -eq $true) {
-                $app.silentArguments = "/quiet /norestart"
-            }
-            Install-Software -Name $app.name -Url $app.url -InstallerFileName $installerFileName -SilentArguments $app.silentArguments
         } else {
             Write-Host "$($app.name) is already installed."
         }
@@ -316,11 +530,11 @@ foreach ($app in $config.applications) {
     }
 }
 
-# If Docker is installed or being installed, check and enable WSL 2
-if ($installDocker) {
+# Optional post-install: enable WSL 2 (YAML enableWsl2 on the application that was installed, e.g. Docker Desktop)
+if ($pendingWsl2) {
     $wslVersion = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss" -Name "DefaultVersion" -ErrorAction SilentlyContinue).DefaultVersion
     if ($wslVersion -ne 2) {
-        Write-Host "Enabling WSL 2 for Docker..."
+        Write-Host "Enabling WSL 2 (post-install flag enableWsl2)..."
         wsl --install
         wsl --set-default-version 2
 
