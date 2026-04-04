@@ -43,7 +43,7 @@ Use [SetupGitEnv.ps1](SetupGitEnv.ps1) (Windows) or [SetupGitEnv.sh](SetupGitEnv
 **Windows:** Default root in `SetupGitEnv.ps1` is `C:\workspace`. To use a different folder, edit `$gitFolder` at the top of the script (it does not read `$env:GitFolder`). Run with your normal user (no Administrator required), from the folder that contains the script:
 
 ```powershell
-.\SetupGitEnv.ps1
+powershell -ExecutionPolicy Bypass -File "C:\Setup\.\SetupGitEnv.ps1"
 ```
 
 **macOS/Linux:** Default root is `/workspace` (same convention as `C:\workspace` on Windows). [SetupDeveloperEnv.sh](SetupDeveloperEnv.sh) still creates `~/workspace` for Cursor on Mac; if you do not use a `/workspace` mount, run with `GIT_FOLDER=$HOME/workspace`.
