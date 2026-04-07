@@ -12,7 +12,7 @@ For the full Windows developer flow (tools + WSL + repos + onboarding), see [Set
 
 ## 1. Get the setup script
 
-Copy `SetupWslUbuntuDev.ps1` onto your machine into **`C:\Setup\`** (e.g. download from the repo or clone the configuration repository).
+Copy `SetupWslUbuntuDev.ps1` onto your machine into **`C:\Setup\`**. Use the same **pinned raw URL** as in [Setup-developer.md](../Setup-developer.md) (`$configurationVersion` + `raw.githubusercontent.com`), or clone the [configuration](https://github.com/esystemsdev/configuration) repository. See [README.md](../README.md#bootstrap-release-pinning).
 
 ## 2. Install the image on your dev PC
 

@@ -4,6 +4,8 @@
 
 This guide gets you from zero to a full AI Fabrix development environment with all repositories, Cursor, and remote development.
 
+**Onboarding stages:** **Stage 1** is this public **configuration** repo (inspectable scripts and YAML). **Stage 2** is optional company-internal setup in **dev-config-internal** (private); it extends stage 1 and does not replace these steps. Missing private access does not block the public bootstrap.
+
 **Important: You need eSystems Twingate activated before you can use any services.**
 
 ---
@@ -20,10 +22,17 @@ This guide gets you from zero to a full AI Fabrix development environment with a
 
 **Step 1: Download setup scripts to `C:\Setup`**
 
+Bootstrap files are fetched from a **pinned release ref** (not `main`) so runs are reproducible. Set `$configurationVersion` to the current release (see [README.md](README.md#bootstrap-release-pinning)). For the latest unpublished scripts, clone this repo instead of using raw URLs.
+
 ```powershell
 New-Item -ItemType Directory -Force -Path "C:\Setup" | Out-Null
-$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/main/"
-$files = @("SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupWslUbuntuDev.ps1")
+$configurationVersion = "1.1.0"
+$baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/$configurationVersion/"
+$files = @(
+    "SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupWslUbuntuDev.ps1",
+    "SetupGitEnv.ps1", "SetupGitEnv.workspace.yaml", "SetupGitEnv.workspace.public.yaml",
+    "SetupGitEnv_workspace_load.rb"
+)
 foreach ($file in $files) {
     Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
 }
@@ -82,29 +91,18 @@ git config --global user.name "Your Name"
 git config --global user.email firstname.lastname@esystems.fi
 ```
 
-**Step 6: Get all repos into `/workspace`**
+**Step 6: Get repos into `/workspace`**
 
-Clone the following repositories (from `/workspace` in WSL or after configuring your workspace path):
+Repositories are **split across two config files** so public onboarding stays cloneable without internal Git access:
 
-```bash
-git clone git@github.com:esystemsdev/configuration.git
-git clone git@github.com:esystemsdev/aifabrix-training.git
-git clone git@github.com:esystemsdev/aifabrix-miso.git
-git clone git@github.com:esystemsdev/aifabrix-miso-azure.git
-git clone git@github.com:esystemsdev/aifabrix-miso-backend.git
-git clone git@github.com:esystemsdev/aifabrix-miso-client.git
-git clone git@github.com:esystemsdev/aifabrix-miso-client-python.git
-git clone git@github.com:esystemsdev/aifabrix-dataplane.git
-git clone git@github.com:esystemsdev/aifabrix-d360.git
-git clone git@github.com:esystemsdev/aifabrix-core.git
-git clone git@github.com:esystemsdev/aifabrix-form-engine.git
-git clone git@github.com:esystemsdev/aifabrix-builder.git
-git clone git@github.com:esystemsdev/aifabrix-docs.git
-git clone git@github.com:esystemsdev/openwebui-template.git
-git clone git@github.com:esystemsdev/flowise-template.git
-```
+| Layer | File | Purpose |
+|--------|------|--------|
+| **Public** | [SetupGitEnv.workspace.public.yaml](SetupGitEnv.workspace.public.yaml) | Always safe to ship: **dev-config** (legacy repo name *configuration*), **dataplane-integrations**, **training** (legacy *aifabrix-training*). Same three as the [integration path](Setup-integration.md). |
+| **Private** | `../dev-config/workspace.private.yaml` (from **dev-config-internal**; not in the public repo) | Internal repos only. Copy into a sibling `dev-config/` folder next to your `configuration` clone. |
 
-Alternatively, use [SetupGitEnv.ps1](SetupGitEnv.ps1) or [SetupGitEnv.sh](SetupGitEnv.sh) with `$repositories` / `REPOSITORIES` set to this full list and `$gitFolder` / `GIT_FOLDER` pointing to your workspace (e.g. `C:\workspace` on Windows or the path that WSL exposes as `/workspace`).
+**Recommended:** run [SetupGitEnv.ps1](SetupGitEnv.ps1) or [SetupGitEnv.sh](SetupGitEnv.sh) from the **configuration** repo with [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml). It merges **public** first, then **private** if present; if the private file is missing, you get a stderr warning and only the **public** trio is cloned. Copy [SetupGitEnv_workspace_load.py](SetupGitEnv_workspace_load.py) and both YAML files next to the script (or clone the whole repo). Set `$gitFolder` / `GIT_FOLDER` if needed (default `/workspace` / `C:\workspace`).
+
+**Org/repo rename (migration):** Canonical old → new names and topics live in **aifabrix-setup** [migration/repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json). Examples: *aifabrix-builder* → **builder-cli**, *aifabrix-miso* → **miso-controller**, *aifabrix-dataplane* → **dataplane**. That map is **updated as migration completes**; prefer `SetupGitEnv` + YAML over hand-maintained `git clone` lists. Templates and repos not yet in the map can be added to your local `workspace.private.yaml` until the map catches up.
 
 **Step 7: Remote development onboarding**
 
@@ -156,6 +154,8 @@ mkdir -p ~/workspace
 cd ~/workspace
 git clone https://github.com/esystemsdev/configuration.git
 cd configuration
+# Optional: match the same release as Windows raw downloads (see README.md — Bootstrap release pinning)
+git checkout 1.1.0
 ```
 
 **Step 2: Run the developer environment script**
@@ -184,13 +184,7 @@ git config --global user.email firstname.lastname@esystems.fi
 
 **Step 5: Get all repos**
 
-Use [SetupGitEnv.sh](SetupGitEnv.sh) with the full repository list. Default clone root is `/workspace` (aligned with `C:\workspace` on Windows). **On a local Mac** where you use `~/workspace` from SetupDeveloperEnv, prefix with `GIT_FOLDER=$HOME/workspace`.
-
-```bash
-REPOSITORIES="configuration,aifabrix-training,aifabrix-miso,aifabrix-miso-azure,aifabrix-miso-backend,aifabrix-miso-client,aifabrix-miso-client-python,aifabrix-dataplane,aifabrix-d360,aifabrix-core,aifabrix-form-engine,aifabrix-builder,aifabrix-docs,openwebui-template,flowise-template" ./SetupGitEnv.sh
-```
-
-Or clone the repos manually (see the list under [Step 6: Get all repos](#step-6-get-all-repos-into-workspace) in the Windows section).
+Use [SetupGitEnv.sh](SetupGitEnv.sh) with [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml) (public + optional private merge; see [Step 6](#step-6-get-repos-into-workspace)). Default clone root is `/workspace`. **On a local Mac** where you use `~/workspace` from SetupDeveloperEnv, prefix with `GIT_FOLDER=$HOME/workspace`.
 
 **Step 6: Remote development onboarding**
 
@@ -215,7 +209,7 @@ Same as Windows: Connect via SSH in Cursor and open `/workspace` or `/workspace/
 - **Builder Server:** e.g. `https://builder01.local` – provides dev settings, certificates, sync parameters.
 - **CLI:** `aifabrix` (from `@aifabrix/builder`) for infra, platform, and dev isolation.
 
-For diagrams and flows, see the **aifabrix-builder** repo: [.cursor/rules/flows-and-visuals.md](https://github.com/esystemsdev/aifabrix-builder/blob/main/.cursor/rules/flows-and-visuals.md) (or `aifabrix-builder/.cursor/rules/flows-and-visuals.md` in your workspace once cloned).
+For diagrams and flows, see the **builder-cli** repo (legacy name *aifabrix-builder*): [.cursor/rules/flows-and-visuals.md](https://github.com/esystemsdev/aifabrix-builder/blob/main/.cursor/rules/flows-and-visuals.md) until the GitHub rename is complete; then use `git@github.com:aifabrix/builder-cli.git` per [repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json).
 
 ---
 
@@ -238,7 +232,7 @@ After `aifabrix dev init` when you need the platform:
 
 ### Developer workspace
 
-Workspace root: `/workspace`. Key config (in container): `aifabrix-home: '/workspace/.aifabrix'`, `aifabrix-secrets: '/workspace/aifabrix-miso/builder/secrets.local.yaml'`. Use `aifabrix` CLI for local infra and app workflows.
+Workspace root: `/workspace`. Key config (in container): `aifabrix-home: '/workspace/.aifabrix'`, and Builder secrets under your **miso-controller** (or legacy **aifabrix-miso**) clone, e.g. `.../builder/secrets.local.yaml`. Use `aifabrix` CLI for local infra and app workflows.
 
 ---
 

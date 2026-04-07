@@ -65,10 +65,10 @@ applications:
 
   - name: Python
     group: "Local Dev"
-    url: "https://www.python.org/ftp/python/3.11.9/python-3.11.9-amd64.exe"
+    url: "https://www.python.org/ftp/python/3.14.3/python-3.14.3-amd64.exe"
     silentArguments: "/quiet InstallAllUsers=1 PrependPath=1"
-    programCheck: "Python311\\python.exe"
-    homebrewFormula: python@3.11
+    programCheck: "Python314\\python.exe"
+    homebrewFormula: python@3.14
 
   - name: Ruby
     group: "Local Dev"
@@ -113,7 +113,7 @@ applications:
 
   - name: 7-Zip
     group: "Development"
-    url: "https://www.7-zip.org/a/7z2301-x64.exe"
+    url: "https://github.com/ip7z/7zip/releases/download/26.00/7z2600-x64.exe"
     silentArguments: "/S"
     programCheck: "7-Zip\\7z.exe"
     environmentVariable : true

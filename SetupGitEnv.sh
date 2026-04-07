@@ -1,31 +1,103 @@
 #!/usr/bin/env bash
-# macOS/Unix equivalent of SetupGitEnv.ps1
-# Creates git workspace, clones/updates repos, installs global npm packages.
-# Run with your user account. Default root is /workspace (same role as C:\workspace on Windows in SetupGitEnv.ps1).
-# On a local Mac, or if you cannot create /workspace, use: GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
-#
-# For full developer path: see Setup-developer.md for the complete repository list and set REPOSITORIES accordingly.
+# macOS/Unix: one YAML file per run (no merge / no extends).
+# Default root: /workspace. Override: GIT_FOLDER=/path ./SetupGitEnv.sh
+# Config: SETUPGITENV_CONFIG, or first argument (path to YAML), else SetupGitEnv.yaml beside this script
+# Group: SETUPGITENV_GROUP=public ./SetupGitEnv.sh
 
 set -e
 
-# Configuration (mirror SetupGitEnv.ps1: $gitFolder = "C:\workspace")
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+GROUP="${SETUPGITENV_GROUP:-}"
+
+if [[ -n "${SETUPGITENV_CONFIG:-}" ]]; then
+  CONFIG="${SETUPGITENV_CONFIG}"
+elif [[ -n "${1:-}" ]]; then
+  CONFIG="$1"
+else
+  CONFIG="${SCRIPT_DIR}/SetupGitEnv.yaml"
+fi
+
+if [[ ! -f "$CONFIG" ]]; then
+  echo "SetupGitEnv: config not found: $CONFIG" >&2
+  exit 1
+fi
+
+if ! command -v ruby >/dev/null 2>&1; then
+  echo "SetupGitEnv: Ruby is required to parse workspace YAML." >&2
+  echo "Install Ruby (macOS: preinstalled or brew install ruby; Linux: apt install ruby)." >&2
+  exit 1
+fi
+
+WORKSPACE_JSON="$(
+  CONFIG_PATH="$CONFIG" GROUP_NAME="$GROUP" ruby <<'RUBY'
+require 'yaml'
+require 'json'
+
+def stringify_keys(obj)
+  case obj
+  when Hash
+    obj.each_with_object({}) { |(k, v), h| h[k.to_s] = stringify_keys(v) }
+  when Array
+    obj.map { |e| stringify_keys(e) }
+  else
+    obj
+  end
+end
+
+path = ENV.fetch('CONFIG_PATH', '').strip
+group_name = ENV.fetch('GROUP_NAME', '').strip
+abort 'SetupGitEnv: CONFIG_PATH empty' if path.empty?
+abort "SetupGitEnv: file not found: #{path}" unless File.file?(path)
+
+doc = stringify_keys(YAML.load_file(path))
+repos = doc['repos'] || []
+
+unless group_name.empty?
+  groups = doc['groups'] || {}
+  allowed = groups[group_name]
+  unless allowed
+    keys = groups.keys.join(', ')
+    warn "SetupGitEnv: unknown group '#{group_name}'. Defined: #{keys}"
+    exit 1
+  end
+  allowed_set = allowed.map(&:to_s).each_with_object({}) { |n, h| h[n] = true }
+  repos = repos.select { |r| allowed_set[r['name'].to_s] }
+  if repos.empty?
+    warn "SetupGitEnv: group '#{group_name}' matched no repos."
+    exit 1
+  end
+end
+
+out = {
+  'organization' => doc['organization'],
+  'gitFolder' => doc['gitFolder'],
+  'packages' => doc['packages'] || [],
+  'repos' => repos
+}
+puts JSON.generate(out)
+RUBY
+)"
+
 GIT_FOLDER="${GIT_FOLDER:-/workspace}"
-ORGANIZATION="${ORGANIZATION:-esystemsdev}"
-REPOSITORIES="${REPOSITORIES:-configuration,aifabrix-training}"  # Full list in Setup-developer.md
-PACKAGES="${PACKAGES:-@aifabrix/builder}"
+ORGANIZATION="$(ruby -rjson -e 'print JSON.parse(STDIN.read)["organization"].to_s' <<< "$WORKSPACE_JSON")"
+if [[ -z "$ORGANIZATION" ]]; then
+  echo "SetupGitEnv: could not read organization from config" >&2
+  exit 1
+fi
+
+YAML_GIT_FOLDER="$(ruby -rjson -e 'v = JSON.parse(STDIN.read)["gitFolder"]; print v ? v.to_s : ""' <<< "$WORKSPACE_JSON")"
+if [[ -n "$YAML_GIT_FOLDER" ]]; then
+  GIT_FOLDER="$YAML_GIT_FOLDER"
+fi
 
 ORG_FOLDER="$GIT_FOLDER/$ORGANIZATION"
-# aifabrix-work in ~/.aifabrix/config.yaml (AI Fabrix CLI). Default: org clone root.
-# Override: AIFABRIX_WORK=/your/path ./SetupGitEnv.sh
 AIFABRIX_WORK_ROOT="${AIFABRIX_WORK:-$ORG_FOLDER}"
 
 CONFIG_DIR="${HOME}/.aifabrix"
 SHELL_ENV_FILE="${CONFIG_DIR}/aifabrix-shell-env.sh"
-# Match lib/utils/register-aifabrix-shell-env.js so blocks merge cleanly with `aifabrix dev set-work`.
 PROFILE_BLOCK_BEGIN="# BEGIN aifabrix-builder shell env"
 PROFILE_BLOCK_END="# END aifabrix-builder shell env"
 
-# Exported after set_aifabrix_work_yaml runs
 WORK_RESOLVED=""
 
 resolve_path() {
@@ -42,7 +114,6 @@ resolve_path() {
   fi
 }
 
-# Ensure ~/.aifabrix/config.yaml contains aifabrix-work (merge; other keys preserved)
 set_aifabrix_work_yaml() {
   local work_path="$1"
   local config_path="${CONFIG_DIR}/config.yaml"
@@ -64,7 +135,6 @@ set_aifabrix_work_yaml() {
   echo "Updated aifabrix-work in: $config_path" >&2
 }
 
-# Write aifabrix-shell-env.sh and ensure ~/.zshrc or ~/.bashrc sources it (same markers as aifabrix CLI)
 register_posix_aifabrix_env() {
   local home_abs
   home_abs="$(resolve_path "$CONFIG_DIR")"
@@ -75,7 +145,7 @@ register_posix_aifabrix_env() {
 
   mkdir -p "$CONFIG_DIR"
   {
-    echo "# Managed by SetupGitEnv.sh (AI Fabrix). Do not edit."
+    echo "# Managed by SetupGitEnv.sh — AI Fabrix. Do not edit."
     echo "export AIFABRIX_HOME=${q_home}"
     echo "export AIFABRIX_WORK=${q_work}"
   } >"$SHELL_ENV_FILE"
@@ -95,24 +165,20 @@ register_posix_aifabrix_env() {
 ${PROFILE_BLOCK_END}
 "
 
-  if command -v python3 >/dev/null 2>&1; then
-    AIFABRIX_PATCH_PROFILE="$profile" AIFABRIX_PATCH_SNIPPET="$snippet" python3 - <<'PY'
-import os, re, pathlib
-p = pathlib.Path(os.environ["AIFABRIX_PATCH_PROFILE"])
-snippet = os.environ["AIFABRIX_PATCH_SNIPPET"].rstrip() + "\n"
-text = p.read_text() if p.exists() else ""
-text = re.sub(
-    r"\n?# BEGIN aifabrix-builder shell env\n[\s\S]*?\n# END aifabrix-builder shell env\n?",
-    "\n",
-    text,
-)
-text = text.rstrip() + "\n\n" + snippet
-p.parent.mkdir(parents=True, exist_ok=True)
-p.write_text(text)
-PY
-    echo "Updated shell profile: $profile (open a new terminal, then: echo \"\$AIFABRIX_HOME\")" >&2
+  if AIFABRIX_PATCH_PROFILE="$profile" AIFABRIX_PATCH_SNIPPET="$snippet" ruby <<'PATCHRUBY'
+require 'fileutils'
+p = ENV['AIFABRIX_PATCH_PROFILE']
+snippet = (ENV['AIFABRIX_PATCH_SNIPPET'] || '').rstrip + "\n"
+text = File.exist?(p) ? File.read(p) : ''
+text = text.gsub(/\n?# BEGIN aifabrix-builder shell env\n[\s\S]*?\n# END aifabrix-builder shell env\n?/, "\n")
+text = text.rstrip + "\n\n" + snippet
+FileUtils.mkdir_p(File.dirname(p))
+File.write(p, text)
+PATCHRUBY
+then
+    echo "Updated shell profile: $profile — open a new terminal, then: echo \"\$AIFABRIX_HOME\"" >&2
   else
-    echo "Warning: python3 not found; append this to $profile manually:" >&2
+    echo "Warning: could not patch shell profile; append this to $profile manually:" >&2
     printf '%s\n' "$snippet" >&2
   fi
 }
@@ -127,48 +193,45 @@ add_safe_directory() {
   fi
 }
 
-# Ensure directories exist
+clone_or_update_repo_url() {
+  local name="$1"
+  local url="$2"
+  local clone_path="$ORG_FOLDER/$name"
+
+  add_safe_directory "$clone_path"
+
+  if [ ! -d "$clone_path/.git" ]; then
+    echo "Cloning $name from $url to $clone_path..."
+    git clone "$url" "$clone_path"
+  else
+    echo "Repository $name already in $clone_path. Pulling..."
+    git -C "$clone_path" pull
+  fi
+}
+
+echo "Using workspace config: $CONFIG" >&2
+if [[ -n "$GROUP" ]]; then
+  echo "Group filter: $GROUP" >&2
+fi
+
 mkdir -p "$GIT_FOLDER"
 mkdir -p "$ORG_FOLDER"
 
 set_aifabrix_work_yaml "$AIFABRIX_WORK_ROOT"
 register_posix_aifabrix_env
 
-# Configure Git safe directory for root and org folder
 add_safe_directory "$GIT_FOLDER"
 
-# Clone or update a repository
-clone_or_update_repo() {
-  local repo="$1"
-  local repo_url="https://github.com/$ORGANIZATION/$repo.git"
-  local clone_path="$ORG_FOLDER/$repo"
+while IFS=$'\t' read -r repo_name repo_url; do
+  [[ -z "$repo_name" ]] && continue
+  clone_or_update_repo_url "$repo_name" "$repo_url"
+done < <(ruby -rjson -e '(d = JSON.parse(STDIN.read); (d["repos"] || []).each { |r| n = r["name"].to_s; u = r["url"].to_s; puts n + "\t" + u if !n.empty? && !u.empty? })' <<< "$WORKSPACE_JSON")
 
-  add_safe_directory "$clone_path"
-
-  if [ ! -d "$clone_path/.git" ]; then
-    echo "Cloning the repository $repo to $clone_path..."
-    git clone "$repo_url" "$clone_path"
-  else
-    echo "Repository $repo already cloned in $clone_path. Pulling the latest changes..."
-    git -C "$clone_path" pull
-  fi
-}
-
-# Clone or update each repository
-IFS=',' read -ra REPO_LIST <<< "$REPOSITORIES"
-for repo in "${REPO_LIST[@]}"; do
-  clone_or_update_repo "$(echo "$repo" | xargs)"
-done
-
-# Install global npm packages
-echo "Installing necessary npm packages..."
-IFS=',' read -ra PKG_LIST <<< "$PACKAGES"
-for pkg in "${PKG_LIST[@]}"; do
-  pkg=$(echo "$pkg" | xargs)
-  if [ -n "$pkg" ]; then
-    echo "Installing npm package: $pkg..."
-    npm install -g "$pkg" || { echo "Installation of npm package $pkg failed." >&2; exit 1; }
-  fi
-done
+echo "Installing necessary npm packages..." >&2
+while read -r pkg; do
+  [[ -z "$pkg" ]] && continue
+  echo "Installing npm package: $pkg..." >&2
+  npm install -g "$pkg" || { echo "Installation of npm package $pkg failed." >&2; exit 1; }
+done < <(ruby -rjson -e '(d = JSON.parse(STDIN.read); (d["packages"] || []).each { |p| s = p.to_s.strip; puts s unless s.empty? })' <<< "$WORKSPACE_JSON")
 
 echo "Setup complete."

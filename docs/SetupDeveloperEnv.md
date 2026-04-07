@@ -2,6 +2,8 @@
 
 These scripts automate the installation of essential tools for development. They read **the same** `SetupDeveloperEnv.yaml` (in the same directory as the script). **SetupDeveloperEnv.ps1** is for Windows (PowerShell); **SetupDeveloperEnv.sh** is for macOS (Homebrew, using `homebrewCask` and `homebrewFormula` in the YAML).
 
+**Windows without a prior clone:** scripts are normally downloaded with `Invoke-WebRequest` from `raw.githubusercontent.com` using a **pinned release ref** (see [README.md](../README.md#bootstrap-release-pinning)), not `main`. For unreleased script changes, clone the configuration repo and run the files locally.
+
 **Groups:**
 
 - **Basic** – Integration path: Cursor, Node.js, Git, and Docker **CLI + Compose v2 plugin only** (no Docker Desktop). Use `-groups "Basic"` for [Setup-integration.md](../Setup-integration.md).

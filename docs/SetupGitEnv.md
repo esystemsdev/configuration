@@ -1,81 +1,49 @@
 # SetupGitEnv.ps1 / SetupGitEnv.sh
 
-These scripts automate the setup of your Git workspace and development dependencies. They create the folder structure, configure Git safe directories, clone or update repositories from GitHub, and install global npm packages. Run with your user account (no administrator rights required). **SetupGitEnv.ps1** is for Windows; **SetupGitEnv.sh** is for macOS/Unix.
+These scripts create your Git workspace, configure Git safe directories, clone or update repositories using **per-repo URLs** from YAML, and install global npm packages. Run with your user account. **SetupGitEnv.ps1** is for Windows; **SetupGitEnv.sh** is for macOS/Unix.
 
-**Workspace path:**
+## Workspace files (public vs private)
 
-- **Default:** `C:\workspace` (Windows, `SetupGitEnv.ps1`) and `/workspace` (macOS/Linux, `SetupGitEnv.sh`)—same convention on both platforms. The macOS tool installer still uses `~/workspace` for Cursor (see [SetupDeveloperEnv.md](SetupDeveloperEnv.md)); use `GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh` when you are not using a `/workspace` root. Edit `$gitFolder` in the PS1 script, or set `GIT_FOLDER` for the shell script, if you need another path. See [Setup-integration.md](../Setup-integration.md).
-- **Full developer path:** For the complete repository list, see [Setup-developer.md](../Setup-developer.md); set `$repositories` / `REPOSITORIES` accordingly.
+| File | Location | Contents |
+|------|------------|----------|
+| **Public** | [SetupGitEnv.workspace.public.yaml](../SetupGitEnv.workspace.public.yaml) | **dev-config** (legacy *configuration*), **dataplane-integrations**, **training** (legacy *aifabrix-training*). Safe for the integration path and anyone without internal Git access. |
+| **Default** | [SetupGitEnv.workspace.yaml](../SetupGitEnv.workspace.yaml) | Merges the public file, then optionally `../dev-config/workspace.private.yaml` (staff-only list from **dev-config-internal**). If the private file is missing, you get a warning and **only public repos** are cloned. |
+| **Loader** | [SetupGitEnv_workspace_load.py](../SetupGitEnv_workspace_load.py) | Parses YAML; supports **`extends` as a string or a list** (merged in order). |
 
-**Features:**
+Override the config path with **`SETUPGITENV_CONFIG`** (or `-ConfigPath` on Windows). **Integration:** set it to `SetupGitEnv.workspace.public.yaml` so private paths are never required.
 
-- Creates the Git root folder and organization folder (e.g. `C:\workspace\esystemsdev` or `/workspace/esystemsdev`) if they do not exist.
-- Sets full access permissions for the Users group on the Git and organization folders so tools can access repositories reliably.
-- Configures Git safe directory for the Git root and each cloned repository, so Git can work with them without trust prompts.
-- Clones repositories from GitHub if they are not present, or pulls the latest changes if they are already cloned.
-- Installs global npm packages (e.g. `@aifabrix/builder`) required for development.
-- Uses a simple in-script configuration: edit variables at the top to choose organization, repository list, and npm packages.
+**Merge rules:** Each `extends` entry is loaded recursively. Later layers override `repos` by `name`, replace `groups` keys, merge `packages` uniquely, and prefer overlay `organization` / `gitFolder` when set. Partial YAML files used only as `extends` targets do not need `organization` until the final merged result (validated at the top-level load).
+
+**Workspace path:** Defaults: `C:\workspace` (Windows) and `/workspace` (Unix). Override with `gitFolder` in YAML or `GIT_FOLDER` / `$env:GIT_FOLDER`. Repos clone to `<gitFolder>/<organization>/<name>`.
+
+**Groups:** `SETUPGITENV_GROUP=<name>` (or `-Group`) clones only repos listed under `groups.<name>` in the **merged** config. Define groups that reference internal repos in `workspace.private.yaml` so public-only runs do not break.
+
+**Prerequisites:** Python 3 + PyYAML (`pip install pyyaml`). Git on `PATH`; Node/npm if you use `packages` in YAML.
+
+**Features:** Directory creation, Windows Users ACL, Git `safe.directory`, `aifabrix-work` in `~/.aifabrix/config.yaml`, user env / shell snippet (unchanged from earlier behavior).
 
 **Usage:**
 
 ```powershell
-# Run the script with your user account (no administrator rights required)
 .\SetupGitEnv.ps1
-
-# Or using full path
-C:\workspace\esystemsdev\configuration\SetupGitEnv.ps1
+.\SetupGitEnv.ps1 -ConfigPath "D:\cfg\SetupGitEnv.workspace.public.yaml"
+$env:SETUPGITENV_GROUP = "core"; .\SetupGitEnv.ps1
 ```
-
-**SetupGitEnv.sh** (default root `/workspace`):
 
 ```bash
 ./SetupGitEnv.sh
-# Local Mac or when /workspace is not writable: GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
+SETUPGITENV_CONFIG="$PWD/SetupGitEnv.workspace.public.yaml" ./SetupGitEnv.sh
+SETUPGITENV_GROUP=core ./SetupGitEnv.sh
 ```
 
-**What the script does:**
-
-1. Ensures the Git root directory (default `C:\workspace` on Windows, `/workspace` on macOS/Linux) and the organization directory (e.g. `C:\workspace\esystemsdev` or `/workspace/esystemsdev`) exist.
-2. Sets full access for the Users group on those directories so IDEs and other tools can access the repos.
-3. Adds the Git root and (after cloning) each repo path to Git’s global `safe.directory` list.
-4. For each repository in the configuration list, either clones it from `https://github.com/<organization>/<repo>.git` or runs `git pull` if it is already cloned.
-5. Installs each configured global npm package with `npm install -g <package>`. The script exits with an error if any package installation fails.
-
-**Configuration:**
-
-The script is configured by editing variables at the top of `SetupGitEnv.ps1`:
-
-| Variable        | Purpose                                                                 | Example                          |
-|----------------|-------------------------------------------------------------------------|----------------------------------|
-| `$gitFolder`   | Root folder for all Git repositories                                         | `C:\workspace` (default) or another path |
-| `$organization`| GitHub organization or user name                                       | `esystemsdev`                    |
-| `$repositories`| Comma-separated list of repository names to clone or update            | `configuration,aifabrix-training`|
-| `$packages`    | Comma-separated list of global npm packages to install                 | `@aifabrix/builder`              |
-
-**Sample configuration:**
-
-```powershell
-$gitFolder      = "C:\workspace"
-$organization   = "esystemsdev"
-$repositories   = "configuration,aifabrix-training"  # Comma-separated list of repositories
-$packages       = "@aifabrix/builder"  # Comma-separated list of npm packages
-```
-
-- To add or remove repos, edit the `$repositories` string (e.g. add `,my-other-repo`).
-- To add or remove global npm packages, edit the `$packages` string (e.g. add `,typescript`).
-- Repositories are cloned to `$gitFolder\$organization\<repository-name>` (e.g. `C:\workspace\esystemsdev\configuration`).
-
-**Prerequisites:**
-
-- Git must be installed and available on the system `PATH` (e.g. via [SetupDeveloperEnv.ps1](SetupDeveloperEnv.md) or a manual Git install).
-- Node.js and npm must be installed if you use the `$packages` list (script will fail on `npm install -g` if npm is missing).
+**Migration:** Old GitHub org/repo names → new names are tracked in **aifabrix-setup** [migration/repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json) and updated as migration completes.
 
 ## How this fits into the setup process
 
-1. **Set up your development environment** – Run [SetupDeveloperEnv.ps1](SetupDeveloperEnv.md) (Windows) or SetupDeveloperEnv.sh (macOS) to install tools such as Git and Node.js.
-2. **Clone repositories and install global packages** – Run this script with your user account to create folders, clone/update repos, and install global npm packages.
-3. **Onboard to development servers (optional)** – Use `aifabrix dev init` if you need remote development access.
+1. **Install tools** – [SetupDeveloperEnv.ps1](SetupDeveloperEnv.md) or SetupDeveloperEnv.sh.
+2. **Clone repos** – Run this script with the appropriate workspace YAML (public-only vs default).
+3. **Remote onboarding (optional)** – `aifabrix dev init`.
 
-- **Full developer path:** [Setup-developer.md](../Setup-developer.md)
-- **Integration specialist path:** [Setup-integration.md](../Setup-integration.md)
-- **Tool installer details:** [SetupDeveloperEnv.md](SetupDeveloperEnv.md)
+- **Full developer:** [Setup-developer.md](../Setup-developer.md)
+- **Integration:** [Setup-integration.md](../Setup-integration.md)
+- **Tool installer:** [SetupDeveloperEnv.md](SetupDeveloperEnv.md)

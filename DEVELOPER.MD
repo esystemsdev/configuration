@@ -1,8 +1,8 @@
 # Developer Onboarding
 
-This guide points you to the right setup path for your role.
+This guide points you to the right setup path for your role. **Stage 1** is the public [configuration](https://github.com/esystemsdev/configuration) repo; **stage 2** (optional) is internal **dev-config-internal** for staff-only steps.
 
-**Important: You need eSystems Twingate activated before you can use any services.**
+**Important:** Internal services (shared dev hosts, Builder Server sync, etc.) usually require your organization’s network or zero-trust access to be active. Your admin or internal docs will say what applies.
 
 ## Choose your path
 
@@ -14,6 +14,4 @@ This guide points you to the right setup path for your role.
 
 ## Get access
 
-Request a developer account via Service Desk:  
-`https://esystem.atlassian.net/servicedesk/customer/portal/2/group/6/create/17`  
-Choose "Dev – Workato" or "Dev – AI Fabrix" as appropriate.
+Account requests, Service Desk links, and team-specific onboarding are **not** in this public repo. If you are staff, see **dev-config-internal** (stage 2) for where to request access and which options apply.

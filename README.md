@@ -2,6 +2,24 @@
 
 Welcome to the eSystems Nordic configuration repository. This repository contains scripts and configuration for setting up development environments for projects managed by eSystems Nordic Ltd.
 
+### Two-stage onboarding
+
+1. **Stage 1 (public)** – This repo: run the bootstrap scripts and follow [Setup-developer.md](Setup-developer.md) or [Setup-integration.md](Setup-integration.md). No private GitHub access required for these steps beyond your own account.
+2. **Stage 2 (internal, optional)** – Company-private repo **dev-config-internal**: extra scripts and defaults for staff. Follow its README after stage 1 if you have access. Missing access does not block public-only onboarding.
+
+### Bootstrap release pinning
+
+Raw downloads from GitHub use a **pinned ref**, not the moving `main` branch, so everyone gets the same script set for a given release.
+
+| Item | Value |
+|------|--------|
+| **Current ref in docs** | `1.1.0` |
+| **URL pattern** | `https://raw.githubusercontent.com/esystemsdev/configuration/<REF>/<file>` |
+
+**When you tag a new configuration release:** set the same `<REF>` in every raw-download snippet in [Setup-developer.md](Setup-developer.md), [Setup-integration.md](Setup-integration.md), and optional `git checkout` lines for macOS clone flows. Prefer an immutable **git tag** per release.
+
+**Backward compatibility:** If you bookmarked old URLs that used `.../configuration/main/`, switch to a tag (e.g. `1.1.0`) or clone the repo and run scripts from disk.
+
 ## Onboarding guides
 
 Choose your path:
@@ -13,14 +31,14 @@ Choose your path:
 
 ### Initial Developer Computer Setup - Windows
 
-1. Download scripts to `C:\Setup` (see [Setup-developer.md](Setup-developer.md) for the download snippet).
+1. Download scripts to `C:\Setup` using the pinned ref in [Setup-developer.md](Setup-developer.md) (variable `$configurationVersion`, not `main`).
 2. Run **SetupDeveloperEnv.ps1** as Administrator with groups `Basic,Development,Local Dev` (or omit `-groups` to choose interactively). See [docs/SetupDeveloperEnv.md](docs/SetupDeveloperEnv.md).
 3. Run **SetupWslUbuntuDev.ps1** as Administrator with `-TarPath` (URL or local .tar). The image has `/workspace` ready. See [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md).
 4. Open Cursor → WSL → `/workspace`; run `gh auth login`; clone repos; run `aifabrix dev init` when needed.
 
 ### Initial Developer Computer Setup - macOS
 
-1. Clone this repo and run **SetupDeveloperEnv.sh** with `--groups "Basic,Development,Local Dev"` (uses same [SetupDeveloperEnv.yaml](SetupDeveloperEnv.yaml) via Homebrew). See [Setup-developer.md](Setup-developer.md).
+1. Clone this repo (optionally `git checkout 1.1.0` to match the pinned bootstrap ref) and run **SetupDeveloperEnv.sh** with `--groups "Basic,Development,Local Dev"` (uses same [SetupDeveloperEnv.yaml](SetupDeveloperEnv.yaml) via Homebrew). See [Setup-developer.md](Setup-developer.md).
 2. Run **SetupGitEnv.sh** (defaults to `/workspace`, same idea as `C:\workspace` on Windows; use `GIT_FOLDER=$HOME/workspace` on a local Mac if needed). See [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
 3. Open Cursor in your workspace; run `gh auth login`; run `aifabrix dev init` when needed.
 
@@ -34,8 +52,7 @@ See [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md). Run `SetupWslUbuntuD
 - **Setup-integration.md** – Integration specialist setup.
 - **SetupDeveloperEnv.ps1** / **SetupDeveloperEnv.yaml** – Windows: install tools by group (Basic, Development, Local Dev, etc.). [docs/SetupDeveloperEnv.md](docs/SetupDeveloperEnv.md).
 - **SetupDeveloperEnv.sh** – macOS: reads same YAML, installs via Homebrew.
-- **SetupGitEnv.ps1** – Windows: create Git folder, clone repos, install global npm packages. [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
-- **SetupGitEnv.sh** – macOS/Unix: same as PS1; default `GIT_FOLDER` is `/workspace`.
+- **SetupGitEnv.ps1** / **SetupGitEnv.sh** – Git workspace from YAML: [SetupGitEnv.workspace.public.yaml](SetupGitEnv.workspace.public.yaml) (public repos only) and [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml) (public + optional `../dev-config/workspace.private.yaml`). Windows uses **powershell-yaml** (same as [SetupDeveloperEnv.ps1](SetupDeveloperEnv.ps1)); macOS/Linux use Ruby stdlib (same pattern as [SetupDeveloperEnv.sh](SetupDeveloperEnv.sh)) via [SetupGitEnv_workspace_load.rb](SetupGitEnv_workspace_load.rb). [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
 - **SetupWslUbuntuDev.ps1** – Windows: import pre-built WSL dev image. [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md).
 
 ### Developer onboarding (remote development)
