@@ -30,8 +30,7 @@ $configurationVersion = "1.1.0"
 $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/$configurationVersion/"
 $files = @(
     "SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml", "SetupWslUbuntuDev.ps1",
-    "SetupGitEnv.ps1", "SetupGitEnv.workspace.yaml", "SetupGitEnv.workspace.public.yaml",
-    "SetupGitEnv_workspace_load.rb"
+    "SetupGitEnv.ps1", "SetupGitEnv.yaml"
 )
 foreach ($file in $files) {
     Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
@@ -40,13 +39,13 @@ foreach ($file in $files) {
 
 **Step 2: Run the developer environment script (as Administrator)**
 
-Open PowerShell **as Administrator**, then run with **basic and developer** groups:
+Open PowerShell **as Administrator**, then run with **Basic**, **Development**, and **Local Dev** groups (see [docs/SetupDeveloperEnv.md](docs/SetupDeveloperEnv.md)):
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1" -groups "Basic,Development"
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupDeveloperEnv.ps1" -groups "Basic,Development,Local Dev"
 ```
 
-Omit `-groups` to be prompted for which groups to install. Use `Basic` for the integration path (includes **Docker CLI** in YAML). For full developer setup use `Development` with **`Local Dev`** (includes **Docker Desktop** in YAML; `enableWsl2` on Windows) and optionally `Database`. **Docker CLI** and **Docker Desktop** are separate applications in `SetupDeveloperEnv.yaml`.
+Omit `-groups` to be prompted for which groups to install. Use `Basic` alone for the [integration path](Setup-integration.md) (includes **Docker CLI** in YAML). Full developer setup needs **`Local Dev`** as well (**Docker Desktop**, VS Code, GitHub CLI, Python, and related tools; `enableWsl2` on Windows) and optionally `Database`. **Docker CLI** and **Docker Desktop** are separate applications in `SetupDeveloperEnv.yaml`.
 
 **Step 3: Install the WSL dev image (as Administrator)**
 
@@ -93,16 +92,22 @@ git config --global user.email firstname.lastname@esystems.fi
 
 **Step 6: Get repos into `/workspace`**
 
-Repositories are **split across two config files** so public onboarding stays cloneable without internal Git access:
+Stage 1 clones the **public** trio from [SetupGitEnv.yaml](SetupGitEnv.yaml): **dev-config**, **dataplane-integrations**, and **training**. Same list as the [integration path](Setup-integration.md).
 
-| Layer | File | Purpose |
-|--------|------|--------|
-| **Public** | [SetupGitEnv.workspace.public.yaml](SetupGitEnv.workspace.public.yaml) | Always safe to ship: **dev-config** (legacy repo name *configuration*), **dataplane-integrations**, **training** (legacy *aifabrix-training*). Same three as the [integration path](Setup-integration.md). |
-| **Private** | `../dev-config/workspace.private.yaml` (from **dev-config-internal**; not in the public repo) | Internal repos only. Copy into a sibling `dev-config/` folder next to your `configuration` clone. |
+Run [SetupGitEnv.ps1](SetupGitEnv.ps1) (Windows host) or [SetupGitEnv.sh](SetupGitEnv.sh) (WSL / macOS / Linux) with the default config next to the script (or from `C:\Setup` after the download step). Override with `SETUPGITENV_CONFIG` / `-ConfigPath` only if you keep a custom YAML. Set `$gitFolder` / `GIT_FOLDER` if needed (default `/workspace` / `C:\workspace`). Details: [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
 
-**Recommended:** run [SetupGitEnv.ps1](SetupGitEnv.ps1) or [SetupGitEnv.sh](SetupGitEnv.sh) from the **configuration** repo with [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml). It merges **public** first, then **private** if present; if the private file is missing, you get a stderr warning and only the **public** trio is cloned. Copy [SetupGitEnv_workspace_load.py](SetupGitEnv_workspace_load.py) and both YAML files next to the script (or clone the whole repo). Set `$gitFolder` / `GIT_FOLDER` if needed (default `/workspace` / `C:\workspace`).
+```powershell
+# From Windows after download to C:\Setup (clones under C:\workspace by default):
+powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
+```
 
-**Org/repo rename (migration):** Canonical old → new names and topics live in **aifabrix-setup** [migration/repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json). Examples: *aifabrix-builder* → **builder-cli**, *aifabrix-miso* → **miso-controller**, *aifabrix-dataplane* → **dataplane**. That map is **updated as migration completes**; prefer `SetupGitEnv` + YAML over hand-maintained `git clone` lists. Templates and repos not yet in the map can be added to your local `workspace.private.yaml` until the map catches up.
+```bash
+# From WSL (default root /workspace):
+./SetupGitEnv.sh
+# Or: SETUPGITENV_CONFIG=/mnt/c/Setup/SetupGitEnv.yaml ./SetupGitEnv.sh
+```
+
+**Stage 2 (optional):** Internal repos come from **dev-config-internal** after you have access—follow that repo’s README. This public tree does not ship a private overlay or merge loader.
 
 **Step 7: Remote development onboarding**
 
@@ -160,11 +165,11 @@ git checkout 1.1.0
 
 **Step 2: Run the developer environment script**
 
-Install **basic and developer** groups (same tools as Windows, via Homebrew):
+Install **Basic**, **Development**, and **Local Dev** groups (same tools as Windows, via Homebrew):
 
 ```bash
 chmod +x SetupDeveloperEnv.sh
-./SetupDeveloperEnv.sh --groups "Basic,Development"
+./SetupDeveloperEnv.sh --groups "Basic,Development,Local Dev"
 ```
 
 This creates `~/workspace` (or use `WORKSPACE_DIR=/workspace` if you create that path). The script reads [SetupDeveloperEnv.yaml](SetupDeveloperEnv.yaml) and installs apps using Homebrew.
@@ -184,7 +189,12 @@ git config --global user.email firstname.lastname@esystems.fi
 
 **Step 5: Get all repos**
 
-Use [SetupGitEnv.sh](SetupGitEnv.sh) with [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml) (public + optional private merge; see [Step 6](#step-6-get-repos-into-workspace)). Default clone root is `/workspace`. **On a local Mac** where you use `~/workspace` from SetupDeveloperEnv, prefix with `GIT_FOLDER=$HOME/workspace`.
+Use [SetupGitEnv.sh](SetupGitEnv.sh) with the default [SetupGitEnv.yaml](SetupGitEnv.yaml) (public trio; see [Step 6](#step-6-get-repos-into-workspace)). Default clone root is `/workspace`. **On a local Mac** where you use `~/workspace` from SetupDeveloperEnv, prefix with `GIT_FOLDER=$HOME/workspace`:
+
+```bash
+chmod +x SetupGitEnv.sh
+GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
+```
 
 **Step 6: Remote development onboarding**
 
@@ -209,7 +219,7 @@ Same as Windows: Connect via SSH in Cursor and open `/workspace` or `/workspace/
 - **Builder Server:** e.g. `https://builder01.local` – provides dev settings, certificates, sync parameters.
 - **CLI:** `aifabrix` (from `@aifabrix/builder`) for infra, platform, and dev isolation.
 
-For diagrams and flows, see the **builder-cli** repo (legacy name *aifabrix-builder*): [.cursor/rules/flows-and-visuals.md](https://github.com/esystemsdev/aifabrix-builder/blob/main/.cursor/rules/flows-and-visuals.md) until the GitHub rename is complete; then use `git@github.com:aifabrix/builder-cli.git` per [repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json).
+For diagrams and flows, see the **builder-cli** repo: [flows-and-visuals.md](https://github.com/aifabrix/builder-cli/blob/main/.cursor/rules/flows-and-visuals.md).
 
 ---
 
@@ -232,7 +242,7 @@ After `aifabrix dev init` when you need the platform:
 
 ### Developer workspace
 
-Workspace root: `/workspace`. Key config (in container): `aifabrix-home: '/workspace/.aifabrix'`, and Builder secrets under your **miso-controller** (or legacy **aifabrix-miso**) clone, e.g. `.../builder/secrets.local.yaml`. Use `aifabrix` CLI for local infra and app workflows.
+Workspace root: `/workspace`. Key config (in container): `aifabrix-home: '/workspace/.aifabrix'`, and Builder secrets under your **miso-controller** clone, e.g. `.../builder/secrets.local.yaml`. Use `aifabrix` CLI for local infra and app workflows.
 
 ---
 

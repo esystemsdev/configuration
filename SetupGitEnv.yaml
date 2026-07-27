@@ -1,6 +1,5 @@
 # Public-only workspace (integration path / anyone without private Git access).
-# Post-migration repo names under org aifabrix; legacy GitHub names in comments.
-# Source of truth for rename/migration: aifabrix-setup/migration/repo,map.json (updated as migration completes).
+# Repos under org aifabrix.
 
 organization: aifabrix
 
@@ -8,14 +7,12 @@ packages:
   - "@aifabrix/builder"
 
 repos:
-  # Legacy: "configuration" → dev-config (see repo,map.json)
   - name: dev-config
     url: git@github.com:aifabrix/dev-config.git
 
   - name: dataplane-integrations
     url: git@github.com:aifabrix/dataplane-integrations.git
 
-  # Legacy: aifabrix-training → training
   - name: training
     url: git@github.com:aifabrix/training.git
 

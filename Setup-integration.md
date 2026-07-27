@@ -1,6 +1,6 @@
 # Integration specialist setup
 
-**Persona: Integration specialist** – Use your own AI Fabrix environment and the **aifabrix-builder CLI** to create integrations and learn the platform. Windows and macOS. No full repo set or WSL required.
+**Persona: Integration specialist** – Use your own AI Fabrix environment and the **Builder CLI** (`aifabrix`) to create integrations and learn the platform. Windows and macOS. No full repo set or WSL required.
 
 This guide gets you Cursor, Node, Git, **Docker** (via the same installer), and the Git workspace so you can work with the Builder CLI and integrations.
 
@@ -12,7 +12,7 @@ This guide gets you Cursor, Node, Git, **Docker** (via the same installer), and 
 
 ## 1) Install Cursor and Node (Basic group)
 
-Use the same installer as developers, but install only the **Basic** group (Cursor, Node, Git).
+Use the same installer as developers, but install only the **Basic** group (Cursor, Node, Git, Docker CLI).
 
 **Windows:** Create `C:\Setup`, download the scripts from this repo, then run as Administrator:
 
@@ -22,7 +22,7 @@ $configurationVersion = "1.1.0"
 $baseUrl = "https://raw.githubusercontent.com/esystemsdev/configuration/$configurationVersion/"
 foreach ($file in @(
     "SetupDeveloperEnv.ps1", "SetupDeveloperEnv.yaml",
-    "SetupGitEnv.ps1", "SetupGitEnv.workspace.public.yaml", "SetupGitEnv_workspace_load.py"
+    "SetupGitEnv.ps1", "SetupGitEnv.yaml"
 )) {
     Invoke-WebRequest -Uri "$baseUrl$file" -OutFile "C:\Setup\$file"
 }
@@ -46,23 +46,25 @@ This installs Cursor, Node.js, Git, and **Docker CLI** via Homebrew.
 
 ## 2) Set up Git workspace (local / `C:\workspace` or `/workspace`)
 
-Use [SetupGitEnv.ps1](SetupGitEnv.ps1) (Windows) or [SetupGitEnv.sh](SetupGitEnv.sh) (macOS/Linux) with the **public-only** workspace file so you never depend on a private overlay. **Prerequisite:** Python 3 with PyYAML (`pip install pyyaml` or `python3 -m pip install pyyaml`).
+Use [SetupGitEnv.ps1](SetupGitEnv.ps1) (Windows) or [SetupGitEnv.sh](SetupGitEnv.sh) (macOS/Linux) with the default [SetupGitEnv.yaml](SetupGitEnv.yaml) (public trio: **dev-config**, **dataplane-integrations**, **training**).
 
-**Windows:** Point the script at [SetupGitEnv.workspace.public.yaml](SetupGitEnv.workspace.public.yaml) (three public repos: **dev-config**, **dataplane-integrations**, **training**—see [Setup-developer.md](Setup-developer.md) for legacy names and [aifabrix-setup migration/repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json)). Default root is `C:\workspace` unless you set `$env:GIT_FOLDER`.
+**Prerequisites:** Windows needs **powershell-yaml** (auto-installed by the script if missing). macOS/Linux need **Ruby** for YAML parsing. Details: [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
+
+**Windows:** Default root is `C:\workspace` unless you set `$env:GIT_FOLDER`.
 
 ```powershell
-$env:SETUPGITENV_CONFIG = "C:\Setup\SetupGitEnv.workspace.public.yaml"
 powershell -ExecutionPolicy Bypass -File "C:\Setup\SetupGitEnv.ps1"
 ```
 
 **macOS/Linux:** Default root is `/workspace`. [SetupDeveloperEnv.sh](SetupDeveloperEnv.sh) still creates `~/workspace` for Cursor on Mac; if you do not use a `/workspace` mount, use `GIT_FOLDER=$HOME/workspace`.
 
 ```bash
-SETUPGITENV_CONFIG="$PWD/SetupGitEnv.workspace.public.yaml" ./SetupGitEnv.sh
-# Local Mac: GIT_FOLDER=$HOME/workspace SETUPGITENV_CONFIG=... ./SetupGitEnv.sh
+chmod +x SetupGitEnv.sh
+./SetupGitEnv.sh
+# Local Mac: GIT_FOLDER=$HOME/workspace ./SetupGitEnv.sh
 ```
 
-**Where repos land:** `<gitFolder>/aifabrix/<name>` (for example `C:\workspace\aifabrix\training`). Details: [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
+**Where repos land:** `<gitFolder>/aifabrix/<name>` (for example `C:\workspace\aifabrix\training`).
 
 ---
 
@@ -98,7 +100,7 @@ git config --global user.name "Your Name"
 git config --global user.email firstname.lastname@esystems.fi
 ```
 
-If you clone by hand instead of SetupGitEnv, use the **public** trio (post-migration **aifabrix** org names; legacy names in [repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json)):
+If you clone by hand instead of SetupGitEnv, use the **public** trio:
 
 ```bash
 git clone git@github.com:aifabrix/dev-config.git
@@ -106,7 +108,7 @@ git clone git@github.com:aifabrix/dataplane-integrations.git
 git clone git@github.com:aifabrix/training.git
 ```
 
-The Builder CLI still comes from npm (`@aifabrix/builder`); the old **aifabrix-builder** repo is **builder-cli** after rename. Add internal repos only if you have access and need them.
+The Builder CLI comes from npm (`@aifabrix/builder`). Add internal repos only if you have access and need them.
 
 ---
 
@@ -137,7 +139,7 @@ aifabrix up-infra --pgAdmin --traefik
 aifabrix up-platform
 ```
 
-Builder CLI source repo (renaming to **builder-cli**): [aifabrix-builder](https://github.com/esystemsdev/aifabrix-builder) — see [repo,map.json](https://github.com/esystemsdev/aifabrix-setup/blob/main/migration/repo,map.json) for current naming.
+Builder CLI source repo: [builder-cli](https://github.com/aifabrix/builder-cli).
 
 ---
 
@@ -146,7 +148,7 @@ Builder CLI source repo (renaming to **builder-cli**): [aifabrix-builder](https:
 | Step | Windows | macOS / Linux |
 |------|---------|----------------|
 | 1. Install Cursor + Node + Git + Docker CLI | `SetupDeveloperEnv.ps1` with `-groups "Basic"` | `SetupDeveloperEnv.sh --groups "Basic"` |
-| 2. Git workspace | `SETUPGITENV_CONFIG` → `SetupGitEnv.workspace.public.yaml`; run `SetupGitEnv.ps1` | Same with `SETUPGITENV_CONFIG`; optional `GIT_FOLDER=$HOME/workspace` on local Mac |
+| 2. Git workspace | Run `SetupGitEnv.ps1` (default `SetupGitEnv.yaml`) | Run `SetupGitEnv.sh`; optional `GIT_FOLDER=$HOME/workspace` on local Mac |
 | 3. Open Cursor | Open `C:\workspace` or `C:\workspace\aifabrix` | Open `/workspace` or `/workspace/aifabrix` (or `~/workspace` if you cloned there) |
 | 4. Remote onboarding | `aifabrix dev init` when needed | Same |
 | 5. AI Fabrix env | `aifabrix` CLI (`up-infra`, `up-platform`, …) | Same |

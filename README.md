@@ -13,19 +13,19 @@ Raw downloads from GitHub use a **pinned ref**, not the moving `main` branch, so
 
 | Item | Value |
 |------|--------|
-| **Current ref in docs** | `1.1.0` |
+| **Current ref in docs** | `1.1.0` (release branch; prefer an immutable **git tag** with the same name when locking a release) |
 | **URL pattern** | `https://raw.githubusercontent.com/esystemsdev/configuration/<REF>/<file>` |
 
-**When you tag a new configuration release:** set the same `<REF>` in every raw-download snippet in [Setup-developer.md](Setup-developer.md), [Setup-integration.md](Setup-integration.md), and optional `git checkout` lines for macOS clone flows. Prefer an immutable **git tag** per release.
+**When you ship a new configuration release:** set the same `<REF>` in every raw-download snippet in [Setup-developer.md](Setup-developer.md), [Setup-integration.md](Setup-integration.md), and optional `git checkout` lines for macOS clone flows. Prefer an immutable **git tag** per release so raw URLs cannot drift with later branch commits.
 
-**Backward compatibility:** If you bookmarked old URLs that used `.../configuration/main/`, switch to a tag (e.g. `1.1.0`) or clone the repo and run scripts from disk.
+**Backward compatibility:** If you bookmarked old URLs that used `.../configuration/main/`, switch to the pinned ref (e.g. `1.1.0`) or clone the repo and run scripts from disk.
 
 ## Onboarding guides
 
 Choose your path:
 
 - **[Setup-developer.md](Setup-developer.md)** – **Full developer**: all repos, Cursor + full tool set, WSL (Windows) or native macOS. Use when you need the complete AI Fabrix dev environment and Builder Server sync.
-- **[Setup-integration.md](Setup-integration.md)** – **Integration specialist**: Cursor, Node, Git, and aifabrix-builder CLI. Use when you create integrations and learn the platform without the full repo set.
+- **[Setup-integration.md](Setup-integration.md)** – **Integration specialist**: Cursor, Node, Git, and the Builder CLI (`aifabrix`). Use when you create integrations and learn the platform without the full repo set.
 
 ## Quick reference
 
@@ -52,12 +52,12 @@ See [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md). Run `SetupWslUbuntuD
 - **Setup-integration.md** – Integration specialist setup.
 - **SetupDeveloperEnv.ps1** / **SetupDeveloperEnv.yaml** – Windows: install tools by group (Basic, Development, Local Dev, etc.). [docs/SetupDeveloperEnv.md](docs/SetupDeveloperEnv.md).
 - **SetupDeveloperEnv.sh** – macOS: reads same YAML, installs via Homebrew.
-- **SetupGitEnv.ps1** / **SetupGitEnv.sh** – Git workspace from YAML: [SetupGitEnv.workspace.public.yaml](SetupGitEnv.workspace.public.yaml) (public repos only) and [SetupGitEnv.workspace.yaml](SetupGitEnv.workspace.yaml) (public + optional `../dev-config/workspace.private.yaml`). Windows uses **powershell-yaml** (same as [SetupDeveloperEnv.ps1](SetupDeveloperEnv.ps1)); macOS/Linux use Ruby stdlib (same pattern as [SetupDeveloperEnv.sh](SetupDeveloperEnv.sh)) via [SetupGitEnv_workspace_load.rb](SetupGitEnv_workspace_load.rb). [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
+- **SetupGitEnv.ps1** / **SetupGitEnv.sh** – Git workspace from [SetupGitEnv.yaml](SetupGitEnv.yaml) (public repos: **dev-config**, **dataplane-integrations**, **training**). Windows uses **powershell-yaml** (same as [SetupDeveloperEnv.ps1](SetupDeveloperEnv.ps1)); macOS/Linux parse YAML with Ruby stdlib (inline in the shell script). Optional internal repos are stage 2 (**dev-config-internal**), not a private overlay in this repo. [docs/SetupGitEnv.md](docs/SetupGitEnv.md).
 - **SetupWslUbuntuDev.ps1** – Windows: import pre-built WSL dev image. [docs/SetupWslUbuntuDev.md](docs/SetupWslUbuntuDev.md).
 
 ### Developer onboarding (remote development)
 
-One-time setup for remote development uses the **aifabrix** CLI: it issues a client certificate (mTLS), fetches server settings, and registers your SSH keys so Mutagen sync works without a password. Requires the [aifabrix-builder](https://github.com/esystemsdev/aifabrix-builder) CLI (`npm install -g @aifabrix/builder`) and a Builder Server URL plus a one-time PIN from your admin.
+One-time setup for remote development uses the **aifabrix** CLI: it issues a client certificate (mTLS), fetches server settings, and registers your SSH keys so Mutagen sync works without a password. Requires the [Builder CLI](https://github.com/aifabrix/builder-cli) (`npm install -g @aifabrix/builder`) and a Builder Server URL plus a one-time PIN from your admin.
 
 **Usage (aifabrix dev init):**
 
@@ -85,7 +85,7 @@ aifabrix dev init
 
 - Config is written to `~/.aifabrix/config.yaml` (e.g. `remote-server`, `docker-endpoint`, `sync-ssh-host`, `sync-ssh-user`).
 - To refresh settings or renew the certificate: `aifabrix dev refresh` (use `aifabrix dev refresh --cert` to force certificate refresh).
-- See [Developer Isolation Commands](https://github.com/esystemsdev/aifabrix-builder/blob/2.41.0/docs/commands/developer-isolation.md) for `dev refresh`, `dev config`, `dev down`, and related commands.
+- See [Developer Isolation Commands](https://github.com/aifabrix/builder-cli/blob/main/docs/commands/developer-isolation.md) for `dev refresh`, `dev config`, `dev down`, and related commands.
 
 **macOS:** Use [Setup-developer.md](Setup-developer.md) or [Setup-integration.md](Setup-integration.md); then run `aifabrix dev init` as above. The same `~/.aifabrix/config.yaml` and CLI commands apply on Windows and macOS.
 

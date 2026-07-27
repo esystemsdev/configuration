@@ -9,7 +9,7 @@ This guide points you to the right setup path for your role. **Stage 1** is the 
 - **Full developer** (all repos, Cursor + full tool set, WSL on Windows or native macOS):  
   See **[Setup-developer.md](Setup-developer.md)**.
 
-- **Integration specialist** (Cursor, Node, Git, aifabrix-builder CLI; create integrations and learn the platform):  
+- **Integration specialist** (Cursor, Node, Git, Builder CLI; create integrations and learn the platform):  
   See **[Setup-integration.md](Setup-integration.md)**.
 
 ## Get access

@@ -131,7 +131,7 @@ vscodeExtensions:
 ## Next steps by persona
 
 - **Full developer (all repos, WSL on Windows or native Mac):** See [Setup-developer.md](../Setup-developer.md).
-- **Integration specialist (Cursor + Node + Git + Docker CLI, aifabrix-builder CLI):** See [Setup-integration.md](../Setup-integration.md).
+- **Integration specialist (Cursor + Node + Git + Docker CLI, Builder CLI):** See [Setup-integration.md](../Setup-integration.md).
 
 After installing tools, use [SetupGitEnv.ps1](SetupGitEnv.md) (Windows) or [SetupGitEnv.sh](SetupGitEnv.md) (macOS) to clone repositories and install global npm packages. Run with your user account (no administrator rights required).
 
@@ -156,8 +156,7 @@ After installing tools, use [SetupGitEnv.ps1](SetupGitEnv.md) (Windows) or [Setu
 
 1. For remote development access, run one-time setup with the aifabrix CLI:  
    `aifabrix dev init --developer-id <id> --server <Builder Server URL> --pin <PIN>` (get the PIN from your admin).
-2. Or, if your environment uses it, run the `OnboardDeveloper.ps1` script and provide your Developer ID and PIN when prompted or as parameters.
-3. Use `aifabrix dev refresh` later to update settings or renew your certificate.
+2. Use `aifabrix dev refresh` later to update settings or renew your certificate.
 
 ### Step 4: Start developing
 
